@@ -6,6 +6,20 @@ import './WorkoutTracker.css';
 import { useAuth } from '../contexts/AuthContext';
 import voiceAssistantService from '../services/voiceAssistantService';
 import { getHealthProfile } from '../services/firebaseService';
+// Import workout utilities
+import { 
+  calculateAngle, 
+  calculateVerticalAngle,
+  calculateHorizontalDistance,
+  SquatStateMachine,
+  BenchPressStateMachine,
+  DeadliftStateMachine,
+  PushUpStateMachine,
+  PullUpStateMachine,
+  ShoulderPressStateMachine,
+  LateralRaiseStateMachine,
+  LungeStateMachine
+} from '../utils/workoutUtils';
 
 // Cookie helpers for calories burned
 const saveCaloriesBurnedToCookie = (date, calories) => {
@@ -31,21 +45,6 @@ const getCookie = (name) => {
   if (parts.length === 2) return parts.pop().split(';').shift();
   return null;
 };
-
-// Import workout utilities
-import { 
-  calculateAngle, 
-  calculateVerticalAngle,
-  calculateHorizontalDistance,
-  SquatStateMachine,
-  BenchPressStateMachine,
-  DeadliftStateMachine,
-  PushUpStateMachine,
-  PullUpStateMachine,
-  ShoulderPressStateMachine,
-  LateralRaiseStateMachine,
-  LungeStateMachine
-} from '../utils/workoutUtils';
 
 const EXERCISES = {
   squat: { name: 'Squats', icon: '🧍' },
@@ -660,7 +659,7 @@ function WorkoutTracker() {
     
     try {
       // Send workout data to backend for calorie calculation
-      const response = await fetch('http://localhost:5000/api/workout/calculate-calories', {
+      const response = await fetch('https://ai-nutritionist-backend.onrender.com/api/workout/calculate-calories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

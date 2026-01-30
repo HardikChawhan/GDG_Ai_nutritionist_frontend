@@ -478,7 +478,7 @@ class VoiceAssistantService {
       const prompt = this.buildContextPrompt(payload);
 
       // Call backend API
-      const response = await fetch('http://localhost:5000/api/voice-assistant', {
+      const response = await fetch('https://ai-nutritionist-backend.onrender.com/api/voice-assistant', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
