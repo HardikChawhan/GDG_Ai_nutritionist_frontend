@@ -1,0 +1,270 @@
+.agent-selection-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Disclaimer Styles */
+.disclaimer-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  padding: 3rem;
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: var(--shadow-xl);
+}
+
+.disclaimer-icon {
+  font-size: 4rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.disclaimer-card h2 {
+  color: var(--text-primary);
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.disclaimer-content {
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.disclaimer-text {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: var(--text-primary);
+}
+
+.disclaimer-points,
+.disclaimer-privacy {
+  margin-bottom: 2rem;
+}
+
+.disclaimer-points h3,
+.disclaimer-privacy h3 {
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.disclaimer-points ul,
+.disclaimer-privacy ul {
+  list-style: none;
+  padding: 0;
+}
+
+.disclaimer-points li,
+.disclaimer-privacy li {
+  padding: 0.75rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.point-icon {
+  flex-shrink: 0;
+  font-size: 1.2rem;
+}
+
+.disclaimer-actions {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid var(--border);
+}
+
+.accept-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.accept-checkbox input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.accept-checkbox span {
+  flex: 1;
+}
+
+/* Agent Selection */
+.agent-selection-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.agent-selection-header h2 {
+  color: var(--text-primary);
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.agent-selection-header p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.agent-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.agent-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.agent-card.selected {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.05));
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.agent-avatar {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.agent-card h3 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.agent-personality {
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.agent-voice {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.agent-selected-indicator {
+  margin-top: 1rem;
+  min-height: 24px;
+}
+
+.agent-selected-indicator span {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: inline-block;
+}
+
+/* Custom Agent Form */
+.custom-agent.selected {
+  min-height: 420px;
+}
+
+.custom-agent-form {
+  margin-top: 1.5rem;
+  text-align: left;
+}
+
+.custom-agent-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.custom-agent-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.custom-agent-form .form-input,
+.custom-agent-form .form-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.custom-agent-form .form-input:focus,
+.custom-agent-form .form-select:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* Footer */
+.agent-selection-footer {
+  margin-top: 3rem;
+}
+
+.info-box {
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid var(--primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.info-box p {
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.btn-large {
+  width: 100%;
+  padding: 1.25rem 2rem;
+  font-size: 1.1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .agent-selection-container {
+    padding: 1rem;
+  }
+
+  .disclaimer-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .agents-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .agent-selection-header h2 {
+    font-size: 2rem;
+  }
+}

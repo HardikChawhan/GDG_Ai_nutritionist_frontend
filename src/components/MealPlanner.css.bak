@@ -1,0 +1,131 @@
+.preferences-section {
+  margin-top: 2rem;
+}
+
+.btn-large {
+  width: 100%;
+  padding: 1.2rem;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+}
+
+.loading-card {
+  text-align: center;
+  padding: 3rem;
+}
+
+.loading-animation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-animation p {
+  font-size: 1.1rem;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.loading-subtext {
+  font-size: 0.9rem !important;
+  color: #999 !important;
+  font-weight: normal !important;
+}
+
+.meal-plan-result {
+  margin-top: 2rem;
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-header {
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+.result-header h2 {
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.plan-info {
+  color: #667eea;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.generated-time {
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.meal-plan-content {
+  background: #f8f9ff;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.meal-plan-text {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #333;
+  margin: 0;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+  flex: 1;
+  min-width: 200px;
+}
+
+@media print {
+  .navbar, .footer, .action-buttons, .preferences-section {
+    display: none;
+  }
+
+  .meal-plan-content {
+    max-height: none;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-buttons .btn {
+    width: 100%;
+  }
+}

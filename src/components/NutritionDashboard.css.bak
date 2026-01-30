@@ -1,0 +1,233 @@
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.empty-icon {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h2 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.daily-targets {
+  margin-bottom: 2rem;
+}
+
+.daily-targets h3 {
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.targets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.target-card {
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8eaff 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.target-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.target-info {
+  flex: 1;
+}
+
+.target-label {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+}
+
+.target-value {
+  color: #333;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.target-progress {
+  height: 8px;
+  background: #e5e5e5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  transition: width 0.5s ease, background 0.3s ease;
+  border-radius: 4px;
+}
+
+.food-entry-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: #f8f9ff;
+  border-radius: 12px;
+}
+
+.food-entry-section h3 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.food-entry-bar {
+  display: flex;
+  gap: 1rem;
+}
+
+.food-entry-bar .form-input {
+  flex: 1;
+}
+
+.daily-foods {
+  margin-top: 2rem;
+}
+
+.daily-foods-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.daily-foods-header h3 {
+  color: #333;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.foods-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.food-item {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 2px solid #f0f0f0;
+  transition: all 0.3s;
+}
+
+.food-item:hover {
+  border-color: #667eea;
+}
+
+.food-item-name {
+  color: #333;
+  font-weight: 500;
+}
+
+.remove-btn {
+  background: #fee;
+  color: #e74c3c;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.remove-btn:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.stats-card {
+  margin-top: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.stats-card h2 {
+  margin-bottom: 1.5rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+@media (max-width: 768px) {
+  .targets-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .food-entry-bar {
+    flex-direction: column;
+  }
+
+  .food-entry-bar .btn {
+    width: 100%;
+  }
+
+  .daily-foods-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .daily-foods-header .btn {
+    width: 100%;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

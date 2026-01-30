@@ -1,0 +1,149 @@
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #667eea;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.tag button {
+  background: none;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tag button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tag-danger {
+  background: #e74c3c;
+}
+
+.tag-warning {
+  background: #f39c12;
+}
+
+.recommendations-card {
+  margin-top: 2rem;
+}
+
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.rec-item {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.rec-item h3 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+.rec-value {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.rec-desc {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.macros-section {
+  background: #f8f9ff;
+  padding: 2rem;
+  border-radius: 12px;
+}
+
+.macros-section h3 {
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.macro-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.macro-item {
+  width: 100%;
+}
+
+.macro-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.macro-bar {
+  height: 30px;
+  background: #e5e5e5;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.macro-fill {
+  height: 100%;
+  transition: width 0.5s ease;
+  border-radius: 15px;
+}
+
+.macro-fill.protein {
+  background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+.macro-fill.carbs {
+  background: linear-gradient(90deg, #3498db, #2980b9);
+}
+
+.macro-fill.fat {
+  background: linear-gradient(90deg, #f39c12, #e67e22);
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .recommendations-grid {
+    grid-template-columns: 1fr;
+  }
+}

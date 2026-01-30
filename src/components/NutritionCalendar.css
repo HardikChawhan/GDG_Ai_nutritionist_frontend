@@ -1,0 +1,323 @@
+.nutrition-calendar {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: none;
+  margin: 0;
+  overflow: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.calendar-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.nav-btn {
+  background: transparent;
+  color: white;
+  border: none;
+  font-size: 28px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.nav-btn:hover {
+  transform: scale(1.3);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.calendar-day-header {
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 8px 0;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  background: var(--background);
+  overflow: hidden;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.calendar-day.empty {
+  border: none;
+  cursor: default;
+  background: transparent;
+}
+
+.calendar-day.has-data {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+  color: white;
+}
+
+.calendar-day.today {
+  border: 3px solid #48bb78;
+  box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.2);
+}
+
+.calendar-day.selected {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+  z-index: 1;
+}
+
+.calendar-day:not(.empty):not(.has-data):hover {
+  transform: scale(1.05);
+  background: var(--surface);
+  border-color: var(--text-muted);
+}
+
+.calendar-day.has-data:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
+.day-number {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  color: var(--text-primary);
+  text-align: center;
+  width: 100%;
+}
+
+.calendar-day.has-data .day-number {
+  color: white;
+}
+
+.day-calories {
+  font-size: 9px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 2px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90%;
+  text-align: center;
+}
+
+.calendar-loading {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.calendar-hint {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  background: var(--background);
+  border-radius: 10px;
+}
+
+.day-details {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 24px;
+  border-radius: 12px;
+  color: white;
+}
+
+.day-details h3 {
+  margin: 0 0 20px 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.day-details h4 {
+  margin: 20px 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.day-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.macro-item {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.macro-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.macro-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.foods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.food-item {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 12px 16px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.food-item:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateX(4px);
+}
+
+.food-name {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.food-calories {
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .nutrition-calendar {
+    padding: 12px;
+  }
+
+  .calendar-header h2 {
+    font-size: 18px;
+  }
+
+  .nav-btn {
+    font-size: 24px;
+  }
+
+  .calendar-grid {
+    gap: 3px;
+  }
+
+  .calendar-day-header {
+    font-size: 10px;
+    padding: 6px 0;
+  }
+
+  .calendar-day {
+    padding: 2px;
+  }
+
+  .day-number {
+    font-size: 12px;
+    margin-bottom: 1px;
+  }
+
+  .day-calories {
+    font-size: 8px;
+    padding: 1px 3px;
+  }
+
+  .day-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .day-details {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nutrition-calendar {
+    padding: 10px;
+  }
+
+  .calendar-header h2 {
+    font-size: 16px;
+  }
+
+  .nav-btn {
+    font-size: 20px;
+  }
+
+  .calendar-grid {
+    gap: 2px;
+  }
+
+  .calendar-day-header {
+    font-size: 9px;
+    padding: 4px 0;
+  }
+
+  .calendar-day {
+    padding: 2px;
+    border-width: 1px;
+  }
+
+  .day-number {
+    font-size: 11px;
+  }
+
+  .day-calories {
+    font-size: 7px;
+    padding: 1px 2px;
+  }
+}
