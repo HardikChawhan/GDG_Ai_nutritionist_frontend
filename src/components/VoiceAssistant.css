@@ -407,3 +407,66 @@
     max-height: 350px;
   }
 }
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+@media (max-width: 768px) {
+  .voice-assistant {
+    bottom: 15px;
+    right: 15px;
+    width: 60px;
+    height: 60px;
+  }
+  
+  .voice-button {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+  
+  .pulse-ring {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .voice-status {
+    bottom: -30px;
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .voice-assistant {
+    bottom: 10px;
+    right: 10px;
+    width: 55px;
+    height: 55px;
+  }
+  
+  .voice-button {
+    width: 55px;
+    height: 55px;
+    font-size: 1.3rem;
+  }
+  
+  .pulse-ring {
+    width: 65px;
+    height: 65px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .voice-assistant {
+    bottom: 30px;
+    right: 30px;
+    width: 75px;
+    height: 75px;
+  }
+  
+  .voice-button {
+    width: 75px;
+    height: 75px;
+    font-size: 2rem;
+  }
+}

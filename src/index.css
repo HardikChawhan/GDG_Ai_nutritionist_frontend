@@ -90,6 +90,29 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: 16px;
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1920px) {
+  html {
+    font-size: 18px;
+  }
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -102,6 +125,8 @@ body {
   min-height: 100vh;
   color: var(--text-primary);
   line-height: 1.6;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 code {
@@ -115,7 +140,21 @@ code {
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: clamp(1rem, 3vw, 2rem);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem;
+  }
 }
 
 button {
@@ -178,23 +217,23 @@ input, textarea, select {
 }
 
 .markdown-content h1 {
-  font-size: 2em;
+  font-size: clamp(1.5rem, 4vw, 2rem);
   border-bottom: 2px solid var(--border);
   padding-bottom: 0.5em;
 }
 
 .markdown-content h2 {
-  font-size: 1.6em;
+  font-size: clamp(1.3rem, 3.5vw, 1.6rem);
   border-bottom: 1px solid var(--border);
   padding-bottom: 0.4em;
 }
 
 .markdown-content h3 {
-  font-size: 1.3em;
+  font-size: clamp(1.1rem, 3vw, 1.3rem);
 }
 
 .markdown-content h4 {
-  font-size: 1.1em;
+  font-size: clamp(1rem, 2.5vw, 1.1rem);
 }
 
 .markdown-content p {
@@ -261,13 +300,29 @@ input, textarea, select {
   background: var(--bg-secondary);
   border-radius: 8px;
   overflow: hidden;
+  overflow-x: auto;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .markdown-content table {
+    font-size: 0.9rem;
+  }
 }
 
 .markdown-content th,
 .markdown-content td {
-  padding: 0.75em 1em;
+  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(0.75rem, 2.5vw, 1rem);
   text-align: left;
   border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .markdown-content th,
+  .markdown-content td {
+    font-size: 0.85rem;
+  }
 }
 
 .markdown-content th {

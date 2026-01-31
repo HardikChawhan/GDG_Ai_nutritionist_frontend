@@ -1155,3 +1155,121 @@
     flex-direction: column;
   }
 }
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+@media (max-width: 1024px) {
+  .health-profile-container {
+    padding: 1.5rem;
+  }
+  
+  .profile-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .health-profile-container {
+    padding: 1rem;
+  }
+  
+  .profile-header h1 {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+  
+  .profile-section {
+    padding: 1.5rem;
+  }
+  
+  .section-title {
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
+  }
+  
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+  
+  .form-input,
+  .form-select,
+  .form-textarea {
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+  
+  .btn-group {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .recommendations-list {
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .health-profile-container {
+    padding: 0.75rem;
+  }
+  
+  .profile-section {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  
+  .profile-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .section-title {
+    font-size: 1.2rem;
+  }
+  
+  .form-input,
+  .form-select,
+  .form-textarea {
+    font-size: 0.95rem;
+    padding: 0.625rem;
+  }
+  
+  .stats-card {
+    padding: 1rem;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+  }
+  
+  .stat-label {
+    font-size: 0.85rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  .health-profile-container {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  
+  .profile-grid {
+    gap: 2.5rem;
+  }
+  
+  .profile-section {
+    padding: 2.5rem;
+  }
+}

@@ -234,3 +234,71 @@
     font-size: 1.5rem;
   }
 }
+/* ========== RESPONSIVE DESIGN ========== */
+
+@media (max-width: 768px) {
+  .food-analyzer-container {
+    padding: 1rem;
+  }
+  
+  .analyzer-header h1 {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+  
+  .input-section {
+    padding: 1.25rem;
+  }
+  
+  .analyzer-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .analyzer-actions .btn {
+    width: 100%;
+  }
+  
+  .analysis-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .nutrition-breakdown {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .food-analyzer-container {
+    padding: 0.75rem;
+  }
+  
+  .input-section {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  
+  .food-input {
+    min-height: 100px;
+    font-size: 0.95rem;
+  }
+  
+  .nutrition-breakdown {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .nutrient-card {
+    padding: 1rem;
+  }
+  
+  .analysis-section {
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  .food-analyzer-container {
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+}

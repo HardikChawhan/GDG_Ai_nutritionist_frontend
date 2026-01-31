@@ -849,3 +849,146 @@
     min-width: auto;
   }
 }
+/* ========== RESPONSIVE DESIGN ========== */
+
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .meals-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .nutrition-dashboard {
+    padding: 1rem;
+  }
+  
+  .dashboard-header h1 {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+  
+  .meals-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .meal-card {
+    padding: 1.25rem;
+  }
+  
+  .macro-bars {
+    gap: 1rem;
+  }
+  
+  .macro-bar {
+    padding: 0.75rem;
+  }
+  
+  .dashboard-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .dashboard-actions .btn {
+    width: 100%;
+  }
+  
+  .food-items-list {
+    gap: 0.75rem;
+  }
+  
+  .recommendations-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .nutrition-dashboard {
+    padding: 0.75rem;
+  }
+  
+  .dashboard-card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  
+  .meal-card {
+    padding: 1rem;
+  }
+  
+  .macro-bar {
+    padding: 0.625rem;
+  }
+  
+  .macro-label {
+    font-size: 0.85rem;
+  }
+  
+  .macro-value {
+    font-size: 0.85rem;
+  }
+  
+  .food-item {
+    padding: 0.75rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .food-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (min-width: 1920px) {
+  .nutrition-dashboard {
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+  
+  .dashboard-grid {
+    gap: 2.5rem;
+  }
+  
+  .meals-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Workout Button Styling */
+.workout-btn {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  width: 100%;
+}
+
+.workout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+}
+
+.workout-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .workout-btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9rem;
+  }
+}

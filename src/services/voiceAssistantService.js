@@ -15,6 +15,10 @@ class VoiceAssistantService {
     this.onTranscriptCallback = null;
     this.onResponseCallback = null;
     this.userContext = null;
+    this.restartTimeout = null;
+    this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    this.startAttempts = 0;
+    this.maxStartAttempts = 3;
   }
 
   enableTTS() {
@@ -44,6 +48,13 @@ class VoiceAssistantService {
     this.recognition.interimResults = true;
     this.recognition.lang = 'en-US';
     this.recognition.maxAlternatives = 1;
+
+    // Mobile-specific optimizations
+    if (this.isMobile) {
+      console.log('📱 Mobile device detected - applying mobile optimizations');
+      // On mobile, speech recognition tends to stop more frequently
+      // We'll handle this in the onend event
+    }
 
     // Initialize TTS with silent utterance to enable it (Chrome autoplay policy workaround)
     try {
@@ -80,6 +91,7 @@ class VoiceAssistantService {
     this.recognition.onstart = () => {
       console.log('Voice recognition started');
       this.isListening = true;
+      this.startAttempts = 0; // Reset start attempts on successful start
       
       // Stop any ongoing speech when user starts speaking
       if (this.isSpeaking) {
@@ -97,14 +109,22 @@ class VoiceAssistantService {
       console.error('Speech recognition error:', event.error);
       
       if (event.error === 'no-speech') {
-        // Automatically restart if stopped
-        if (this.isActive) {
-          setTimeout(() => this.start(), 100);
-        }
+        console.log('No speech detected, will auto-restart');
+        // Don't stop listening, let onend handle restart
+      } else if (event.error === 'aborted') {
+        console.log('Recognition aborted, will restart if active');
+        // This is common on mobile, handle in onend
       } else if (event.error === 'audio-capture' || event.error === 'not-allowed') {
         this.isListening = false;
         this.isActive = false;
-        console.error('Microphone access error');
+        console.error('Microphone access error - stopping voice assistant');
+        if (this.restartTimeout) {
+          clearTimeout(this.restartTimeout);
+          this.restartTimeout = null;
+        }
+      } else if (event.error === 'network') {
+        console.error('Network error - will retry');
+        // Let onend handle restart
       }
     };
 
@@ -112,17 +132,39 @@ class VoiceAssistantService {
       console.log('Voice recognition ended, isActive:', this.isActive, 'isSpeaking:', this.isSpeaking);
       this.isListening = false;
       
-      // Auto-restart if still active (with delay to prevent race conditions)
-      if (this.isActive) {
-        console.log('⏰ Scheduling restart in 300ms...');
-        setTimeout(() => {
-          if (this.isActive && !this.isListening) {
-            console.log('🔄 Auto-restarting recognition');
-            this.start();
+      // Clear any pending restart timeout
+      if (this.restartTimeout) {
+        clearTimeout(this.restartTimeout);
+        this.restartTimeout = null;
+      }
+      
+      // Auto-restart if still active and not speaking
+      if (this.isActive && !this.isSpeaking) {
+        // On mobile, restart immediately to minimize gaps
+        const restartDelay = this.isMobile ? 100 : 300;
+        
+        console.log(`⏰ Scheduling restart in ${restartDelay}ms (Mobile: ${this.isMobile})...`);
+        this.restartTimeout = setTimeout(() => {
+          if (this.isActive && !this.isListening && !this.isSpeaking) {
+            if (this.startAttempts < this.maxStartAttempts) {
+              console.log(`🔄 Auto-restarting recognition (Attempt ${this.startAttempts + 1}/${this.maxStartAttempts})`);
+              this.startAttempts++;
+              this.startRecognition();
+            } else {
+              console.log('⚠️ Max restart attempts reached, waiting for next cycle');
+              this.startAttempts = 0;
+              // Try again after a longer delay
+              this.restartTimeout = setTimeout(() => {
+                if (this.isActive) {
+                  this.startAttempts = 0;
+                  this.startRecognition();
+                }
+              }, 1000);
+            }
           } else {
-            console.log('❌ Not restarting - isActive:', this.isActive, 'isListening:', this.isListening);
+            console.log('❌ Not restarting - isActive:', this.isActive, 'isListening:', this.isListening, 'isSpeaking:', this.isSpeaking);
           }
-        }, 300);
+        }, restartDelay);
       }
     };
   }
@@ -606,11 +648,12 @@ class VoiceAssistantService {
       // Restart recognition if it stopped during speech
       if (this.isActive && !this.isListening) {
         console.log('🔄 Restarting recognition after TTS');
+        const restartDelay = this.isMobile ? 200 : 500; // Shorter delay on mobile
         setTimeout(() => {
           if (this.isActive && !this.isListening) {
-            this.start();
+            this.startRecognition();
           }
-        }, 100);
+        }, restartDelay);
       }
     };
 
@@ -633,20 +676,34 @@ class VoiceAssistantService {
 
   start() {
     if (this.recognition && !this.isListening) {
-      try {
-        if (!this.isActive) {
-          this.isActive = true;
-        }
-        console.log('🎤 Starting recognition, isActive:', this.isActive);
-        this.recognition.start();
-        console.log('Voice assistant started');
-      } catch (error) {
-        // Handle "already started" error gracefully
-        if (error.message && error.message.includes('already started')) {
-          console.log('Recognition already active, skipping start');
-          this.isActive = true;
-        } else {
-          console.error('Error starting recognition:', error);
+      this.startRecognition();
+    }
+  }
+
+  startRecognition() {
+    try {
+      if (!this.isActive) {
+        this.isActive = true;
+      }
+      console.log('🎤 Starting recognition, isActive:', this.isActive);
+      this.recognition.start();
+      console.log('Voice assistant started');
+    } catch (error) {
+      // Handle "already started" error gracefully
+      if (error.message && error.message.includes('already started')) {
+        console.log('Recognition already active, skipping start');
+        this.isActive = true;
+        this.isListening = true; // Update state
+      } else {
+        console.error('Error starting recognition:', error);
+        // On error, try again after a delay if still active
+        if (this.isActive && this.startAttempts < this.maxStartAttempts) {
+          this.startAttempts++;
+          setTimeout(() => {
+            if (this.isActive && !this.isListening) {
+              this.startRecognition();
+            }
+          }, 500);
         }
       }
     }
@@ -654,13 +711,28 @@ class VoiceAssistantService {
 
   stop() {
     this.isActive = false;
-    if (this.recognition && this.isListening) {
-      this.recognition.stop();
-      console.log('Voice assistant stopped');
+    this.startAttempts = 0;
+    
+    // Clear any pending restart timeout
+    if (this.restartTimeout) {
+      clearTimeout(this.restartTimeout);
+      this.restartTimeout = null;
     }
+    
+    if (this.recognition && this.isListening) {
+      try {
+        this.recognition.stop();
+        console.log('Voice assistant stopped');
+      } catch (error) {
+        console.error('Error stopping recognition:', error);
+      }
+    }
+    
     if (this.isSpeaking) {
       this.synthesis.cancel();
     }
+    
+    this.isListening = false;
   }
 
   updateUserContext(newContext) {

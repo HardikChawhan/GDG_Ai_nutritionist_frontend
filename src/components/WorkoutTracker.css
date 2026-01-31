@@ -510,3 +510,132 @@
     font-size: 2rem;
   }
 }
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+@media (max-width: 1024px) {
+  .workout-tracker-container {
+    padding: 1.5rem;
+  }
+  
+  .workout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .workout-tracker-container {
+    padding: 1rem;
+  }
+  
+  .tracker-header h1 {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+  
+  .exercise-selector {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .exercise-card {
+    padding: 1rem;
+  }
+  
+  .video-container {
+    height: 250px;
+    border-radius: 12px;
+  }
+  
+  .video-overlay {
+    padding: 1rem;
+  }
+  
+  .stats-panel {
+    padding: 1rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .workout-controls {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+  
+  .workout-controls .btn {
+    width: 100%;
+  }
+  
+  .feedback-list {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .workout-tracker-container {
+    padding: 0.75rem;
+  }
+  
+  .video-container {
+    height: 200px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.625rem;
+  }
+  
+  .stat-card {
+    padding: 0.75rem;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+  }
+  
+  .exercise-card {
+    padding: 0.875rem;
+  }
+  
+  .exercise-icon {
+    font-size: 1.5rem;
+  }
+  
+  .workout-controls {
+    padding: 0.75rem;
+  }
+  
+  .feedback-item {
+    padding: 0.625rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  .workout-tracker-container {
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+  
+  .video-container {
+    height: 600px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Landscape Mobile */
+@media (max-width: 896px) and (orientation: landscape) {
+  .video-container {
+    height: 300px;
+  }
+  
+  .workout-grid {
+    grid-template-columns: 1fr;
+  }
+}

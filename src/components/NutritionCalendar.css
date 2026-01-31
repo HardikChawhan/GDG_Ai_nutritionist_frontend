@@ -321,3 +321,100 @@
     padding: 1px 2px;
   }
 }
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+@media (max-width: 768px) {
+  .nutrition-calendar-container {
+    padding: 1rem;
+  }
+  
+  .calendar-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .calendar-header h2 {
+    font-size: clamp(1.3rem, 4vw, 1.6rem);
+    text-align: center;
+  }
+  
+  .calendar-controls {
+    justify-content: center;
+  }
+  
+  .calendar-grid {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .day-cell {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    min-height: 60px;
+  }
+  
+  .day-number {
+    font-size: 0.9rem;
+  }
+  
+  .day-calories {
+    font-size: 0.7rem;
+  }
+  
+  .calendar-legend {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .nutrition-calendar-container {
+    padding: 0.75rem;
+  }
+  
+  .calendar-grid {
+    gap: 0.25rem;
+  }
+  
+  .day-cell {
+    padding: 0.375rem;
+    font-size: 0.75rem;
+    min-height: 50px;
+    border-radius: 6px;
+  }
+  
+  .day-number {
+    font-size: 0.8rem;
+  }
+  
+  .day-calories {
+    font-size: 0.65rem;
+  }
+  
+  .calendar-controls .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .legend-item {
+    font-size: 0.8rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  .nutrition-calendar-container {
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+  
+  .calendar-grid {
+    gap: 1rem;
+  }
+  
+  .day-cell {
+    padding: 1rem;
+    min-height: 100px;
+  }
+}

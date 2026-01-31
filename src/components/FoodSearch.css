@@ -703,3 +703,98 @@
     flex-direction: column;
   }
 }
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+@media (max-width: 768px) {
+  .food-search-container {
+    padding: 1rem;
+  }
+  
+  .search-header h1 {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+  
+  .search-bar {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .search-input {
+    width: 100%;
+  }
+  
+  .search-button {
+    width: 100%;
+  }
+  
+  .results-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .food-result-card {
+    padding: 1.25rem;
+  }
+  
+  .nutrition-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .modal-content {
+    padding: 1.5rem;
+    width: 95%;
+    max-height: 90vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .food-search-container {
+    padding: 0.75rem;
+  }
+  
+  .search-section {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  
+  .food-result-card {
+    padding: 1rem;
+  }
+  
+  .nutrition-grid {
+    grid-template-columns: 1fr;
+    gap: 0.625rem;
+  }
+  
+  .nutrient-item {
+    padding: 0.625rem;
+  }
+  
+  .modal-content {
+    padding: 1rem;
+    width: 98%;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .results-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1920px) {
+  .food-search-container {
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+  
+  .results-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

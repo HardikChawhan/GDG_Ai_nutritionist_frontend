@@ -1,6 +1,9 @@
 .home-container {
   max-width: 1400px;
   animation: fadeInUp 0.8s ease-out;
+  width: 100%;
+  padding: 0 clamp(0.5rem, 2vw, 1rem);
+  box-sizing: border-box;
 }
 
 @keyframes fadeInUp {
@@ -16,11 +19,11 @@
 
 .hero-section {
   text-align: center;
-  padding: 5rem 2rem;
+  padding: clamp(2rem, 8vw, 5rem) clamp(1rem, 4vw, 2rem);
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
-  border-radius: 24px;
+  border-radius: clamp(16px, 3vw, 24px);
   margin-bottom: 3rem;
   box-shadow: var(--shadow-xl);
   position: relative;
@@ -130,7 +133,7 @@
 }
 
 .hero-title {
-  font-size: 3.5rem;
+  font-size: clamp(2rem, 6vw, 3.5rem);
   background: linear-gradient(135deg, var(--primary-light), var(--secondary), var(--primary));
   background-size: 200% auto;
   -webkit-background-clip: text;
@@ -142,6 +145,8 @@
   position: relative;
   z-index: 1;
   animation: gradientShift 3s ease-in-out infinite;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
 @keyframes gradientShift {
@@ -833,6 +838,8 @@
 @media (max-width: 768px) {
   .login-modal {
     padding: 2rem;
+    width: 95%;
+    max-width: 500px;
   }
 
   .modal-content h2 {
@@ -846,5 +853,68 @@
   .google-signin-btn {
     font-size: 1rem;
     padding: 0.875rem 1.5rem;
+  }
+  
+  .hero-section {
+    margin-bottom: 2rem;
+  }
+  
+  .shape {
+    display: none;
+  }
+  
+  .features-grid,
+  .cta-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-modal {
+    padding: 1.5rem;
+    width: 98%;
+  }
+  
+  .modal-content h2 {
+    font-size: 1.3rem;
+  }
+  
+  .google-signin-btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+  }
+  
+  .hero-section {
+    margin-bottom: 1.5rem;
+  }
+  
+  .modal-benefits {
+    padding: 1rem;
+  }
+  
+  .modal-benefits h4 {
+    font-size: 1.1rem;
+  }
+  
+  .modal-benefits li {
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1440px) {
+  .features-grid,
+  .cta-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1920px) {
+  .home-container {
+    max-width: 1800px;
+  }
+  
+  .hero-section {
+    padding: 6rem 3rem;
   }
 }
