@@ -115,12 +115,28 @@ export const AuthProvider = ({ children }) => {
       // Set persistence to LOCAL (survives browser restarts)
       await setPersistence(auth, browserLocalPersistence);
       
+      // For iOS Safari compatibility - clear any stale state
+      try {
+        sessionStorage.removeItem('firebase:previous_websocket_failure');
+        sessionStorage.removeItem('firebase:authUser');
+      } catch (storageError) {
+        console.log('SessionStorage not accessible:', storageError);
+      }
+      
       const result = await signInWithPopup(auth, googleProvider);
       
       return result.user;
     } catch (err) {
       console.error('Error signing in with Google:', err);
-      setError(err.message);
+      
+      // Provide iOS-specific error guidance
+      if (err.code === 'auth/operation-not-allowed' || 
+          err.message?.includes('sessionStorage')) {
+        setError('Please enable cookies and disable private browsing mode in your browser settings.');
+      } else {
+        setError(err.message);
+      }
+      
       throw err;
     } finally {
       setLoading(false);

@@ -96,7 +96,15 @@ function Home() {
       navigate('/profile');
     } catch (error) {
       console.error('Error signing in:', error);
-      alert('Failed to sign in. Please try again.');
+      
+      // Check for iOS-specific errors
+      if (error.code === 'auth/popup-blocked') {
+        alert('Popup was blocked. Please allow popups for this site in your browser settings.');
+      } else if (error.message?.includes('sessionStorage')) {
+        alert('Authentication requires browser storage. Please:\n1. Disable Private Browsing mode\n2. Enable cookies in Settings\n3. Try again');
+      } else {
+        alert('Failed to sign in. Please try again.');
+      }
     }
   };
 

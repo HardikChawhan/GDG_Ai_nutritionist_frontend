@@ -25,6 +25,10 @@ googleProvider.setCustomParameters({
   prompt: 'select_account'
 });
 
+// Add additional parameters for iOS compatibility
+googleProvider.addScope('profile');
+googleProvider.addScope('email');
+
 // Initialize Firestore
 export const db = getFirestore(app);
 
