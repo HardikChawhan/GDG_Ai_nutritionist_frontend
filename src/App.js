@@ -245,7 +245,7 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
+    <Router basename="/GDG_Ai_nutritionist_frontend">
       <AuthProvider>
         <AppContent />
       </AuthProvider>
