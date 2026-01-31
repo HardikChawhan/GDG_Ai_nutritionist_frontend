@@ -19,6 +19,9 @@ class VoiceAssistantService {
     this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     this.startAttempts = 0;
     this.maxStartAttempts = 3;
+    this.isMobileMode = false;
+    this.mobileSilenceTimeout = null;
+    this.mobileSilenceDelay = 2500; // 2.5 seconds of silence before auto-stop on mobile
   }
 
   enableTTS() {
@@ -44,16 +47,14 @@ class VoiceAssistantService {
     }
 
     this.recognition = new SpeechRecognition();
-    this.recognition.continuous = true; // Continuous listening
+    this.recognition.continuous = this.isMobile ? false : true; // Mobile: manual stop, Desktop: continuous
     this.recognition.interimResults = true;
     this.recognition.lang = 'en-US';
     this.recognition.maxAlternatives = 1;
 
     // Mobile-specific optimizations
     if (this.isMobile) {
-      console.log('📱 Mobile device detected - applying mobile optimizations');
-      // On mobile, speech recognition tends to stop more frequently
-      // We'll handle this in the onend event
+      console.log('📱 Mobile device detected - push-to-talk mode enabled');
     }
 
     // Initialize TTS with silent utterance to enable it (Chrome autoplay policy workaround)
@@ -138,7 +139,14 @@ class VoiceAssistantService {
         this.restartTimeout = null;
       }
       
-      // Auto-restart if still active and not speaking
+      // Mobile mode: don't auto-restart (push-to-talk)
+      if (this.isMobileMode) {
+        console.log('📱 Mobile mode: Recognition ended (push-to-talk)');
+        this.isActive = false;
+        return;
+      }
+      
+      // Desktop mode: Auto-restart if still active and not speaking
       if (this.isActive && !this.isSpeaking) {
         // On mobile, restart immediately to minimize gaps
         const restartDelay = this.isMobile ? 100 : 300;
@@ -184,11 +192,24 @@ class VoiceAssistantService {
       }
     }
 
+    // Clear mobile silence timeout on any speech
+    if (this.isMobileMode && (interimTranscript || finalTranscript)) {
+      if (this.mobileSilenceTimeout) {
+        clearTimeout(this.mobileSilenceTimeout);
+        this.mobileSilenceTimeout = null;
+      }
+    }
+
     // Show interim results
     if (interimTranscript) {
       console.log('🎤 Interim:', interimTranscript);
       if (this.onTranscriptCallback) {
         this.onTranscriptCallback(interimTranscript, false);
+      }
+      
+      // Mobile: Reset silence timer
+      if (this.isMobileMode) {
+        this.startMobileSilenceTimer();
       }
     }
 
@@ -196,7 +217,25 @@ class VoiceAssistantService {
     if (finalTranscript) {
       console.log('✅ Final transcript:', finalTranscript);
       this.processFinalTranscript(finalTranscript.trim());
+      
+      // Mobile: Start silence timer after final transcript
+      if (this.isMobileMode) {
+        this.startMobileSilenceTimer();
+      }
     }
+  }
+
+  startMobileSilenceTimer() {
+    // Clear existing timer
+    if (this.mobileSilenceTimeout) {
+      clearTimeout(this.mobileSilenceTimeout);
+    }
+    
+    // Start new silence timer
+    this.mobileSilenceTimeout = setTimeout(() => {
+      console.log('📱 Mobile: Silence detected, stopping recording');
+      this.stopMobileRecording();
+    }, this.mobileSilenceDelay);
   }
 
   async processFinalTranscript(transcript) {
@@ -712,11 +751,18 @@ class VoiceAssistantService {
   stop() {
     this.isActive = false;
     this.startAttempts = 0;
+    this.isMobileMode = false;
     
     // Clear any pending restart timeout
     if (this.restartTimeout) {
       clearTimeout(this.restartTimeout);
       this.restartTimeout = null;
+    }
+    
+    // Clear mobile silence timeout
+    if (this.mobileSilenceTimeout) {
+      clearTimeout(this.mobileSilenceTimeout);
+      this.mobileSilenceTimeout = null;
     }
     
     if (this.recognition && this.isListening) {
@@ -730,6 +776,45 @@ class VoiceAssistantService {
     
     if (this.isSpeaking) {
       this.synthesis.cancel();
+    }
+    
+    this.isListening = false;
+  }
+
+  // Mobile-specific methods
+  startMobileRecording() {
+    console.log('📱 Starting mobile recording (push-to-talk)');
+    this.isMobileMode = true;
+    this.isActive = true;
+    
+    // Clear any existing silence timeout
+    if (this.mobileSilenceTimeout) {
+      clearTimeout(this.mobileSilenceTimeout);
+      this.mobileSilenceTimeout = null;
+    }
+    
+    // Start recognition
+    this.startRecognition();
+  }
+
+  stopMobileRecording() {
+    console.log('📱 Stopping mobile recording');
+    
+    // Clear silence timeout
+    if (this.mobileSilenceTimeout) {
+      clearTimeout(this.mobileSilenceTimeout);
+      this.mobileSilenceTimeout = null;
+    }
+    
+    this.isMobileMode = false;
+    this.isActive = false;
+    
+    if (this.recognition && this.isListening) {
+      try {
+        this.recognition.stop();
+      } catch (error) {
+        console.error('Error stopping mobile recording:', error);
+      }
     }
     
     this.isListening = false;

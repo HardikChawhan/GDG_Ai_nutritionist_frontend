@@ -10,15 +10,35 @@ const VoiceAssistant = ({ agentConfig, userContext, isEnabled }) => {
   const [currentTranscript, setCurrentTranscript] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [ttsEnabled, setTtsEnabled] = useState(false);
+  const [isMobileRecording, setIsMobileRecording] = useState(false);
   const messagesEndRef = useRef(null);
   const isInitializedRef = useRef(false);
   const currentAgentRef = useRef(null);
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
   // Enable TTS on first user interaction
   const enableTTS = () => {
     console.log('🎙️ User clicked to enable TTS');
     voiceAssistantService.enableTTS();
     setTtsEnabled(true);
+  };
+
+  // Mobile: Toggle microphone on/off
+  const toggleMobileMic = () => {
+    if (isMobileRecording) {
+      // Stop recording
+      console.log('📱 Mobile: Stopping recording');
+      voiceAssistantService.stopMobileRecording();
+      setIsMobileRecording(false);
+      setIsListening(false);
+    } else {
+      // Start recording
+      console.log('📱 Mobile: Starting recording');
+      voiceAssistantService.startMobileRecording();
+      setIsMobileRecording(true);
+      setIsListening(true);
+      enableTTS(); // Enable TTS on first interaction
+    }
   };
 
   useEffect(() => {
@@ -73,11 +93,22 @@ const VoiceAssistant = ({ agentConfig, userContext, isEnabled }) => {
             data: response.data
           }]);
           setIsProcessing(false);
+          
+          // On mobile, auto-stop recording after response
+          if (isMobile && isMobileRecording) {
+            setTimeout(() => {
+              voiceAssistantService.stopMobileRecording();
+              setIsMobileRecording(false);
+              setIsListening(false);
+            }, 500);
+          }
         });
 
-        // Start listening
-        voiceAssistantService.start();
-        setIsListening(true);
+        // Start listening (desktop only - mobile uses push-to-talk)
+        if (!isMobile) {
+          voiceAssistantService.start();
+          setIsListening(true);
+        }
 
         console.log('Voice assistant initialized');
       } catch (error) {
@@ -91,8 +122,9 @@ const VoiceAssistant = ({ agentConfig, userContext, isEnabled }) => {
       console.log('Cleanup: stopping voice assistant');
       isInitializedRef.current = false;
       voiceAssistantService.stop();
+      setIsMobileRecording(false);
     };
-  }, [agentConfig, isEnabled]);
+  }, [agentConfig, isEnabled, isMobile]);
 
   // Update user context when it changes WITHOUT restarting
   useEffect(() => {
@@ -127,8 +159,31 @@ const VoiceAssistant = ({ agentConfig, userContext, isEnabled }) => {
 
   return (
     <>
-      {/* Wake Word Indicator */}
-      {isListening && !isVisible && (
+      {/* Mobile Microphone Button */}
+      {isMobile && (
+        <div className="mobile-mic-container">
+          <button 
+            className={`mobile-mic-btn ${isMobileRecording ? 'recording' : ''}`}
+            onClick={toggleMobileMic}
+            aria-label={isMobileRecording ? 'Stop recording' : 'Start recording'}
+          >
+            {isMobileRecording ? (
+              <>
+                <span className="mic-icon recording">🎤</span>
+                <span className="recording-pulse"></span>
+              </>
+            ) : (
+              <span className="mic-icon">🎤</span>
+            )}
+          </button>
+          {isMobileRecording && (
+            <div className="recording-status">Recording... Speak now</div>
+          )}
+        </div>
+      )}
+
+      {/* Wake Word Indicator (Desktop only) */}
+      {!isMobile && isListening && !isVisible && (
         <div className="voice-indicator" onClick={enableTTS}>
           <div className="voice-indicator-pulse"></div>
           <span className="voice-indicator-text">
