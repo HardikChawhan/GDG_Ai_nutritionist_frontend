@@ -175,7 +175,9 @@
   background: #000;
   border-radius: 15px;
   overflow: hidden;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  max-height: 80vh;
 }
 
 .video-container video {
@@ -542,7 +544,8 @@
   }
   
   .video-container {
-    height: 250px;
+    aspect-ratio: 4 / 3;
+    max-height: 60vh;
     border-radius: 12px;
   }
   
@@ -580,7 +583,8 @@
   }
   
   .video-container {
-    height: 200px;
+    aspect-ratio: 4 / 3;
+    max-height: 50vh;
   }
   
   .stats-grid {
@@ -621,7 +625,8 @@
   }
   
   .video-container {
-    height: 600px;
+    aspect-ratio: 16 / 9;
+    max-height: 80vh;
   }
   
   .stats-grid {
@@ -632,7 +637,8 @@
 /* Landscape Mobile */
 @media (max-width: 896px) and (orientation: landscape) {
   .video-container {
-    height: 300px;
+    aspect-ratio: 16 / 9;
+    max-height: 70vh;
   }
   
   .workout-grid {
