@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import './NutritionCalendar.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Flame, Beef, Wheat, Droplets, Activity, Utensils } from 'lucide-react';
 import firebaseService from '../services/firebaseService';
 import { useAuth } from '../contexts/AuthContext';
+import { cn } from '../utils/cn';
 
-// Cookie helper for calories burned
 const getCaloriesBurnedFromCookie = (dateKey) => {
   const cookieKey = `caloriesBurned_${dateKey}`;
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${cookieKey}=`);
-  if (parts.length === 2) {
-    return parseInt(parts.pop().split(';').shift()) || 0;
-  }
+  if (parts.length === 2) return parseInt(parts.pop().split(';').shift()) || 0;
   return 0;
 };
 
@@ -22,23 +21,17 @@ const NutritionCalendar = () => {
   const [selectedDayData, setSelectedDayData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadMonthData();
-  }, [currentDate, currentUser]);
+  useEffect(() => { loadMonthData(); }, [currentDate, currentUser]);
 
   const loadMonthData = async () => {
     if (!currentUser) return;
-
     setLoading(true);
     try {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
-      
-      // Get all days in the month
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const data = {};
 
-      // Load nutrition data for each day
       for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
         const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -46,181 +39,202 @@ const NutritionCalendar = () => {
         try {
           const nutritionData = await firebaseService.getDailyNutrition(currentUser.uid, dateKey);
           const caloriesBurned = getCaloriesBurnedFromCookie(dateKey);
-          
           if ((nutritionData && nutritionData.foods && nutritionData.foods.length > 0) || caloriesBurned > 0) {
-            data[dateKey] = {
-              ...nutritionData,
-              caloriesBurned: caloriesBurned
-            };
+            data[dateKey] = { ...nutritionData, caloriesBurned };
           }
-        } catch (error) {
-          console.error(`Error loading data for ${dateKey}:`, error);
-        }
+        } catch (error) {}
       }
-
       setMonthData(data);
-    } catch (error) {
-      console.error('Error loading month data:', error);
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) {} finally { setLoading(false); }
   };
 
   const getDaysInMonth = (date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    
-    const days = [];
-    const startOffset = firstDay.getDay(); // 0 = Sunday
-    
-    // Add empty cells for days before month starts
-    for (let i = 0; i < startOffset; i++) {
-      days.push(null);
-    }
-    
-    // Add all days in month
-    for (let day = 1; day <= lastDay.getDate(); day++) {
-      days.push(new Date(year, month, day));
-    }
-    
+    const year = date.getFullYear(); const month = date.getMonth();
+    const firstDay = new Date(year, month, 1); const lastDay = new Date(year, month + 1, 0);
+    const days = []; const startOffset = firstDay.getDay();
+    for (let i = 0; i < startOffset; i++) days.push(null);
+    for (let day = 1; day <= lastDay.getDate(); day++) days.push(new Date(year, month, day));
     return days;
   };
 
-  const handlePrevMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
-  };
-
-  const handleNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
-  };
-
+  const handlePrevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
+  const handleNextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
   const handleDateClick = (date) => {
     if (!date) return;
-    
     const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    setSelectedDate(dateKey);
-    setSelectedDayData(monthData[dateKey] || null);
+    setSelectedDate(dateKey); setSelectedDayData(monthData[dateKey] || null);
   };
 
   const getCaloriesForDate = (date) => {
     if (!date) return null;
     const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    const data = monthData[dateKey];
-    return data?.totals?.calories || 0;
+    return monthData[dateKey]?.totals?.calories || 0;
   };
 
   const isToday = (date) => {
     if (!date) return false;
-    const today = new Date();
-    return date.toDateString() === today.toDateString();
+    return date.toDateString() === new Date().toDateString();
   };
 
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'];
-
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const days = getDaysInMonth(currentDate);
 
   return (
-    <div className="nutrition-calendar">
-      <div className="calendar-header">
-        <button onClick={handlePrevMonth} className="nav-btn">←</button>
-        <h2>{monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}</h2>
-        <button onClick={handleNextMonth} className="nav-btn">→</button>
+    <div className="min-h-screen max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="mb-12 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center mx-auto mb-6">
+           <CalendarIcon className="w-8 h-8 text-accent" />
+        </div>
+        <h1 className="text-4xl font-heading font-bold mb-4 tracking-tight">Temporal Telemetry Log</h1>
+        <p className="text-muted max-w-2xl mx-auto text-lg">Historical overview of biological input and physical output cycles.</p>
       </div>
 
-      {loading ? (
-        <div className="calendar-loading">Loading calendar data...</div>
-      ) : (
-        <>
-          <div className="calendar-grid">
-            <div className="calendar-day-header">Sun</div>
-            <div className="calendar-day-header">Mon</div>
-            <div className="calendar-day-header">Tue</div>
-            <div className="calendar-day-header">Wed</div>
-            <div className="calendar-day-header">Thu</div>
-            <div className="calendar-day-header">Fri</div>
-            <div className="calendar-day-header">Sat</div>
-
-            {days.map((date, index) => {
-              if (!date) {
-                return <div key={`empty-${index}`} className="calendar-day empty"></div>;
-              }
-
-              const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-              const calories = getCaloriesForDate(date);
-              const hasData = monthData[dateKey];
-              const isSelected = selectedDate === dateKey;
-              const todayClass = isToday(date) ? 'today' : '';
-
-              return (
-                <div
-                  key={dateKey}
-                  className={`calendar-day ${hasData ? 'has-data' : ''} ${isSelected ? 'selected' : ''} ${todayClass}`}
-                  onClick={() => handleDateClick(date)}
-                >
-                  <div className="day-number">{date.getDate()}</div>
-                  {hasData && (
-                    <div className="day-calories">{calories} cal</div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {selectedDayData && (
-            <div className="day-details">
-              <h3>📅 {selectedDate}</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Calendar View */}
+        <div className="lg:col-span-8">
+           <div className="glass-panel p-6">
               
-              <div className="day-summary">
-                <div className="macro-item">
-                  <span className="macro-label">🔥 Calories:</span>
-                  <span className="macro-value">{selectedDayData.totals?.calories || 0}</span>
-                </div>
-                <div className="macro-item">
-                  <span className="macro-label">💪 Protein:</span>
-                  <span className="macro-value">{selectedDayData.totals?.protein || 0}g</span>
-                </div>
-                <div className="macro-item">
-                  <span className="macro-label">🍞 Carbs:</span>
-                  <span className="macro-value">{selectedDayData.totals?.carbohydrates || 0}g</span>
-                </div>
-                <div className="macro-item">
-                  <span className="macro-label">🥑 Fat:</span>
-                  <span className="macro-value">{selectedDayData.totals?.fat || 0}g</span>
-                </div>
-                {selectedDayData.caloriesBurned > 0 && (
-                  <div className="macro-item workout">
-                    <span className="macro-label">🏋️ Calories Burned:</span>
-                    <span className="macro-value">{selectedDayData.caloriesBurned}</span>
-                  </div>
-                )}
+              <div className="flex items-center justify-between mb-8 px-2">
+                 <button onClick={handlePrevMonth} className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors">
+                   <ChevronLeft className="w-5 h-5 text-muted"/>
+                 </button>
+                 <h2 className="text-xl font-heading font-bold uppercase tracking-wider">
+                   {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+                 </h2>
+                 <button onClick={handleNextMonth} className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors">
+                   <ChevronRight className="w-5 h-5 text-muted"/>
+                 </button>
               </div>
 
-              <h4>Foods Eaten:</h4>
-              <div className="foods-list">
-                {selectedDayData.foods && selectedDayData.foods.length > 0 ? (
-                  selectedDayData.foods.map((food, index) => (
-                    <div key={index} className="food-item">
-                      <span className="food-name">{food.name}</span>
-                      <span className="food-calories">{food.calories} cal</span>
+              {loading ? (
+                <div className="h-[400px] flex flex-col items-center justify-center">
+                  <Activity className="w-8 h-8 text-accent animate-pulse mb-4"/>
+                  <span className="text-sm font-mono text-muted">Retrieving temporal logs...</span>
+                </div>
+              ) : (
+                <div className="grid grid-cols-7 gap-2">
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                    <div key={day} className="text-center text-xs font-semibold uppercase tracking-wider text-muted pb-4">
+                      {day}
                     </div>
-                  ))
-                ) : (
-                  <div className="no-foods">No foods logged this day</div>
-                )}
-              </div>
-            </div>
-          )}
+                  ))}
 
-          {!selectedDate && (
-            <div className="calendar-hint">
-              Click on any date to see what you ate that day
-            </div>
-          )}
-        </>
-      )}
+                  {days.map((date, index) => {
+                    const dateKey = date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : null;
+                    const calories = date ? getCaloriesForDate(date) : null;
+                    const hasData = dateKey ? monthData[dateKey] : false;
+                    const isSelected = selectedDate === dateKey;
+                    const today = isToday(date);
+
+                    return (
+                      <button
+                        key={index}
+                        disabled={!date}
+                        onClick={() => handleDateClick(date)}
+                        className={cn(
+                          "aspect-square p-2 rounded-xl flex flex-col items-center border transition-all cursor-pointer relative overflow-hidden group",
+                          !date ? "border-transparent cursor-default" : "border-white/5 hover:border-white/20 bg-surface/30",
+                          hasData && "bg-surface/80 border-white/10",
+                          isSelected && "ring-2 ring-accent border-accent bg-accent/10",
+                          today && !isSelected && "border-blue-500/50"
+                        )}
+                      >
+                        {today && <div className="absolute top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-blue-500 rounded-full"></div>}
+                        
+                        <div className={cn("text-lg font-heading font-semibold mt-auto", hasData ? "text-foreground" : "text-muted", isSelected && "text-accent")}>
+                           {date ? date.getDate() : ''}
+                        </div>
+                        
+                        {hasData && calories > 0 && (
+                          <div className={cn("text-[10px] uppercase font-bold tracking-wider mt-1 w-full text-center truncate px-1", isSelected ? "text-accent" : "text-emerald-400")}>
+                             {calories} cal
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+           </div>
+        </div>
+
+        {/* Selected Date Analytics */}
+        <div className="lg:col-span-4">
+           {selectedDayData && selectedDate ? (
+             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="glass-panel p-6 sticky top-24">
+                <div className="border-b border-white/5 pb-4 mb-6">
+                   <h3 className="text-sm font-semibold uppercase tracking-wider text-muted mb-1 flex items-center gap-2">
+                     <CalendarIcon className="w-4 h-4"/> Selected Log
+                   </h3>
+                   <div className="text-2xl font-heading font-bold">
+                      {new Date(selectedDate + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric'})}
+                   </div>
+                </div>
+
+                <div className="space-y-6">
+                   {/* Macros */}
+                   <div className="grid grid-cols-2 gap-3">
+                     <div className="bg-surface/80 p-3 rounded-xl border border-white/5">
+                        <div className="flex items-center gap-2 mb-1"><Flame className="w-4 h-4 text-emerald-400"/><span className="text-xs text-muted uppercase">Intake</span></div>
+                        <div className="text-xl font-bold">{selectedDayData.totals?.calories || 0} <span className="text-xs text-muted font-normal">kcal</span></div>
+                     </div>
+                     <div className="bg-surface/80 p-3 rounded-xl border border-white/5">
+                        <div className="flex items-center gap-2 mb-1"><Activity className="w-4 h-4 text-orange-400"/><span className="text-xs text-muted uppercase">Output</span></div>
+                        <div className="text-xl font-bold">{selectedDayData.caloriesBurned || 0} <span className="text-xs text-muted font-normal">kcal</span></div>
+                     </div>
+                   </div>
+
+                   <div className="bg-surface/50 rounded-xl border border-white/5 p-4 flex justify-between">
+                     <div className="text-center">
+                       <Beef className="w-4 h-4 text-rose-400 mx-auto mb-1"/>
+                       <div className="text-xs text-muted uppercase mb-1">Pro</div>
+                       <div className="font-bold text-sm">{selectedDayData.totals?.protein || 0}g</div>
+                     </div>
+                     <div className="text-center">
+                       <Wheat className="w-4 h-4 text-amber-400 mx-auto mb-1"/>
+                       <div className="text-xs text-muted uppercase mb-1">Carb</div>
+                       <div className="font-bold text-sm">{selectedDayData.totals?.carbohydrates || 0}g</div>
+                     </div>
+                     <div className="text-center">
+                       <Droplets className="w-4 h-4 text-lime-400 mx-auto mb-1"/>
+                       <div className="text-xs text-muted uppercase mb-1">Fat</div>
+                       <div className="font-bold text-sm">{selectedDayData.totals?.fat || 0}g</div>
+                     </div>
+                   </div>
+
+                   {/* Food List */}
+                   <div>
+                     <h4 className="text-sm font-semibold uppercase tracking-wider text-muted mb-3 flex items-center gap-2"><Utensils className="w-4 h-4"/> Input Log</h4>
+                     <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                       {selectedDayData.foods && selectedDayData.foods.length > 0 ? (
+                         selectedDayData.foods.map((food, index) => (
+                           <div key={index} className="flex justify-between items-center p-3 rounded-lg bg-surface/30 border border-white/5 hover:border-white/10 transition-colors">
+                             <span className="text-sm font-medium capitalize truncate pr-4">{food.name}</span>
+                             <span className="text-sm font-mono text-muted shrink-0">{food.calories} kcal</span>
+                           </div>
+                         ))
+                       ) : (
+                         <div className="text-center p-4 text-sm text-muted bg-surface/30 rounded-lg border border-dashed border-white/10">
+                            No nutritional inputs logged on this day.
+                         </div>
+                       )}
+                     </div>
+                   </div>
+                </div>
+             </motion.div>
+           ) : (
+             <div className="glass-panel p-10 flex flex-col items-center justify-center text-center h-full min-h-[400px]">
+                <div className="w-16 h-16 rounded-full border border-dashed border-white/20 flex items-center justify-center mb-6">
+                   <CalendarIcon className="w-6 h-6 text-muted" />
+                </div>
+                <h3 className="text-lg font-heading font-semibold mb-2">Unselected Temporal Coordinate</h3>
+                <p className="text-sm text-muted">Select a date from the calendar matrix to decode its stored biological telemetry.</p>
+             </div>
+           )}
+        </div>
+
+      </div>
     </div>
   );
 };

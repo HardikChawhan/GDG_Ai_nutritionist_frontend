@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X, Activity, User, LogOut, Sun, Moon } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+
 import Home from './components/Home';
 import HealthProfile from './components/HealthProfile';
 import MealPlanner from './components/MealPlanner';
@@ -12,12 +14,15 @@ import VoiceAssistant from './components/VoiceAssistant';
 import WorkoutTracker from './components/WorkoutTracker';
 import ScrollToTop from './components/ScrollToTop';
 import Logo_pic from './assets/Images/god.png';
+
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { getAgentSettings, getHealthProfile, getDailyNutrition } from './services/firebaseService';
+import { cn } from './utils/cn';
 
 function AppContent() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
@@ -25,46 +30,37 @@ function AppContent() {
   const [voiceAssistantEnabled, setVoiceAssistantEnabled] = useState(false);
   const [userContext, setUserContext] = useState(null);
 
+  // Initialize data theme attribute properly
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
   // Listen for voice navigation events
   useEffect(() => {
     const handleVoiceNavigation = (event) => {
       const { destination } = event.detail;
       navigate(destination);
     };
-
     window.addEventListener('voice-navigation', handleVoiceNavigation);
-
-    return () => {
-      window.removeEventListener('voice-navigation', handleVoiceNavigation);
-    };
+    return () => window.removeEventListener('voice-navigation', handleVoiceNavigation);
   }, [navigate]);
 
-  // Load agent settings and user context when user logs in
   useEffect(() => {
     const loadUserData = async () => {
       if (currentUser) {
         try {
-          // Load agent settings
           const agent = await getAgentSettings(currentUser.uid);
           if (agent) {
-            console.log('Agent loaded:', agent);
             setAgentConfig(agent);
             setVoiceAssistantEnabled(true);
           } else {
-            console.log('No agent configured');
+            setVoiceAssistantEnabled(false);
           }
-
-          // Load user context for voice assistant
           const [healthProfile, todayNutrition] = await Promise.all([
             getHealthProfile(currentUser.uid),
             getDailyNutrition(currentUser.uid)
           ]);
-
-          console.log('User context loaded:', { healthProfile, todayNutrition });
-          setUserContext({
-            healthProfile,
-            todayNutrition
-          });
+          setUserContext({ healthProfile, todayNutrition });
         } catch (error) {
           console.error('Error loading user data:', error);
         }
@@ -74,14 +70,12 @@ function AppContent() {
         setUserContext(null);
       }
     };
-
     loadUserData();
   }, [currentUser]);
 
   const handleAgentSetupComplete = (agent) => {
     setAgentConfig(agent);
     setVoiceAssistantEnabled(true);
-    // Force reload user context
     loadUserContext();
   };
 
@@ -92,11 +86,7 @@ function AppContent() {
           getHealthProfile(currentUser.uid),
           getDailyNutrition(currentUser.uid)
         ]);
-
-        setUserContext({
-          healthProfile,
-          todayNutrition
-        });
+        setUserContext({ healthProfile, todayNutrition });
       } catch (error) {
         console.error('Error loading user context:', error);
       }
@@ -110,128 +100,167 @@ function AppContent() {
       setShowLogoutModal(false);
     } catch (error) {
       console.error('Error logging out:', error);
-      alert('Failed to logout. Please try again.');
+      alert('Logout failed. Please retry.');
     }
   };
 
   const toggleTheme = () => {
+    // Only toggling class or attribute for now, relying on dark default
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
   };
 
-  React.useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
+  const navLinks = [
+    { name: 'Dashboard', path: '/dashboard' },
+    { name: 'Profile', path: '/profile' },
+    { name: 'Meal Planner', path: '/meal-planner' },
+    { name: 'Analysis', path: '/food-analyzer' },
+    { name: 'Database', path: '/food-search' },
+    { name: 'Workouts', path: '/workout' },
+  ];
 
   return (
-    <div className="App">
+    <div className="flex flex-col min-h-screen bg-background text-foreground font-sans selection:bg-accent/30">
       <ScrollToTop />
-      <nav className="navbar">
-        <div className="nav-container">
-          <Link to="/" className="nav-brand">
-            <img src={Logo_pic} alt="Logo" className="nav-logo" />
-            <span>AI Nutrition Assistant</span>
-          </Link>
-          <button 
-            className="nav-toggle"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            ☰
-          </button>
-          <div className={`nav-right ${menuOpen ? 'active' : ''}`}>
-            <ul className="nav-menu">
-              <li><Link to="/" onClick={() => setMenuOpen(false)}>Home</Link></li>
-              <li><Link to="/profile" onClick={() => setMenuOpen(false)}>Health Profile</Link></li>
-              <li><Link to="/meal-planner" onClick={() => setMenuOpen(false)}>Meal Planner</Link></li>
-              <li><Link to="/food-analyzer" onClick={() => setMenuOpen(false)}>Food Analyzer</Link></li>
-              <li><Link to="/food-search" onClick={() => setMenuOpen(false)}>Food Database</Link></li>
-              <li><Link to="/workout" onClick={() => setMenuOpen(false)}>Workout Tracker</Link></li>
-            </ul>
-            <button className="theme-toggle" onClick={toggleTheme} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </button>
-            {currentUser && (
-              <div className="user-profile-nav">
-                <Link to="/dashboard" className="user-info" onClick={() => setMenuOpen(false)}>
-                  {currentUser.photoURL && (
-                    <img 
-                      src={currentUser.photoURL} 
-                      alt={currentUser.displayName || 'User'} 
-                      className="user-avatar"
-                      referrerPolicy="no-referrer"
-                    />
+      
+      {/* Modern Glass Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 glass-panel !rounded-none !border-t-0 !border-x-0 bg-surface/80 backdrop-blur-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            
+            {/* Brand */}
+            <Link to="/" className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg overflow-hidden bg-accent/20 flex items-center justify-center p-1">
+                <Activity className="w-5 h-5 text-accent" />
+              </div>
+              <span className="font-heading font-semibold text-lg tracking-tight hidden sm:block">AI Nutritionist</span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-6">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={cn(
+                    "text-sm font-medium transition-colors hover:text-foreground",
+                    location.pathname === link.path ? "text-accent" : "text-muted"
                   )}
-                  <span className="user-name">{currentUser.displayName || 'User'}</span>
+                >
+                  {link.name}
                 </Link>
-                <button onClick={() => setShowLogoutModal(true)} className="logout-btn">
-                  Logout
+              ))}
+            </div>
+
+            {/* Right Side Actions */}
+            <div className="flex items-center gap-4">
+              <button onClick={toggleTheme} className="text-muted hover:text-foreground transition-colors p-2 rounded-full hover:bg-white/5">
+                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+              
+              {currentUser ? (
+                <div className="flex items-center gap-4">
+                  <div className="hidden sm:flex items-center gap-2">
+                    {currentUser.photoURL ? (
+                      <img src={currentUser.photoURL} alt="Avatar" className="w-8 h-8 rounded-full border border-white/10" referrerPolicy="no-referrer" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-surface/80 border border-white/10 flex items-center justify-center">
+                        <User className="w-4 h-4 text-muted" />
+                      </div>
+                    )}
+                  </div>
+                  <button 
+                    onClick={() => setShowLogoutModal(true)} 
+                    className="flex items-center gap-2 text-sm font-medium text-muted hover:text-red-400 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="hidden sm:inline">Logout</span>
+                  </button>
+                </div>
+              ) : null}
+
+              {/* Mobile menu button */}
+              <div className="md:hidden flex items-center">
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="p-2 text-muted hover:text-foreground"
+                >
+                  {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                 </button>
               </div>
-            )}
+            </div>
           </div>
         </div>
+
+        {/* Mobile menu */}
+        {menuOpen && (
+          <div className="md:hidden glass-panel !rounded-none !border-x-0 !border-b-0 border-t border-white/10">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 flex flex-col">
+              <Link to="/" onClick={() => setMenuOpen(false)} className="px-3 py-2 text-base font-medium text-muted hover:text-foreground hover:bg-white/5 rounded-md">Home</Link>
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setMenuOpen(false)}
+                  className="px-3 py-2 text-base font-medium text-muted hover:text-foreground hover:bg-white/5 rounded-md"
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </nav>
 
-      <main className="main-content">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route 
-            path="/profile" 
-            element={<HealthProfile />} 
-          />
-          <Route 
-            path="/agent-setup" 
-            element={<AgentSelection onComplete={handleAgentSetupComplete} />} 
-          />
-          <Route 
-            path="/meal-planner" 
-            element={<MealPlanner />} 
-          />
-          <Route 
-            path="/food-analyzer" 
-            element={<FoodAnalyzer />} 
-          />
-          <Route 
-            path="/food-search" 
-            element={<FoodSearch />} 
-          />
-          <Route 
-            path="/dashboard" 
-            element={<NutritionDashboard />} 
-          />
-          <Route 
-            path="/workout" 
-            element={<WorkoutTracker />} 
-          />
-        </Routes>
+      {/* Main Content routing */}
+      <main className="flex-1 w-full pt-16">
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<Home />} />
+            <Route path="/profile" element={<HealthProfile />} />
+            <Route path="/agent-setup" element={<AgentSelection onComplete={handleAgentSetupComplete} />} />
+            <Route path="/meal-planner" element={<MealPlanner />} />
+            <Route path="/food-analyzer" element={<FoodAnalyzer />} />
+            <Route path="/food-search" element={<FoodSearch />} />
+            <Route path="/dashboard" element={<NutritionDashboard />} />
+            <Route path="/workout" element={<WorkoutTracker />} />
+          </Routes>
+        </AnimatePresence>
       </main>
 
-      <footer className="footer">
-        <p>© 2025 AI Nutrition Assistant | Powered by Google Gemini AI</p>
+      <footer className="w-full py-8 text-center text-sm text-muted border-t border-white/5 mt-auto">
+        <p>© 2026 AI Clinical Nutrition Coordinator | Secure Infrastructure</p>
       </footer>
 
-      {/* Logout Confirmation Modal */}
+      {/* Logout Modal */}
       {showLogoutModal && (
-        <div className="modal-overlay" onClick={() => setShowLogoutModal(false)}>
-          <div className="logout-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon">👋</div>
-            <h3>Logout Confirmation</h3>
-            <p>Are you sure you want to logout? Your data is safely saved in the cloud.</p>
-            <div className="modal-buttons">
-              <button className="modal-btn modal-btn-cancel" onClick={() => setShowLogoutModal(false)}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm" onClick={() => setShowLogoutModal(false)}>
+          <div className="glass-panel w-full max-w-sm p-6 relative border-red-500/20 shadow-red-500/10" onClick={(e) => e.stopPropagation()}>
+            <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-4 mx-auto">
+              <LogOut className="w-6 h-6 text-red-500" />
+            </div>
+            <h3 className="text-xl font-heading font-semibold text-center mb-2">Terminate Session</h3>
+            <p className="text-muted text-center text-sm mb-6">Confirming session termination. Your clinical profile and biometric data strictly remain encrypted.</p>
+            <div className="flex gap-3">
+              <button 
+                className="flex-1 py-2 rounded-lg bg-surface hover:bg-surface/80 text-foreground transition-colors border border-white/10"
+                onClick={() => setShowLogoutModal(false)}
+              >
                 Cancel
               </button>
-              <button className="modal-btn modal-btn-confirm" onClick={handleLogout}>
-                Logout
+              <button 
+                className="flex-1 py-2 rounded-lg bg-red-500/80 hover:bg-red-500 text-white transition-colors"
+                onClick={handleLogout}
+              >
+                Terminate
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Voice Assistant */}
+      {/* Voice Assistant Module */}
       {currentUser && voiceAssistantEnabled && agentConfig && (
         <VoiceAssistant 
           agentConfig={agentConfig}

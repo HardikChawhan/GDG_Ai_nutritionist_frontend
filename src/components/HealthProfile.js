@@ -2,10 +2,18 @@ import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  UserCircle, Activity, HeartPulse, Scale, Ruler, 
+  Target, AlertCircle, Calendar, Save, Copy, Trash2, 
+  ChevronRight, ChevronLeft, Lock, ArrowRight, BookOpen,
+  Wheat, Ban, Info, CheckCircle2, X
+} from 'lucide-react';
+
 import { healthProfileAPI, nutritionAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import firebaseService from '../services/firebaseService';
-import './HealthProfile.css';
+import { cn } from '../utils/cn';
 
 function HealthProfile() {
   const { currentUser, userProfile, updateProfile, signInWithGoogle, loading: authLoading } = useAuth();
@@ -28,25 +36,19 @@ function HealthProfile() {
 
   const [recommendations, setRecommendations] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
+  const [message, setMessage] = useState(null);
   const [savedMealPlans, setSavedMealPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  // Check if user is authenticated
   useEffect(() => {
-    if (!authLoading && !currentUser) {
-      setShowLoginPrompt(true);
-    } else {
-      setShowLoginPrompt(false);
-    }
+    if (!authLoading && !currentUser) setShowLoginPrompt(true);
+    else setShowLoginPrompt(false);
   }, [currentUser, authLoading]);
 
-  // Load user profile data
   useEffect(() => {
     if (currentUser) {
-      // Update formData with current user info
       setFormData(prev => ({
         ...prev,
         userId: currentUser.uid,
@@ -55,21 +57,18 @@ function HealthProfile() {
         photoURL: currentUser.photoURL || '',
       }));
 
-      // Load health profile from cache or Firebase
       if (userProfile) {
         setFormData(prev => ({ ...prev, ...userProfile }));
         fetchRecommendations(userProfile);
       } else {
-        // Try to fetch from Firebase
         loadHealthProfileFromFirebase();
       }
     }
     loadSavedMealPlans();
-  }, [currentUser, userProfile]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentUser, userProfile]);
 
   const loadHealthProfileFromFirebase = async () => {
     if (!currentUser) return;
-    
     try {
       const profile = await firebaseService.getHealthProfile(currentUser.uid);
       if (profile) {
@@ -83,26 +82,17 @@ function HealthProfile() {
 
   const loadSavedMealPlans = async () => {
     if (!currentUser) {
-      // Fall back to localStorage
       try {
         const plans = JSON.parse(localStorage.getItem('savedMealPlans') || '[]');
         setSavedMealPlans(plans);
-      } catch (err) {
-        console.error('Failed to load saved meal plans:', err);
-      }
+      } catch (err) {}
       return;
     }
-
     try {
-      // Try to get from Firebase
       const plans = await firebaseService.getMealPlans(currentUser.uid);
       setSavedMealPlans(plans);
-      
-      // Cache in localStorage as backup
       localStorage.setItem('savedMealPlans', JSON.stringify(plans));
     } catch (err) {
-      console.error('Failed to load meal plans from Firebase:', err);
-      // Fall back to localStorage
       const plans = JSON.parse(localStorage.getItem('savedMealPlans') || '[]');
       setSavedMealPlans(plans);
     }
@@ -113,24 +103,14 @@ function HealthProfile() {
       if (currentUser) {
         await firebaseService.deleteMealPlan(currentUser.uid, planId);
       }
-      
       const plans = savedMealPlans.filter(plan => plan.id !== planId);
       localStorage.setItem('savedMealPlans', JSON.stringify(plans));
       setSavedMealPlans(plans);
-      setMessage({ type: 'success', text: 'Meal plan deleted successfully!' });
-      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+      setMessage({ type: 'success', text: 'Clinical plan purged successfully.' });
+      setTimeout(() => setMessage(null), 3000);
     } catch (err) {
-      console.error('Failed to delete meal plan:', err);
-      setMessage({ type: 'error', text: 'Failed to delete meal plan.' });
+      setMessage({ type: 'error', text: 'Error executing deletion.' });
     }
-  };
-
-  const viewMealPlan = (plan) => {
-    setSelectedPlan(plan);
-  };
-
-  const closeMealPlanModal = () => {
-    setSelectedPlan(null);
   };
 
   const handleChange = (e) => {
@@ -166,60 +146,27 @@ function HealthProfile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!currentUser) {
-      setMessage({ type: 'error', text: 'Please sign in to save your profile' });
+      setMessage({ type: 'error', text: 'Authentication required for profile modification.' });
       setShowLoginPrompt(true);
       return;
     }
-
     setLoading(true);
-    setMessage({ type: '', text: '' });
+    setMessage(null);
 
     try {
-      // Save to Firebase
       await updateProfile(formData);
-      
-      // Also save to backend API
       await healthProfileAPI.create(formData);
-      
-      // Fetch recommendations
       await fetchRecommendations(formData);
+      setMessage({ type: 'success', text: 'Biometric profile synchronized.' });
       
-      setMessage({ type: 'success', text: '🎉 Profile saved successfully!' });
-      
-      // Check if user needs to set up voice assistant
       const agentSettings = await firebaseService.getAgentSettings(currentUser.uid);
-      if (!agentSettings) {
-        // Redirect to agent setup after a short delay
-        setTimeout(() => {
-          navigate('/agent-setup');
-        }, 1500);
-      }
+      if (!agentSettings) setTimeout(() => navigate('/agent-setup'), 1500);
     } catch (error) {
-      console.error('Error saving profile:', error);
-      setMessage({ type: 'error', text: '❌ Failed to save profile. Please try again.' });
+      setMessage({ type: 'error', text: 'Synchronization failed. Please verify connection.' });
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-      setShowLoginPrompt(false);
-    } catch (error) {
-      console.error('Error signing in:', error);
-      setMessage({ type: 'error', text: 'Failed to sign in. Please try again.' });
-    }
-  };
-
-  const nextStep = () => {
-    if (currentStep < 3) setCurrentStep(currentStep + 1);
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
   const getBMI = () => {
@@ -231,575 +178,372 @@ function HealthProfile() {
   };
 
   const getBMICategory = (bmi) => {
-    if (bmi < 18.5) return { label: 'Underweight', color: '#3b82f6' };
-    if (bmi < 25) return { label: 'Healthy', color: '#10b981' };
-    if (bmi < 30) return { label: 'Overweight', color: '#f59e0b' };
-    return { label: 'Obese', color: '#ef4444' };
+    if (bmi < 18.5) return { label: 'Underweight', color: 'text-blue-400' };
+    if (bmi < 25) return { label: 'Optimal', color: 'text-accent' };
+    if (bmi < 30) return { label: 'Overweight', color: 'text-orange-400' };
+    return { label: 'Obese', color: 'text-red-500' };
+  };
+
+  const stepVariants = {
+    hidden: { opacity: 0, x: 20 },
+    visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 300, damping: 30 } },
+    exit: { opacity: 0, x: -20, transition: { duration: 0.2 } }
   };
 
   return (
-    <div className="health-profile-page">
-      {/* Login Prompt Modal */}
-      {showLoginPrompt && (
-        <div className="modal-overlay">
-          <div className="login-modal">
-            <div className="modal-content">
-              <div className="modal-icon">🔐</div>
-              <h2>Sign In Required</h2>
-              <p>Please sign in with Google to create and save your health profile!</p>
+    <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      
+      <AnimatePresence>
+        {showLoginPrompt && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md"
+          >
+            <motion.div 
+              initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+              className="glass-panel w-full max-w-md p-8 text-center"
+            >
+              <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center mb-6 mx-auto">
+                <Lock className="w-6 h-6 text-accent" />
+              </div>
+              <h2 className="text-2xl font-heading font-semibold mb-2">Authentication Required</h2>
+              <p className="text-muted text-sm mb-8">Clinical data requires secure authentication.</p>
               
-              <button 
-                onClick={handleGoogleSignIn} 
-                className="google-signin-btn"
-                disabled={authLoading}
-              >
-                <img 
-                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
-                  alt="Google" 
-                />
-                {authLoading ? 'Signing in...' : 'Sign in with Google'}
+              <button onClick={() => signInWithGoogle()} className="w-full flex items-center justify-center gap-3 bg-white text-black hover:bg-white/90 px-4 py-3 rounded-xl font-medium transition-colors mb-4">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
+                Authenticate with Google
               </button>
-              
-              <button 
-                onClick={() => navigate('/')} 
-                className="btn btn-secondary"
-                style={{ marginTop: '1rem', width: '100%' }}
-              >
-                Go Back to Home
+              <button onClick={() => navigate('/')} className="w-full border border-white/10 hover:bg-white/5 py-3 rounded-xl font-medium text-muted transition-colors">
+                Return to Dashboard
               </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="mb-12">
+        <h1 className="text-4xl font-heading font-bold mb-4">Clinical Profile</h1>
+        <p className="text-muted max-w-2xl text-lg">Manage your biometric data, dietary requirements, and computational health models.</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Left Column: Form Setup */}
+        <div className="lg:col-span-7">
+          <div className="glass-panel p-8">
+            
+            {/* Progress indicators */}
+            <div className="flex items-center justify-between mb-8 pb-8 border-b border-white/5 text-sm font-medium">
+              {[
+                { step: 1, label: 'Biometrics', icon: UserCircle },
+                { step: 2, label: 'Parameters', icon: Target },
+                { step: 3, label: 'Pathology', icon: HeartPulse }
+              ].map((s, idx) => (
+                <div key={s.step} className="flex items-center">
+                  <div className={cn(
+                    "flex items-center justify-center w-8 h-8 rounded-full border-2 transition-colors",
+                    currentStep === s.step ? "border-accent text-accent bg-accent/10" : 
+                    currentStep > s.step ? "border-transparent bg-accent text-white" : "border-white/10 text-muted"
+                  )}>
+                    {currentStep > s.step ? <CheckCircle2 className="w-4 h-4" /> : <s.icon className="w-4 h-4" />}
+                  </div>
+                  <span className={cn("ml-3 hidden sm:block", currentStep >= s.step ? "text-foreground" : "text-muted")}>{s.label}</span>
+                  {idx < 2 && <div className={cn("hidden sm:block w-12 h-px mx-4", currentStep > s.step ? "bg-accent" : "bg-white/10")} />}
+                </div>
+              ))}
             </div>
+
+            <AnimatePresence mode="wait">
+              {message && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className={cn(
+                  "px-4 py-3 rounded-lg mb-6 flex items-center gap-3 text-sm font-medium",
+                  message.type === 'error' ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-accent/10 text-accent border border-accent/20"
+                )}>
+                  {message.type === 'error' ? <AlertCircle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+                  {message.text}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <form onSubmit={handleSubmit}>
+              <AnimatePresence mode="wait">
+                
+                {currentStep === 1 && (
+                  <motion.div key="step1" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="space-y-6">
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                         <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><Calendar className="w-4 h-4 text-accent/70"/> Age</label>
+                         <input type="number" name="age" required value={formData.age} onChange={handleChange} className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-white/20" placeholder="Years" />
+                      </div>
+                      <div className="space-y-2">
+                         <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><UserCircle className="w-4 h-4 text-accent/70"/> Genotype/Sex</label>
+                         <div className="flex bg-surface/50 p-1 rounded-xl border border-white/5">
+                           {['male', 'female'].map(g => (
+                             <button key={g} type="button" onClick={() => setFormData(p => ({...p, gender: g}))} className={cn("flex-1 py-1.5 rounded-lg text-sm font-medium capitalize transition-all", formData.gender === g ? "bg-surface shadow-[0_1px_4px_rgba(0,0,0,0.2)] text-foreground" : "text-muted hover:text-foreground")}>{g}</button>
+                           ))}
+                         </div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                         <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><Scale className="w-4 h-4 text-accent/70"/> Mass (kg)</label>
+                         <input type="number" name="weight" step="0.1" required value={formData.weight} onChange={handleChange} className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-white/20" placeholder="0.0" />
+                      </div>
+                      <div className="space-y-2">
+                         <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><Ruler className="w-4 h-4 text-accent/70"/> Stature (cm)</label>
+                         <input type="number" name="height" required value={formData.height} onChange={handleChange} className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-white/20" placeholder="170" />
+                      </div>
+                    </div>
+
+                    {getBMI() && (
+                      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mt-8 p-4 rounded-xl border border-white/5 bg-gradient-to-br from-surface to-background flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-surface/80 flex items-center justify-center border border-white/10 font-mono text-sm font-medium">BMI</div>
+                          <div>
+                             <div className="text-2xl font-bold font-heading">{getBMI()}</div>
+                             <div className={cn("text-xs font-semibold uppercase tracking-wider", getBMICategory(parseFloat(getBMI())).color)}>{getBMICategory(parseFloat(getBMI())).label}</div>
+                          </div>
+                        </div>
+                        <Info className="w-5 h-5 text-muted/50" />
+                      </motion.div>
+                    )}
+                  </motion.div>
+                )}
+
+                {currentStep === 2 && (
+                  <motion.div key="step2" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8">
+                     <div className="space-y-4">
+                        <label className="flex items-center gap-2 text-sm font-medium text-muted mb-3"><Activity className="w-4 h-4 text-accent/70"/> Energy Expenditure</label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {[
+                            { value: 'sedentary', label: 'Sedentary', desc: 'Base metabolism' },
+                            { value: 'light', label: 'Light', desc: '1-3 sessions/week' },
+                            { value: 'moderate', label: 'Moderate', desc: '3-5 sessions/week' },
+                            { value: 'active', label: 'Active', desc: '6-7 sessions/week' }
+                          ].map(act => (
+                            <button key={act.value} type="button" onClick={() => setFormData(p => ({...p, activityLevel: act.value}))} className={cn("p-4 rounded-xl border text-left transition-all", formData.activityLevel === act.value ? "bg-accent/10 border-accent/40 shadow-[0_0_15px_rgba(34,197,94,0.1)]" : "bg-surface/30 border-white/5 hover:border-white/20")}>
+                               <div className={cn("font-medium mb-1", formData.activityLevel === act.value ? "text-accent" : "text-foreground")}>{act.label}</div>
+                               <div className="text-xs text-muted">{act.desc}</div>
+                            </button>
+                          ))}
+                        </div>
+                     </div>
+                     <div className="space-y-4">
+                        <label className="flex items-center gap-2 text-sm font-medium text-muted mb-3"><Target className="w-4 h-4 text-accent/70"/> Biological Objective</label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {[
+                            { value: 'weight_loss', label: 'Deficit (Cut)' },
+                            { value: 'weight_gain', label: 'Surplus (Bulk)' },
+                            { value: 'maintenance', label: 'Equilibrium' },
+                            { value: 'general_health', label: 'Optimization' }
+                          ].map(goal => (
+                            <button key={goal.value} type="button" onClick={() => setFormData(p => ({...p, goal: goal.value}))} className={cn("p-4 rounded-xl border text-left transition-all", formData.goal === goal.value ? "bg-accent/10 border-accent/40 shadow-[0_0_15px_rgba(34,197,94,0.1)]" : "bg-surface/30 border-white/5 hover:border-white/20")}>
+                               <div className={cn("font-medium", formData.goal === goal.value ? "text-accent" : "text-foreground")}>{goal.label}</div>
+                            </button>
+                          ))}
+                        </div>
+                     </div>
+                  </motion.div>
+                )}
+
+                {currentStep === 3 && (
+                  <motion.div key="step3" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="space-y-6">
+                    <div className="space-y-3">
+                      <label className="flex items-center gap-2 text-sm font-medium text-muted"><Wheat className="w-4 h-4 text-accent/70"/> Dietary Restrictions</label>
+                      <select onChange={(e) => handleMultiSelect(e, 'dietaryRestrictions')} value="" className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none">
+                        <option value="">Select restrictions to append...</option>
+                        <option value="Vegetarian">Vegetarian</option>
+                        <option value="Vegan">Vegan</option>
+                        <option value="Gluten-Free">Gluten-Free</option>
+                        <option value="Dairy-Free">Dairy-Free</option>
+                        <option value="Ketogenic">Ketogenic</option>
+                      </select>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {formData.dietaryRestrictions.map(item => (
+                           <div key={item} className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 border border-accent/20 rounded-lg text-xs font-medium text-accent">
+                             {item}
+                             <button type="button" onClick={() => removeItem('dietaryRestrictions', item)} className="hover:text-white"><X className="w-3 h-3"/></button>
+                           </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="flex items-center gap-2 text-sm font-medium text-muted"><Ban className="w-4 h-4 text-accent/70"/> Known Allergens</label>
+                      <select onChange={(e) => handleMultiSelect(e, 'allergies')} value="" className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none">
+                        <option value="">Select allergens to append...</option>
+                        <option value="Peanuts">Peanuts</option>
+                        <option value="Tree Nuts">Tree Nuts</option>
+                        <option value="Milk">Milk</option>
+                        <option value="Eggs">Eggs</option>
+                        <option value="Soy">Soy</option>
+                      </select>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {formData.allergies.map(item => (
+                           <div key={item} className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg text-xs font-medium text-red-400">
+                             {item}
+                             <button type="button" onClick={() => removeItem('allergies', item)} className="hover:text-white"><X className="w-3 h-3"/></button>
+                           </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="flex items-center gap-2 text-sm font-medium text-muted"><HeartPulse className="w-4 h-4 text-accent/70"/> Diagnosed Conditions</label>
+                      <select onChange={(e) => handleMultiSelect(e, 'healthConditions')} value="" className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none">
+                        <option value="">Select conditions to append...</option>
+                        <option value="Diabetes">Diabetes</option>
+                        <option value="Hypertension">Hypertension</option>
+                        <option value="High Cholesterol">High Cholesterol</option>
+                        <option value="PCOS">PCOS</option>
+                        <option value="Thyroid Issues">Thyroid Issues</option>
+                      </select>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {formData.healthConditions.map(item => (
+                           <div key={item} className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/10 border border-orange-500/20 rounded-lg text-xs font-medium text-orange-400">
+                             {item}
+                             <button type="button" onClick={() => removeItem('healthConditions', item)} className="hover:text-white"><X className="w-3 h-3"/></button>
+                           </div>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+              </AnimatePresence>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-between mt-10 pt-6 border-t border-white/5">
+                {currentStep > 1 ? (
+                  <button type="button" onClick={() => setCurrentStep(c => c - 1)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-sm font-medium transition-colors">
+                    <ChevronLeft className="w-4 h-4" /> Go Back
+                  </button>
+                ) : <div/>}
+
+                {currentStep < 3 ? (
+                  <button type="button" onClick={() => setCurrentStep(c => c + 1)} className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-accent text-background hover:bg-accent/90 text-sm font-semibold transition-colors disabled:opacity-50" disabled={(currentStep === 1 && (!formData.age || !formData.weight || !formData.height)) || (currentStep === 2 && (!formData.activityLevel || !formData.goal))}>
+                    Proceed <ChevronRight className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button type="submit" disabled={loading} className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-accent text-background hover:bg-accent/90 text-sm font-semibold transition-colors disabled:opacity-50">
+                    <Save className="w-4 h-4" /> {loading ? 'Synchronizing...' : 'Save Profile'}
+                  </button>
+                )}
+              </div>
+            </form>
           </div>
         </div>
-      )}
 
-      {/* User Profile Header */}
-      {currentUser && (
-        <div className="user-profile-header">
-          <div className="user-profile-info">
-            {currentUser.photoURL && (
-              <img 
-                src={currentUser.photoURL} 
-                alt={currentUser.displayName} 
-                className="user-profile-avatar"
-              />
+        {/* Right Column: Recommendations & Meals */}
+        <div className="lg:col-span-5 space-y-6">
+          
+          <AnimatePresence>
+            {recommendations && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-panel p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
+                    <Activity className="w-4 h-4 text-accent" />
+                  </div>
+                  <h3 className="font-heading font-semibold text-lg">Biometric Computed Targets</h3>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                   <div className="p-4 rounded-xl border border-white/5 bg-surface/50">
+                     <p className="text-xs text-muted font-medium mb-1">Target Energy</p>
+                     <p className="text-2xl font-bold text-accent font-heading">{recommendations.targetCalories} <span className="text-sm font-normal text-muted">kcal</span></p>
+                     <p className="text-[10px] text-muted uppercase tracking-wider mt-2">Optimal Threshold</p>
+                   </div>
+                   <div className="p-4 rounded-xl border border-white/5 bg-surface/50">
+                     <p className="text-xs text-muted font-medium mb-1">Basal Metabolic Rate</p>
+                     <p className="text-2xl font-bold font-heading">{recommendations.bmr} <span className="text-sm font-normal text-muted">kcal</span></p>
+                     <p className="text-[10px] text-muted uppercase tracking-wider mt-2">Resting Base</p>
+                   </div>
+                </div>
+
+                <h4 className="text-sm font-medium text-muted mb-4">Macronutrient Distribution</h4>
+                <div className="space-y-4">
+                   <div className="space-y-1">
+                     <div className="flex justify-between text-sm">
+                       <span className="font-medium text-foreground">Proteins</span>
+                       <span className="text-accent font-mono">{recommendations.macros.protein}g</span>
+                     </div>
+                     <div className="h-1.5 w-full bg-surface rounded-full overflow-hidden"><div className="h-full bg-accent w-[30%]" /></div>
+                   </div>
+                   <div className="space-y-1">
+                     <div className="flex justify-between text-sm">
+                       <span className="font-medium text-foreground">Carbohydrates</span>
+                       <span className="text-blue-400 font-mono">{recommendations.macros.carbohydrates}g</span>
+                     </div>
+                     <div className="h-1.5 w-full bg-surface rounded-full overflow-hidden"><div className="h-full bg-blue-400 w-[45%]" /></div>
+                   </div>
+                   <div className="space-y-1">
+                     <div className="flex justify-between text-sm">
+                       <span className="font-medium text-foreground">Lipids / Fats</span>
+                       <span className="text-orange-400 font-mono">{recommendations.macros.fat}g</span>
+                     </div>
+                     <div className="h-1.5 w-full bg-surface rounded-full overflow-hidden"><div className="h-full bg-orange-400 w-[25%]" /></div>
+                   </div>
+                </div>
+              </motion.div>
             )}
-            <div className="user-profile-details">
-              <h2>👋 Welcome, {currentUser.displayName}!</h2>
-              <p className="user-email">{currentUser.email}</p>
-            </div>
-          </div>
-        </div>
-      )}
+          </AnimatePresence>
 
-      <div className="profile-wizard-container">
-        {/* Progress Bar */}
-        <div className="wizard-progress">
-          <div className="progress-steps">
-            <div className={`progress-step ${currentStep >= 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}>
-              <div className="step-circle">
-                {currentStep > 1 ? '✓' : '1'}
+          {savedMealPlans.length > 0 && (
+            <div className="glass-panel p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-heading font-semibold text-lg flex items-center gap-2"><BookOpen className="w-4 h-4 text-muted" /> Generated Plans</h3>
+                <span className="px-2.5 py-1 rounded-full bg-surface text-xs font-medium border border-white/5">{savedMealPlans.length} records</span>
               </div>
-              <span className="step-label">Basic Info</span>
-            </div>
-            <div className={`progress-line ${currentStep > 1 ? 'active' : ''}`}></div>
-            <div className={`progress-step ${currentStep >= 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}>
-              <div className="step-circle">
-                {currentStep > 2 ? '✓' : '2'}
+              
+              <div className="space-y-3">
+                {savedMealPlans.map(plan => (
+                  <div key={plan.id} className="p-4 rounded-xl border border-white/5 bg-surface/30 hover:bg-surface/60 transition-colors group cursor-pointer" onClick={() => setSelectedPlan(plan)}>
+                     <div className="flex justify-between items-start mb-2">
+                       <div>
+                         <p className="font-medium text-sm text-foreground">Clinical Plan • {plan.preferences.duration} Day(s)</p>
+                         <p className="text-xs text-muted">{new Date(plan.savedAt).toLocaleDateString()}</p>
+                       </div>
+                       <button onClick={(e) => { e.stopPropagation(); deleteMealPlan(plan.id); }} className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                         <Trash2 className="w-3.5 h-3.5" />
+                       </button>
+                     </div>
+                     <div className="flex gap-2 text-xs font-medium">
+                       <span className="px-2 py-1 bg-white/5 rounded-md">{plan.preferences.mealsPerDay} meals/day</span>
+                       {plan.preferences.cuisinePreferences.length > 0 && <span className="px-2 py-1 bg-white/5 rounded-md text-ellipsis overflow-hidden whitespace-nowrap max-w-[120px]">{plan.preferences.cuisinePreferences[0]}</span>}
+                     </div>
+                  </div>
+                ))}
               </div>
-              <span className="step-label">Lifestyle</span>
-            </div>
-            <div className={`progress-line ${currentStep > 2 ? 'active' : ''}`}></div>
-            <div className={`progress-step ${currentStep >= 3 ? 'active' : ''}`}>
-              <div className="step-circle">3</div>
-              <span className="step-label">Health Details</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Form Card */}
-        <div className="wizard-card">
-          <div className="wizard-header">
-            <h1 className="wizard-title">
-              {currentStep === 1 && '👤 Tell Us About Yourself'}
-              {currentStep === 2 && '🎯 Your Lifestyle & Goals'}
-              {currentStep === 3 && '🏥 Health & Dietary Information'}
-            </h1>
-            <p className="wizard-subtitle">
-              {currentStep === 1 && 'Let\'s start with your basic information'}
-              {currentStep === 2 && 'Help us understand your activity and goals'}
-              {currentStep === 3 && 'Share any restrictions or health conditions'}
-            </p>
-          </div>
-
-          {message.text && (
-            <div className={`wizard-message ${message.type === 'success' ? 'success-message' : 'error-message'}`}>
-              {message.text}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="wizard-form">
-            {/* Step 1: Basic Info */}
-            {currentStep === 1 && (
-              <div className="form-step step-1">
-                <div className="form-grid">
-                  <div className="input-group">
-                    <label className="input-label">
-                      <span className="label-icon">🎂</span>
-                      Age
-                    </label>
-                    <input
-                      type="number"
-                      name="age"
-                      className="wizard-input"
-                      value={formData.age}
-                      onChange={handleChange}
-                      required
-                      min="1"
-                      max="120"
-                      placeholder="Enter your age"
-                    />
-                  </div>
-
-                  <div className="input-group full-width">
-                    <label className="input-label">
-                      <span className="label-icon">⚧</span>
-                      Gender
-                    </label>
-                    <div className="gender-selector">
-                      <button
-                        type="button"
-                        className={`gender-option ${formData.gender === 'male' ? 'selected' : ''}`}
-                        onClick={() => setFormData(prev => ({ ...prev, gender: 'male' }))}
-                      >
-                        <span className="gender-icon">👨</span>
-                        Male
-                      </button>
-                      <button
-                        type="button"
-                        className={`gender-option ${formData.gender === 'female' ? 'selected' : ''}`}
-                        onClick={() => setFormData(prev => ({ ...prev, gender: 'female' }))}
-                      >
-                        <span className="gender-icon">👩</span>
-                        Female
-                      </button>
-                      <button
-                        type="button"
-                        className={`gender-option ${formData.gender === 'other' ? 'selected' : ''}`}
-                        onClick={() => setFormData(prev => ({ ...prev, gender: 'other' }))}
-                      >
-                        <span className="gender-icon">🧑</span>
-                        Other
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="input-group">
-                    <label className="input-label">
-                      <span className="label-icon">⚖️</span>
-                      Weight (kg)
-                    </label>
-                    <input
-                      type="number"
-                      name="weight"
-                      className="wizard-input"
-                      value={formData.weight}
-                      onChange={handleChange}
-                      required
-                      min="1"
-                      step="0.1"
-                      placeholder="Enter your weight"
-                    />
-                  </div>
-
-                  <div className="input-group">
-                    <label className="input-label">
-                      <span className="label-icon">📏</span>
-                      Height (cm)
-                    </label>
-                    <input
-                      type="number"
-                      name="height"
-                      className="wizard-input"
-                      value={formData.height}
-                      onChange={handleChange}
-                      required
-                      min="1"
-                      placeholder="Enter your height"
-                    />
-                  </div>
-                </div>
-
-                {getBMI() && (
-                  <div className="bmi-card">
-                    <div className="bmi-header">
-                      <span className="bmi-icon">📊</span>
-                      <span>Your BMI</span>
-                    </div>
-                    <div className="bmi-value">{getBMI()}</div>
-                    <div className="bmi-category" style={{ color: getBMICategory(parseFloat(getBMI())).color }}>
-                      {getBMICategory(parseFloat(getBMI())).label}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Step 2: Lifestyle & Goals */}
-            {currentStep === 2 && (
-              <div className="form-step step-2">
-                <div className="input-group full-width">
-                  <label className="input-label">
-                    <span className="label-icon">🏃</span>
-                    Activity Level
-                  </label>
-                  <div className="activity-grid">
-                    {[
-                      { value: 'sedentary', icon: '🛋️', label: 'Sedentary', desc: 'Little or no exercise' },
-                      { value: 'light', icon: '🚶', label: 'Light', desc: '1-3 days/week' },
-                      { value: 'moderate', icon: '🏋️', label: 'Moderate', desc: '3-5 days/week' },
-                      { value: 'active', icon: '🏃', label: 'Active', desc: '6-7 days/week' },
-                      { value: 'very_active', icon: '💪', label: 'Very Active', desc: 'Intense daily' }
-                    ].map((activity) => (
-                      <button
-                        key={activity.value}
-                        type="button"
-                        className={`activity-card ${formData.activityLevel === activity.value ? 'selected' : ''}`}
-                        onClick={() => setFormData(prev => ({ ...prev, activityLevel: activity.value }))}
-                      >
-                        <span className="activity-icon">{activity.icon}</span>
-                        <span className="activity-label">{activity.label}</span>
-                        <span className="activity-desc">{activity.desc}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="input-group full-width">
-                  <label className="input-label">
-                    <span className="label-icon">🎯</span>
-                    Health Goal
-                  </label>
-                  <div className="goals-grid">
-                    {[
-                      { value: 'weight_loss', icon: '📉', label: 'Weight Loss', color: '#3b82f6' },
-                      { value: 'weight_gain', icon: '📈', label: 'Weight Gain', color: '#10b981' },
-                      { value: 'muscle_gain', icon: '💪', label: 'Muscle Gain', color: '#8b5cf6' },
-                      { value: 'maintenance', icon: '⚖️', label: 'Maintenance', color: '#f59e0b' },
-                      { value: 'general_health', icon: '❤️', label: 'General Health', color: '#ef4444' }
-                    ].map((goal) => (
-                      <button
-                        key={goal.value}
-                        type="button"
-                        className={`goal-card ${formData.goal === goal.value ? 'selected' : ''}`}
-                        onClick={() => setFormData(prev => ({ ...prev, goal: goal.value }))}
-                        style={{ '--goal-color': goal.color }}
-                      >
-                        <span className="goal-icon">{goal.icon}</span>
-                        <span className="goal-label">{goal.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Health Details */}
-            {currentStep === 3 && (
-              <div className="form-step step-3">
-                <div className="input-group full-width">
-                  <label className="input-label">
-                    <span className="label-icon">🥗</span>
-                    Dietary Restrictions
-                  </label>
-                  <select
-                    className="wizard-select"
-                    onChange={(e) => handleMultiSelect(e, 'dietaryRestrictions')}
-                    value=""
-                  >
-                    <option value="">Click to add restrictions...</option>
-                    <option value="none">None</option>
-                    <option value="vegetarian">🌱 Vegetarian</option>
-                    <option value="vegan">🥬 Vegan</option>
-                    <option value="gluten-free">🌾 Gluten-Free</option>
-                    <option value="dairy-free">🥛 Dairy-Free</option>
-                    <option value="low-carb">🍞 Low-Carb</option>
-                    <option value="keto">🥓 Keto</option>
-                    <option value="paleo">🦴 Paleo</option>
-                    <option value="halal">☪️ Halal</option>
-                    <option value="kosher">✡️ Kosher</option>
-                  </select>
-                  <div className="chips-container">
-                    {formData.dietaryRestrictions.length === 0 && (
-                      <span className="empty-chips">No restrictions selected</span>
-                    )}
-                    {formData.dietaryRestrictions.map(item => (
-                      <span key={item} className="chip chip-primary">
-                        {item}
-                        <button type="button" className="chip-remove" onClick={() => removeItem('dietaryRestrictions', item)}>×</button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="input-group full-width">
-                  <label className="input-label">
-                    <span className="label-icon">⚠️</span>
-                    Allergies
-                  </label>
-                  <select
-                    className="wizard-select"
-                    onChange={(e) => handleMultiSelect(e, 'allergies')}
-                    value=""
-                  >
-                    <option value="">Click to add allergies...</option>
-                    <option value="none">None</option>
-                    <option value="peanuts">🥜 Peanuts</option>
-                    <option value="tree nuts">🌰 Tree Nuts</option>
-                    <option value="milk">🥛 Milk</option>
-                    <option value="eggs">🥚 Eggs</option>
-                    <option value="soy">🫘 Soy</option>
-                    <option value="wheat">🌾 Wheat</option>
-                    <option value="fish">🐟 Fish</option>
-                    <option value="shellfish">🦐 Shellfish</option>
-                  </select>
-                  <div className="chips-container">
-                    {formData.allergies.length === 0 && (
-                      <span className="empty-chips">No allergies selected</span>
-                    )}
-                    {formData.allergies.map(item => (
-                      <span key={item} className="chip chip-danger">
-                        {item}
-                        <button type="button" className="chip-remove" onClick={() => removeItem('allergies', item)}>×</button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="input-group full-width">
-                  <label className="input-label">
-                    <span className="label-icon">🏥</span>
-                    Health Conditions
-                  </label>
-                  <select
-                    className="wizard-select"
-                    onChange={(e) => handleMultiSelect(e, 'healthConditions')}
-                    value=""
-                  >
-                    <option value="">Click to add conditions...</option>
-                    <option value="none">None</option>
-                    <option value="diabetes">💉 Diabetes</option>
-                    <option value="hypertension">🩺 Hypertension</option>
-                    <option value="high cholesterol">📊 High Cholesterol</option>
-                    <option value="heart disease">❤️ Heart Disease</option>
-                    <option value="PCOS">🔬 PCOS</option>
-                    <option value="thyroid">🦋 Thyroid Issues</option>
-                  </select>
-                  <div className="chips-container">
-                    {formData.healthConditions.length === 0 && (
-                      <span className="empty-chips">No health conditions selected</span>
-                    )}
-                    {formData.healthConditions.map(item => (
-                      <span key={item} className="chip chip-warning">
-                        {item}
-                        <button type="button" className="chip-remove" onClick={() => removeItem('healthConditions', item)}>×</button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Navigation Buttons */}
-            <div className="wizard-actions">
-              {currentStep > 1 && (
-                <button type="button" className="btn-wizard btn-secondary" onClick={prevStep}>
-                  ← Previous
-                </button>
-              )}
-              {currentStep < 3 ? (
-                <button 
-                  type="button" 
-                  className="btn-wizard btn-primary" 
-                  onClick={nextStep}
-                  disabled={
-                    (currentStep === 1 && (!formData.age || !formData.weight || !formData.height)) ||
-                    (currentStep === 2 && (!formData.activityLevel || !formData.goal))
-                  }
-                >
-                  Next →
-                </button>
-              ) : (
-                <button type="submit" className="btn-wizard btn-success" disabled={loading}>
-                  {loading ? '⏳ Saving...' : '✨ Complete Profile'}
-                </button>
-              )}
-            </div>
-          </form>
         </div>
       </div>
 
-      {recommendations && (
-        <div className="recommendations-section">
-          <h2 className="section-title">📊 Your Personalized Recommendations</h2>
-          <div className="recommendations-grid-new">
-            <div className="rec-card">
-              <div className="rec-icon">🔥</div>
-              <div className="rec-label">BMR</div>
-              <div className="rec-value">{recommendations.bmr}</div>
-              <div className="rec-unit">calories/day</div>
-            </div>
-            <div className="rec-card">
-              <div className="rec-icon">⚡</div>
-              <div className="rec-label">TDEE</div>
-              <div className="rec-value">{recommendations.tdee}</div>
-              <div className="rec-unit">calories/day</div>
-            </div>
-            <div className="rec-card highlight">
-              <div className="rec-icon">🎯</div>
-              <div className="rec-label">Target Calories</div>
-              <div className="rec-value">{recommendations.targetCalories}</div>
-              <div className="rec-unit">calories/day</div>
-            </div>
-          </div>
+      <AnimatePresence>
+        {selectedPlan && (
+           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md" onClick={() => setSelectedPlan(null)}>
+              <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="glass-panel w-full max-w-2xl max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                 <div className="flex items-center justify-between p-5 border-b border-white/5">
+                   <h2 className="font-heading font-semibold text-lg">Protocol Documentation • {selectedPlan.preferences.duration} Days</h2>
+                   <button onClick={() => setSelectedPlan(null)} className="p-1"><X className="w-5 h-5 text-muted hover:text-foreground" /></button>
+                 </div>
+                 
+                 <div className="flex-1 overflow-y-auto p-6 text-sm text-foreground/90 prose prose-invert prose-p:leading-relaxed prose-headings:font-heading prose-a:text-accent">
+                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{selectedPlan.mealPlan}</ReactMarkdown>
+                 </div>
 
-          <div className="macros-section-new">
-            <h3 className="macros-title">🍽️ Recommended Daily Macros</h3>
-            <div className="macros-cards">
-              <div className="macro-card protein-card">
-                <div className="macro-icon">🥩</div>
-                <div className="macro-name">Protein</div>
-                <div className="macro-amount">{recommendations.macros.protein}g</div>
-                <div className="macro-percentage">30%</div>
-              </div>
-              <div className="macro-card carbs-card">
-                <div className="macro-icon">🍚</div>
-                <div className="macro-name">Carbs</div>
-                <div className="macro-amount">{recommendations.macros.carbohydrates}g</div>
-                <div className="macro-percentage">45%</div>
-              </div>
-              <div className="macro-card fat-card">
-                <div className="macro-icon">🥑</div>
-                <div className="macro-name">Fats</div>
-                <div className="macro-amount">{recommendations.macros.fat}g</div>
-                <div className="macro-percentage">25%</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+                 <div className="p-4 border-t border-white/5 bg-surface/30 flex justify-end gap-3">
+                   <button onClick={() => setSelectedPlan(null)} className="px-4 py-2 text-sm font-medium text-muted hover:text-foreground">Close</button>
+                   <button onClick={() => { navigator.clipboard.writeText(selectedPlan.mealPlan); alert('Data copied to clipboard'); }} className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-accent text-background rounded-lg hover:bg-accent/90">
+                     <Copy className="w-4 h-4" /> Copy Protocol
+                   </button>
+                 </div>
+              </motion.div>
+           </motion.div>
+        )}
+      </AnimatePresence>
 
-      {savedMealPlans.length > 0 && (
-        <div className="saved-meals-section">
-          <div className="section-header">
-            <h2 className="section-title">📋 Saved Meal Plans ({savedMealPlans.length})</h2>
-          </div>
-
-          <div className="meal-plans-grid">
-            {savedMealPlans.map((plan) => (
-              <div key={plan.id} className="saved-plan-card">
-                <div className="plan-card-header">
-                  <div className="plan-icon">🍽️</div>
-                  <div className="plan-meta">
-                    <h3>
-                      {plan.preferences.duration} Day{plan.preferences.duration > 1 ? 's' : ''} Plan
-                    </h3>
-                    <p className="plan-date">
-                      {new Date(plan.savedAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="plan-details">
-                  <div className="plan-detail-item">
-                    <span className="detail-label">Meals/Day:</span>
-                    <span className="detail-value">{plan.preferences.mealsPerDay}</span>
-                  </div>
-                  {plan.preferences.cuisinePreferences.length > 0 && (
-                    <div className="plan-detail-item">
-                      <span className="detail-label">Cuisines:</span>
-                      <span className="detail-value">
-                        {plan.preferences.cuisinePreferences.join(', ')}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="plan-actions">
-                  <button 
-                    className="btn-view-plan"
-                    onClick={() => viewMealPlan(plan)}
-                  >
-                    👁️ View Plan
-                  </button>
-                  <button 
-                    className="btn-delete-plan"
-                    onClick={() => {
-                      if (window.confirm('Are you sure you want to delete this meal plan?')) {
-                        deleteMealPlan(plan.id);
-                      }
-                    }}
-                  >
-                    🗑️ Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {selectedPlan && (
-        <div className="modal-overlay" onClick={closeMealPlanModal}>
-          <div className="meal-plan-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>
-                {selectedPlan.preferences.duration} Day Meal Plan
-              </h2>
-              <button className="modal-close" onClick={closeMealPlanModal}>
-                ×
-              </button>
-            </div>
-
-            <div className="modal-info">
-              <div className="info-badge">
-                📅 Generated: {new Date(selectedPlan.generatedAt).toLocaleDateString()}
-              </div>
-              <div className="info-badge">
-                🍽️ {selectedPlan.preferences.mealsPerDay} meals/day
-              </div>
-              {selectedPlan.preferences.cuisinePreferences.length > 0 && (
-                <div className="info-badge">
-                  🌍 {selectedPlan.preferences.cuisinePreferences.join(', ')}
-                </div>
-              )}
-            </div>
-
-            <div className="modal-content-scroll markdown-content">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {selectedPlan.mealPlan}
-              </ReactMarkdown>
-            </div>
-
-            <div className="modal-footer">
-              <button 
-                className="btn btn-primary"
-                onClick={() => {
-                  navigator.clipboard.writeText(selectedPlan.mealPlan);
-                  alert('Meal plan copied to clipboard!');
-                }}
-              >
-                📋 Copy to Clipboard
-              </button>
-              <button 
-                className="btn btn-secondary"
-                onClick={closeMealPlanModal}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

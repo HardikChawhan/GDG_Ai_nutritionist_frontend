@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Flame, Beef, Wheat, Droplets, Target, Activity, 
+  Calendar as CalendarIcon, Plus, Search, Trash2,
+  AlertTriangle, RotateCcw, Utensils, Zap, CheckCircle2
+} from 'lucide-react';
+
 import { nutritionAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import firebaseService from '../services/firebaseService';
 import NutritionCalendar from './NutritionCalendar';
-import './NutritionDashboard.css';
+import { cn } from '../utils/cn';
 
-// Cookie helper for calories burned
 const getCaloriesBurnedFromCookie = (date) => {
   const dateKey = date || new Date().toISOString().split('T')[0];
   const cookieKey = `caloriesBurned_${dateKey}`;
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${cookieKey}=`);
   if (parts.length === 2) {
-    const calories = parseInt(parts.pop().split(';').shift()) || 0;
-    console.log(`📊 Loaded calories burned from cookie (${dateKey}): ${calories}`);
-    return calories;
+    return parseInt(parts.pop().split(';').shift()) || 0;
   }
   return 0;
 };
@@ -23,166 +27,101 @@ const getCaloriesBurnedFromCookie = (date) => {
 function NutritionDashboard() {
   const { currentUser, userProfile } = useAuth();
   const navigate = useNavigate();
+  
   const [dailyFoods, setDailyFoods] = useState([]);
   const [foodInput, setFoodInput] = useState('');
   const [recommendations, setRecommendations] = useState(null);
-  const [currentNutrition, setCurrentNutrition] = useState({
-    calories: 0,
-    protein: 0,
-    carbohydrates: 0,
-    fat: 0,
-    fiber: 0
-  });
+  const [currentNutrition, setCurrentNutrition] = useState({ calories: 0, protein: 0, carbohydrates: 0, fat: 0, fiber: 0 });
   const [caloriesBurned, setCaloriesBurned] = useState(0);
+  
   const [isSearching, setIsSearching] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [agentSettings, setAgentSettings] = useState(null);
-  const [showAgentSettings, setShowAgentSettings] = useState(false);
+  
   const [showCalendar, setShowCalendar] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
 
-  // Get today's date as a key
   const getTodayKey = () => {
     const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   };
 
-  // Load foods from Firebase or localStorage on mount
   useEffect(() => {
     const loadDailyFoods = async () => {
       try {
         const todayKey = getTodayKey();
-        
         if (currentUser) {
-          // Try to load from Firebase
           try {
             const nutritionData = await firebaseService.getDailyNutrition(currentUser.uid, todayKey);
-            
             if (nutritionData) {
-              console.log('Loaded from Firebase:', nutritionData);
               setDailyFoods(nutritionData.foods || []);
-              setCurrentNutrition(nutritionData.totals || {
-                calories: 0,
-                protein: 0,
-                carbohydrates: 0,
-                fat: 0,
-                fiber: 0
-              });
-              // Load calories burned from cookie instead of Firebase
+              setCurrentNutrition(nutritionData.totals || { calories: 0, protein: 0, carbohydrates: 0, fat: 0, fiber: 0 });
               setCaloriesBurned(getCaloriesBurnedFromCookie(todayKey));
             } else {
-              // No data in Firebase, try localStorage
               loadFromLocalStorage(todayKey);
             }
           } catch (error) {
-            console.error('Error loading from Firebase:', error);
             loadFromLocalStorage(todayKey);
           }
           
-          // Load agent settings
           try {
             const agent = await firebaseService.getAgentSettings(currentUser.uid);
             setAgentSettings(agent);
-          } catch (error) {
-            console.error('Error loading agent settings:', error);
-          }
+          } catch (error) {}
         } else {
-          // Not logged in, use localStorage
           loadFromLocalStorage(todayKey);
-          // Always load calories burned from cookie
-          setCaloriesBurned(getCaloriesBurnedFromCookie(todayKey));
         }
-      } catch (error) {
-        console.error('Error loading daily foods:', error);
       } finally {
         setIsInitialLoad(false);
       }
     };
-
     loadDailyFoods();
   }, [currentUser]);
 
   const loadFromLocalStorage = (todayKey) => {
     try {
       const savedData = localStorage.getItem(`dailyFoods_${todayKey}`);
-      
       if (savedData) {
         const data = JSON.parse(savedData);
         setDailyFoods(data.foods || []);
-        setCurrentNutrition(data.totals || {
-          calories: 0,
-          protein: 0,
-          carbohydrates: 0,
-          fat: 0,
-          fiber: 0
-        });
+        setCurrentNutrition(data.totals || { calories: 0, protein: 0, carbohydrates: 0, fat: 0, fiber: 0 });
       }
-      // Always load calories burned from cookie
       setCaloriesBurned(getCaloriesBurnedFromCookie(todayKey));
-    } catch (error) {
-      console.error('Error loading from localStorage:', error);
-    }
+    } catch (error) {}
   };
 
-  // Save foods to Firebase and localStorage whenever they change
   useEffect(() => {
-    if (isInitialLoad) {
-      return; // Skip saving on initial load
-    }
+    if (isInitialLoad) return;
 
     const saveData = async () => {
       try {
         const todayKey = getTodayKey();
-        const dataToSave = {
-          foods: dailyFoods,
-          totals: currentNutrition,
-          lastUpdated: new Date().toISOString()
-        };
-
-        // Save to localStorage (backup)
+        const dataToSave = { foods: dailyFoods, totals: currentNutrition, lastUpdated: new Date().toISOString() };
         localStorage.setItem(`dailyFoods_${todayKey}`, JSON.stringify(dataToSave));
-
-        // Save to Firebase if user is logged in
         if (currentUser) {
           await firebaseService.saveDailyNutrition(currentUser.uid, todayKey, dataToSave);
-          console.log('Saved to Firebase:', dataToSave);
         }
-      } catch (error) {
-        console.error('Error saving daily foods:', error);
-      }
+      } catch (error) {}
     };
-
     saveData();
   }, [dailyFoods, currentNutrition, isInitialLoad, currentUser]);
 
   const fetchRecommendations = async () => {
     if (!userProfile) return;
-    
     try {
       const response = await nutritionAPI.getRecommendations(userProfile);
       setRecommendations(response.data.data);
-    } catch (error) {
-      console.error('Error fetching recommendations:', error);
-    }
+    } catch (error) {}
   };
 
   useEffect(() => {
-    if (userProfile) {
-      fetchRecommendations();
-    }
-  }, [userProfile]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (userProfile) fetchRecommendations();
+  }, [userProfile]);
 
-  // Listen for voice food logging events
   useEffect(() => {
     const handleVoiceFoodLog = (event) => {
       const foodData = event.detail;
-      console.log('📢 Voice food log received:', foodData);
-      
-      // Add the food to daily foods
       const newFood = {
         name: foodData.food,
         calories: parseFloat(foodData.calories) || 0,
@@ -193,16 +132,7 @@ function NutritionDashboard() {
         timestamp: new Date().toISOString()
       };
 
-      console.log('➕ Adding food with macros:', newFood);
-
-      // Update foods array
-      setDailyFoods(prev => {
-        const updated = [...prev, newFood];
-        console.log('📊 Total foods now:', updated.length);
-        return updated;
-      });
-      
-      // Update totals using functional update to ensure we have latest state
+      setDailyFoods(prev => [...prev, newFood]);
       setCurrentNutrition(prev => {
         const updated = {
           calories: (prev.calories || 0) + newFood.calories,
@@ -211,72 +141,56 @@ function NutritionDashboard() {
           fat: (prev.fat || 0) + newFood.fat,
           fiber: prev.fiber || 0
         };
-        console.log('📈 Updated nutrition totals:', updated);
-        
-        // Check if macros exceed limits
         checkMacroLimits(updated);
-        
         return updated;
       });
-      
       setIsInitialLoad(false);
     };
 
     window.addEventListener('voice-food-log', handleVoiceFoodLog);
-    
-    return () => {
-      window.removeEventListener('voice-food-log', handleVoiceFoodLog);
-    };
-  }, []);
+    return () => window.removeEventListener('voice-food-log', handleVoiceFoodLog);
+  }, [recommendations]);
 
   const searchAndAddFood = async (foodName) => {
     setIsSearching(true);
     try {
-      // Search for the food in the database
       const response = await nutritionAPI.searchFoods(foodName, 1);
-      
       if (response.data.data && response.data.data.length > 0) {
         const foodData = response.data.data[0];
-        
-        // Extract nutritional values from the food data
         const nutrients = foodData.nutrients || {};
-        const calories = nutrients['Energy']?.amount || 0;
-        const protein = nutrients['Protein']?.amount || 0;
-        const carbs = nutrients['Carbohydrate, by difference']?.amount || 0;
-        const fat = nutrients['Total lipid (fat)']?.amount || 0;
-        const fiber = nutrients['Fiber, total dietary']?.amount || 0;
-
-        // Add food with actual nutritional data
+        
+        const extractNutrient = (name) => nutrients[name]?.amount || 0;
+        
         const foodEntry = {
           name: foodName,
           fdcId: foodData.fdcId,
           description: foodData.description,
           nutrition: {
-            calories: Math.round(calories),
-            protein: Math.round(protein * 10) / 10,
-            carbohydrates: Math.round(carbs * 10) / 10,
-            fat: Math.round(fat * 10) / 10,
-            fiber: Math.round(fiber * 10) / 10
+            calories: Math.round(extractNutrient('Energy')),
+            protein: Math.round(extractNutrient('Protein') * 10) / 10,
+            carbohydrates: Math.round(extractNutrient('Carbohydrate, by difference') * 10) / 10,
+            fat: Math.round(extractNutrient('Total lipid (fat)') * 10) / 10,
+            fiber: Math.round(extractNutrient('Fiber, total dietary') * 10) / 10
           }
         };
 
         setDailyFoods([...dailyFoods, foodEntry]);
-        
-        // Update total nutrition
-        setCurrentNutrition(prev => ({
-          calories: prev.calories + foodEntry.nutrition.calories,
-          protein: Math.round((prev.protein + foodEntry.nutrition.protein) * 10) / 10,
-          carbohydrates: Math.round((prev.carbohydrates + foodEntry.nutrition.carbohydrates) * 10) / 10,
-          fat: Math.round((prev.fat + foodEntry.nutrition.fat) * 10) / 10,
-          fiber: Math.round((prev.fiber + foodEntry.nutrition.fiber) * 10) / 10
-        }));
+        setCurrentNutrition(prev => {
+          const updated = {
+            calories: prev.calories + foodEntry.nutrition.calories,
+            protein: Math.round((prev.protein + foodEntry.nutrition.protein) * 10) / 10,
+            carbohydrates: Math.round((prev.carbohydrates + foodEntry.nutrition.carbohydrates) * 10) / 10,
+            fat: Math.round((prev.fat + foodEntry.nutrition.fat) * 10) / 10,
+            fiber: Math.round((prev.fiber + foodEntry.nutrition.fiber) * 10) / 10
+          };
+          checkMacroLimits(updated);
+          return updated;
+        });
       } else {
-        // If food not found, add with estimated values
-        alert(`Food "${foodName}" not found in database. Please try a more specific name.`);
+        alert(`Entry "${foodName}" not located in clinical database.`);
       }
     } catch (error) {
-      console.error('Error searching for food:', error);
-      alert('Failed to search for food. Please try again.');
+      alert('Network issue communicating with USDA database.');
     } finally {
       setIsSearching(false);
     }
@@ -291,44 +205,22 @@ function NutritionDashboard() {
 
   const removeFood = (index) => {
     const foodToRemove = dailyFoods[index];
-    const newFoods = dailyFoods.filter((_, i) => i !== index);
-    setDailyFoods(newFoods);
-    
-    // Subtract the actual nutrition values (handle both old and new structures)
-    const calories = foodToRemove.calories || foodToRemove.nutrition?.calories || 0;
-    const protein = foodToRemove.protein || foodToRemove.nutrition?.protein || 0;
-    const carbs = foodToRemove.carbohydrates || foodToRemove.nutrition?.carbohydrates || 0;
-    const fat = foodToRemove.fat || foodToRemove.nutrition?.fat || 0;
-    const fiber = foodToRemove.fiber || foodToRemove.nutrition?.fiber || 0;
+    setDailyFoods(dailyFoods.filter((_, i) => i !== index));
     
     setCurrentNutrition(prev => ({
-      calories: Math.max(0, prev.calories - calories),
-      protein: Math.max(0, Math.round((prev.protein - protein) * 10) / 10),
-      carbohydrates: Math.max(0, Math.round((prev.carbohydrates - carbs) * 10) / 10),
-      fat: Math.max(0, Math.round((prev.fat - fat) * 10) / 10),
-      fiber: Math.max(0, Math.round((prev.fiber - fiber) * 10) / 10)
+      calories: Math.max(0, prev.calories - (foodToRemove.calories || foodToRemove.nutrition?.calories || 0)),
+      protein: Math.max(0, Math.round((prev.protein - (foodToRemove.protein || foodToRemove.nutrition?.protein || 0)) * 10) / 10),
+      carbohydrates: Math.max(0, Math.round((prev.carbohydrates - (foodToRemove.carbohydrates || foodToRemove.nutrition?.carbohydrates || 0)) * 10) / 10),
+      fat: Math.max(0, Math.round((prev.fat - (foodToRemove.fat || foodToRemove.nutrition?.fat || 0)) * 10) / 10),
+      fiber: Math.max(0, Math.round((prev.fiber - (foodToRemove.fiber || foodToRemove.nutrition?.fiber || 0)) * 10) / 10)
     }));
-    
     setIsInitialLoad(false);
   };
 
   const resetDay = () => {
     setDailyFoods([]);
-    setCurrentNutrition({
-      calories: 0,
-      protein: 0,
-      carbohydrates: 0,
-      fat: 0,
-      fiber: 0
-    });
-    
-    // Clear localStorage for today
-    try {
-      const todayKey = getTodayKey();
-      localStorage.removeItem(todayKey);
-    } catch (error) {
-      console.error('Error clearing localStorage:', error);
-    }
+    setCurrentNutrition({ calories: 0, protein: 0, carbohydrates: 0, fat: 0, fiber: 0 });
+    try { localStorage.removeItem(`dailyFoods_${getTodayKey()}`); } catch (e) {}
   };
 
   const checkMacroLimits = (nutrition) => {
@@ -336,22 +228,12 @@ function NutritionDashboard() {
     
     const warnings = [];
     const targetCals = recommendations.targetCalories || 2000;
-    const targetProtein = recommendations.macros?.protein || 150;
-    const targetCarbs = recommendations.macros?.carbohydrates || 200;
-    const targetFat = recommendations.macros?.fat || 65;
+    const { protein: targetProtein = 150, carbohydrates: targetCarbs = 200, fat: targetFat = 65 } = recommendations.macros || {};
     
-    if (nutrition.calories > targetCals * 1.1) {
-      warnings.push(`Calories exceeded by ${Math.round(nutrition.calories - targetCals)} cal`);
-    }
-    if (nutrition.protein > targetProtein * 1.2) {
-      warnings.push(`Protein exceeded by ${Math.round(nutrition.protein - targetProtein)}g`);
-    }
-    if (nutrition.carbohydrates > targetCarbs * 1.2) {
-      warnings.push(`Carbs exceeded by ${Math.round(nutrition.carbohydrates - targetCarbs)}g`);
-    }
-    if (nutrition.fat > targetFat * 1.2) {
-      warnings.push(`Fat exceeded by ${Math.round(nutrition.fat - targetFat)}g`);
-    }
+    if (nutrition.calories > targetCals * 1.1) warnings.push(`Energy threshold exceeded by ${Math.round(nutrition.calories - targetCals)} kcal`);
+    if (nutrition.protein > targetProtein * 1.2) warnings.push(`Protein threshold exceeded by ${Math.round(nutrition.protein - targetProtein)}g`);
+    if (nutrition.carbohydrates > targetCarbs * 1.2) warnings.push(`Carbohydrate threshold exceeded by ${Math.round(nutrition.carbohydrates - targetCarbs)}g`);
+    if (nutrition.fat > targetFat * 1.2) warnings.push(`Lipid threshold exceeded by ${Math.round(nutrition.fat - targetFat)}g`);
     
     if (warnings.length > 0) {
       setWarningMessage(warnings.join(' • '));
@@ -360,304 +242,217 @@ function NutritionDashboard() {
     }
   };
 
-  const getProgressPercentage = (current, target) => {
-    if (!target) return 0;
-    return Math.min((current / target) * 100, 100);
-  };
-
-  const getProgressColor = (percentage) => {
-    if (percentage < 50) return '#e74c3c';
-    if (percentage < 80) return '#f39c12';
-    if (percentage <= 100) return '#27ae60';
-    return '#3498db';
-  };
+  const getProgressPercentage = (current, target) => !target ? 0 : Math.min((current / target) * 100, 100);
 
   if (!userProfile) {
     return (
-      <div className="container">
-        <div className="card">
-          <div className="empty-state">
-            <div className="empty-icon">📊</div>
-            <h2>Welcome to Your Nutrition Dashboard</h2>
-            <p>Please create your health profile first to get personalized nutrition tracking</p>
-            <a href="/profile" className="btn btn-primary">Create Profile</a>
+      <div className="min-h-[80vh] flex items-center justify-center p-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-panel max-w-lg w-full p-8 text-center text-foreground">
+          <div className="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center mx-auto mb-6">
+             <Activity className="w-8 h-8 text-accent" />
           </div>
-        </div>
+          <h2 className="text-2xl font-heading font-semibold mb-3">Clinical Profile Required</h2>
+          <p className="text-muted mb-8">Baseline biometrics are required before accessing the nutrition intelligence dashboard.</p>
+          <button onClick={() => navigate('/profile')} className="w-full bg-accent hover:bg-accent/90 text-background font-semibold py-3 rounded-xl transition-all">Initialize Profile</button>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="container nutrition-dashboard-container">
-      {/* Warning Popup */}
-      {showWarning && (
-        <div className="warning-popup">
-          <div className="warning-icon">⚠️</div>
-          <div className="warning-content">
-            <h4>Macro Limit Exceeded!</h4>
-            <p>{warningMessage}</p>
-          </div>
-          <button className="warning-close" onClick={() => setShowWarning(false)}>×</button>
-        </div>
-      )}
-
-      {/* Calendar Toggle Button */}
-      <button className="calendar-toggle-btn" onClick={() => setShowCalendar(!showCalendar)}>
-        📅
-      </button>
-
-      {/* Calendar Popup */}
-      {showCalendar && (
-        <div className="calendar-popup">
-          <div className="calendar-popup-header">
-            <h3>📅 Nutrition History</h3>
-            <button className="close-btn" onClick={() => setShowCalendar(false)}>×</button>
-          </div>
-          <NutritionCalendar />
-        </div>
-      )}
-
-      {/* Voice Assistant Settings */}
-      {agentSettings && (
-        <div className="agent-settings-card">
-          <div className="agent-header">
-            <div className="agent-info">
-              <span className="agent-avatar-large">{agentSettings.avatar}</span>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+      
+      <AnimatePresence>
+        {showWarning && (
+           <motion.div initial={{ opacity: 0, y: -50, x: '-50%' }} animate={{ opacity: 1, y: 0, x: '-50%' }} exit={{ opacity: 0, y: -20, x: '-50%' }} className="fixed top-24 left-1/2 z-50 flex items-center gap-3 px-6 py-4 bg-red-500/90 backdrop-blur-md text-white rounded-xl shadow-2xl border border-red-400">
+              <AlertTriangle className="w-5 h-5" />
               <div>
-                <h3>Your AI Assistant: {agentSettings.name}</h3>
-                <p className="agent-personality">{agentSettings.personality}</p>
-                <p className="agent-voice-info">Voice: {agentSettings.voice}</p>
+                <h4 className="font-semibold text-sm">Target Threshold Exceeded</h4>
+                <p className="text-xs text-white/90 font-mono mt-0.5">{warningMessage}</p>
               </div>
-            </div>
-            <button 
-              className="btn btn-secondary"
-              onClick={() => navigate('/agent-setup')}
-            >
-              Change Assistant
-            </button>
-          </div>
-          <div className="agent-status">
-            <div className="status-indicator active"></div>
-            <span>Listening for "{agentSettings.name}"</span>
-          </div>
-        </div>
-      )}
-
-      {/* Hero Stats Section */}
-      {recommendations && (
-        <div className="hero-stats-grid">
-          <div className="hero-stat-card calories-card">
-            <div className="hero-stat-icon">🔥</div>
-            <div className="hero-stat-content">
-              <div className="hero-stat-label">Calories</div>
-              <div className="hero-stat-values">
-                <span className="current">{currentNutrition.calories}</span>
-                <span className="separator">/</span>
-                <span className="target">{recommendations.targetCalories}</span>
-              </div>
-              <div className="hero-progress-bar">
-                <div 
-                  className="hero-progress-fill"
-                  style={{
-                    width: `${getProgressPercentage(currentNutrition.calories, recommendations.targetCalories)}%`,
-                    background: getProgressColor(getProgressPercentage(currentNutrition.calories, recommendations.targetCalories))
-                  }}
-                />
-              </div>
-              <div className="progress-label">
-                {getProgressPercentage(currentNutrition.calories, recommendations.targetCalories).toFixed(0)}% Complete
-              </div>
-            </div>
-          </div>
-
-          <div className="hero-stat-card protein-card">
-            <div className="hero-stat-icon">🥩</div>
-            <div className="hero-stat-content">
-              <div className="hero-stat-label">Protein</div>
-              <div className="hero-stat-values">
-                <span className="current">{currentNutrition.protein}g</span>
-                <span className="separator">/</span>
-                <span className="target">{recommendations.macros.protein}g</span>
-              </div>
-              <div className="hero-progress-bar">
-                <div 
-                  className="hero-progress-fill protein"
-                  style={{
-                    width: `${getProgressPercentage(currentNutrition.protein, recommendations.macros.protein)}%`
-                  }}
-                />
-              </div>
-              <div className="progress-label">
-                {getProgressPercentage(currentNutrition.protein, recommendations.macros.protein).toFixed(0)}% Complete
-              </div>
-            </div>
-          </div>
-
-          <div className="hero-stat-card carbs-card">
-            <div className="hero-stat-icon">🍚</div>
-            <div className="hero-stat-content">
-              <div className="hero-stat-label">Carbs</div>
-              <div className="hero-stat-values">
-                <span className="current">{currentNutrition.carbohydrates}g</span>
-                <span className="separator">/</span>
-                <span className="target">{recommendations.macros.carbohydrates}g</span>
-              </div>
-              <div className="hero-progress-bar">
-                <div 
-                  className="hero-progress-fill carbs"
-                  style={{
-                    width: `${getProgressPercentage(currentNutrition.carbohydrates, recommendations.macros.carbohydrates)}%`
-                  }}
-                />
-              </div>
-              <div className="progress-label">
-                {getProgressPercentage(currentNutrition.carbohydrates, recommendations.macros.carbohydrates).toFixed(0)}% Complete
-              </div>
-            </div>
-          </div>
-
-          <div className="hero-stat-card fats-card">
-            <div className="hero-stat-icon">🥑</div>
-            <div className="hero-stat-content">
-              <div className="hero-stat-label">Fats</div>
-              <div className="hero-stat-values">
-                <span className="current">{currentNutrition.fat}g</span>
-                <span className="separator">/</span>
-                <span className="target">{recommendations.macros.fat}g</span>
-              </div>
-              <div className="hero-progress-bar">
-                <div 
-                  className="hero-progress-fill fats"
-                  style={{
-                    width: `${getProgressPercentage(currentNutrition.fat, recommendations.macros.fat)}%`
-                  }}
-                />
-              </div>
-              <div className="progress-label">
-                {getProgressPercentage(currentNutrition.fat, recommendations.macros.fat).toFixed(0)}% Complete
-              </div>
-            </div>
-          </div>
-
-          <div className="hero-stat-card workout-card">
-            <div className="hero-stat-icon">💪</div>
-            <div className="hero-stat-content">
-              <div className="hero-stat-label">Calories Burned</div>
-              <div className="hero-stat-values">
-                <span className="current workout-calories">{caloriesBurned}</span>
-                <span className="calories-label">kcal</span>
-              </div>
-              <button 
-                className="workout-btn" 
-                onClick={() => navigate('/workout')}
-              >
-                Start Workout
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Food Entry Card */}
-      <div className="card food-entry-card">
-        <div className="card-header">
-          <div>
-            <h2 className="card-title">🍽️ Log Your Food</h2>
-            <p className="card-subtitle">Track what you eat today</p>
-          </div>
-          {dailyFoods.length > 0 && (
-            <button className="btn-reset" onClick={resetDay}>
-              🔄 Reset Day
-            </button>
-          )}
-        </div>
-
-        <div className="food-entry-bar">
-          <input
-            type="text"
-            className="food-input"
-            placeholder="What did you eat? (e.g., chicken breast, apple, oats)"
-            value={foodInput}
-            onChange={(e) => setFoodInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && !isSearching && addFood()}
-            disabled={isSearching}
-          />
-          <button className="btn-add-food" onClick={addFood} disabled={isSearching}>
-            <span className="btn-icon">{isSearching ? '🔄' : '➕'}</span>
-            <span className="btn-text">{isSearching ? 'Searching...' : 'Add Food'}</span>
-          </button>
-        </div>
-
-        {dailyFoods.length > 0 ? (
-          <div className="daily-foods-section">
-            <div className="section-header">
-              <h3>Today's Foods</h3>
-              <span className="food-count">{dailyFoods.length} items</span>
-            </div>
-            <div className="foods-list-modern scrollable">
-                {[...dailyFoods].reverse().map((food, reversedIndex) => {
-                  const actualIndex = dailyFoods.length - 1 - reversedIndex;
-                  return (
-                    <div key={actualIndex} className="food-item-modern">
-                      <div className="food-item-icon">🍴</div>
-                      <div className="food-item-details">
-                        <span className="food-item-name">{food.description || food.name || food}</span>
-                        <span className="food-item-nutrition">
-                          {food.calories || food.nutrition?.calories || 0} cal | {food.protein || food.nutrition?.protein || 0}g protein | {food.carbohydrates || food.nutrition?.carbohydrates || 0}g carbs | {food.fat || food.nutrition?.fat || 0}g fat
-                        </span>
-                      </div>
-                      <button 
-                        className="food-remove-btn"
-                        onClick={() => removeFood(actualIndex)}
-                        title="Remove food"
-                      >
-                        <span>×</span>
-                      </button>
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
-        ) : (
-          <div className="empty-food-list">
-            <div className="empty-icon">🍽️</div>
-            <p>No foods logged yet. Start tracking your meals!</p>
-          </div>
+              <button onClick={() => setShowWarning(false)} className="ml-4 p-1 hover:bg-white/20 rounded-md transition-colors"><Trash2 className="w-4 h-4"/></button>
+           </motion.div>
         )}
+      </AnimatePresence>
+
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-4xl font-heading font-bold mb-2 tracking-tight">Daily Nutrition</h1>
+          <p className="text-muted">Monitor and align your intake with computed targets.</p>
+        </div>
+        <button onClick={() => setShowCalendar(true)} className="flex items-center gap-2 px-4 py-2 border border-white/10 hover:bg-white/5 bg-surface/30 rounded-xl transition-colors text-sm font-medium">
+          <CalendarIcon className="w-4 h-4" /> History
+        </button>
       </div>
 
-      {/* Quick Stats Card */}
-      <div className="card quick-stats-card">
-        <h2 className="stats-title">📊 Quick Stats</h2>
-        <div className="quick-stats-grid">
-          <div className="quick-stat-item">
-            <div className="quick-stat-icon goal-icon">📈</div>
-            <div className="quick-stat-content">
-              <div className="quick-stat-label">Goal</div>
-              <div className="quick-stat-value">{userProfile.goal?.replace('_', ' ')}</div>
+      <AnimatePresence>
+        {showCalendar && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md">
+             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="glass-panel w-full max-w-3xl flex flex-col max-h-[90vh]">
+               <div className="flex items-center justify-between p-5 border-b border-white/5">
+                 <h3 className="font-heading font-semibold text-lg flex items-center gap-2"><CalendarIcon className="w-5 h-5"/> Historical Records</h3>
+                 <button onClick={() => setShowCalendar(false)} className="p-1 text-muted hover:text-foreground"><Trash2 className="w-4 h-4"/></button>
+               </div>
+               <div className="p-6 overflow-y-auto">
+                 <NutritionCalendar />
+               </div>
+             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+        
+        {/* Left Col: Macros & Stats */}
+        <div className="lg:col-span-8 flex flex-col gap-6">
+          
+          {/* Main Macro Row */}
+          {recommendations && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: 'Energy', icon: Flame, current: currentNutrition.calories, target: recommendations.targetCalories, unit: 'kcal', color: 'bg-accent' },
+                { label: 'Protein', icon: Beef, current: currentNutrition.protein, target: recommendations.macros.protein, unit: 'g', color: 'bg-blue-400' },
+                { label: 'Carbs', icon: Wheat, current: currentNutrition.carbohydrates, target: recommendations.macros.carbohydrates, unit: 'g', color: 'bg-orange-400' },
+                { label: 'Lipids', icon: Droplets, current: currentNutrition.fat, target: recommendations.macros.fat, unit: 'g', color: 'bg-yellow-400' }
+              ].map((m, idx) => (
+                <div key={idx} className="glass-panel p-5 relative overflow-hidden group">
+                   <div className="flex justify-between items-start mb-4">
+                     <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center border border-white/5">
+                        <m.icon className="w-4 h-4 text-muted group-hover:text-foreground transition-colors" />
+                     </div>
+                   </div>
+                   <div className="mb-4">
+                     <div className="text-xs text-muted uppercase tracking-wider font-semibold mb-1">{m.label}</div>
+                     <div className="flex items-baseline gap-1.5 font-mono">
+                        <span className="text-2xl font-bold text-foreground">{m.current}</span>
+                        <span className="text-sm text-muted">/ {m.target}{m.unit}</span>
+                     </div>
+                   </div>
+                   <div className="w-full h-1.5 bg-surface rounded-full overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${getProgressPercentage(m.current, m.target)}%` }}
+                        transition={{ duration: 1, ease: 'easeOut' }}
+                        className={cn("h-full", m.color, getProgressPercentage(m.current, m.target) >= 100 ? "bg-red-500" : "")}
+                      />
+                   </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Quick Add Form Section */}
+          <div className="glass-panel flex-col p-0 overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-surface/30">
+               <div>
+                  <h2 className="font-heading font-semibold flex items-center gap-2"><Utensils className="w-4 h-4 text-accent"/> Dietary Intake Log</h2>
+               </div>
+               {dailyFoods.length > 0 && (
+                <button onClick={resetDay} className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 text-muted hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors">
+                  <RotateCcw className="w-3.5 h-3.5" /> Initialize Zero
+                </button>
+               )}
+            </div>
+            
+            <div className="p-6">
+               <div className="flex gap-3 mb-6">
+                 <div className="relative flex-1">
+                   <Search className="absolute left-4 top-[14px] w-5 h-5 text-muted" />
+                   <input
+                     type="text"
+                     value={foodInput}
+                     onChange={(e) => setFoodInput(e.target.value)}
+                     onKeyDown={(e) => e.key === 'Enter' && !isSearching && addFood()}
+                     disabled={isSearching}
+                     className="w-full pl-12 pr-4 py-3 bg-surface border border-white/10 rounded-xl focus:ring-1 focus:ring-accent focus:border-accent text-sm transition-all text-foreground placeholder-white/20"
+                     placeholder="Query database for items (e.g. 200g grilled salmon)"
+                   />
+                 </div>
+                 <button onClick={addFood} disabled={isSearching || !foodInput.trim()} className="px-6 rounded-xl bg-accent text-background font-semibold hover:bg-accent/90 disabled:opacity-50 transition-colors flex items-center gap-2">
+                   {isSearching ? <Activity className="w-4 h-4 animate-spin"/> : <Plus className="w-5 h-5" />}
+                   <span className="hidden sm:inline">Append</span>
+                 </button>
+               </div>
+
+               {dailyFoods.length > 0 ? (
+                 <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                   {[...dailyFoods].reverse().map((food, reversedIndex) => {
+                     const idx = dailyFoods.length - 1 - reversedIndex;
+                     return (
+                       <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} key={idx} className="flex items-center justify-between p-4 rounded-xl border border-white/5 bg-surface/20 hover:bg-surface/50 transition-colors group">
+                          <div>
+                            <div className="font-medium text-sm text-foreground mb-1 capitalize">{food.description || food.name}</div>
+                            <div className="flex items-center gap-3 text-xs text-muted font-mono">
+                               <span>{food.calories || food.nutrition?.calories || 0}kcal</span>
+                               <span className="w-1 h-1 rounded-full bg-white/10" />
+                               <span>{food.protein || food.nutrition?.protein || 0}g Pro</span>
+                               <span className="w-1 h-1 rounded-full bg-white/10" />
+                               <span>{food.carbohydrates || food.nutrition?.carbohydrates || 0}g Carb</span>
+                               <span className="w-1 h-1 rounded-full bg-white/10" />
+                               <span>{food.fat || food.nutrition?.fat || 0}g Fat</span>
+                            </div>
+                          </div>
+                          <button onClick={() => removeFood(idx)} className="p-2 text-muted hover:text-red-400 hover:bg-red-400/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                       </motion.div>
+                     );
+                   })}
+                 </div>
+               ) : (
+                 <div className="py-12 text-center text-muted flex flex-col items-center">
+                   <div className="w-12 h-12 rounded-full border border-dashed border-white/20 flex items-center justify-center mb-3">
+                     <Target className="w-5 h-5 opacity-50" />
+                   </div>
+                   <p className="text-sm">Database query ready. Awaiting dietary input.</p>
+                 </div>
+               )}
             </div>
           </div>
-          <div className="quick-stat-item">
-            <div className="quick-stat-icon activity-icon">⚡</div>
-            <div className="quick-stat-content">
-              <div className="quick-stat-label">Activity</div>
-              <div className="quick-stat-value">{userProfile.activityLevel}</div>
+        </div>
+        
+        {/* Right Col: Secondary Info */}
+        <div className="lg:col-span-4 flex flex-col gap-6">
+          
+          <div className="glass-panel p-6 bg-gradient-to-b from-surface/50 to-background/50">
+             <div className="flex items-center gap-3 mb-6">
+               <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
+                 <Zap className="w-4 h-4 text-orange-400" />
+               </div>
+               <h3 className="font-heading font-semibold">Expenditure Model</h3>
+             </div>
+             
+             <div className="flex flex-col items-center justify-center py-4 mb-6 relative">
+               <div className="w-40 h-40 rounded-full border-4 border-surface flex flex-col items-center justify-center relative overflow-hidden">
+                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-orange-500/20 to-transparent" style={{ height: `${Math.min((caloriesBurned/1000)*100, 100)}%` }} />
+                 <span className="text-4xl font-bold font-mono text-foreground relative z-10 tracking-tighter">{caloriesBurned}</span>
+                 <span className="text-xs uppercase tracking-widest text-muted relative z-10 mt-1">kcal Out</span>
+               </div>
+             </div>
+
+             <button onClick={() => navigate('/workout')} className="w-full flex items-center justify-center gap-2 py-3 border border-white/10 rounded-xl font-medium text-sm hover:bg-white/5 transition-colors">
+               Launch Activity Protocol <Plus className="w-4 h-4"/>
+             </button>
+          </div>
+
+          <div className="glass-panel p-6">
+            <h3 className="text-sm font-semibold text-muted uppercase tracking-wider mb-4">Diagnostics Sync</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-white/5">
+                <div className="flex items-center gap-2 text-sm"><Target className="w-4 h-4 text-muted"/> Current Objective</div>
+                <div className="text-sm font-mono capitalize">{userProfile.goal?.replace('_', ' ')}</div>
+              </div>
+              <div className="flex items-center justify-between pb-3 border-b border-white/5">
+                <div className="flex items-center gap-2 text-sm"><Activity className="w-4 h-4 text-muted"/> Base Multiplier</div>
+                <div className="text-sm font-mono capitalize">{userProfile.activityLevel?.replace('_', ' ')}</div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-accent"/> Intelligence Model</div>
+                <div className="text-sm font-mono text-accent">Active</div>
+              </div>
             </div>
           </div>
-          <div className="quick-stat-item">
-            <div className="quick-stat-icon foods-icon">🍽️</div>
-            <div className="quick-stat-content">
-              <div className="quick-stat-label">Foods Today</div>
-              <div className="quick-stat-value">{dailyFoods.length}</div>
-            </div>
-          </div>
-          <div className="quick-stat-item">
-            <div className="quick-stat-icon streak-icon">✅</div>
-            <div className="quick-stat-content">
-              <div className="quick-stat-label">Streak</div>
-              <div className="quick-stat-value">1 day</div>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>

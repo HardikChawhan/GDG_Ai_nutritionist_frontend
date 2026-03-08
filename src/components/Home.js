@@ -1,84 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Joyride, { STATUS } from 'react-joyride';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import './Home.css';
+import { motion } from 'framer-motion';
+import { BrainCircuit, Activity, Database, Sparkles, User, ChevronRight, Apple } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { cn } from '../utils/cn';
 
 function Home() {
-  const [runTour, setRunTour] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { currentUser, userProfile, signInWithGoogle, loading } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Initialize AOS
-    AOS.init({
-      duration: 1000,
-      once: false,
-      mirror: true,
-      easing: 'ease-out-cubic',
-    });
-
-    // Check if user has seen the tour
-    const hasSeenTour = localStorage.getItem('hasSeenTour');
-    if (!hasSeenTour) {
-      // Start tour after a brief delay
-      setTimeout(() => {
-        setRunTour(true);
-      }, 1000);
-    }
-  }, []);
-
-  const tourSteps = [
-    {
-      target: '.hero-section',
-      content: 'Welcome to your AI Nutrition Assistant! 🎉 Let\'s take a quick tour of all the amazing features.',
-      placement: 'center',
-      disableBeacon: true,
-    },
-    {
-      target: '.feature-card:nth-child(1)',
-      content: '🎯 Create personalized meal plans tailored to your health goals and dietary preferences!',
-      placement: 'bottom',
-    },
-    {
-      target: '.feature-card:nth-child(2)',
-      content: '🔍 Analyze any food or meal to get detailed nutritional insights and AI recommendations!',
-      placement: 'bottom',
-    },
-    {
-      target: '.feature-card:nth-child(3)',
-      content: '📊 Track your daily nutrition, calories, and macros with our interactive dashboard!',
-      placement: 'bottom',
-    },
-    {
-      target: '.feature-card:nth-child(4)',
-      content: '🗃️ Search through thousands of foods in our comprehensive USDA database!',
-      placement: 'bottom',
-    },
-    {
-      target: '.info-section',
-      content: '✨ Powered by Google Gemini AI for intelligent, personalized nutrition guidance!',
-      placement: 'top',
-    },
-    {
-      target: '.btn-primary',
-      content: '🚀 Ready to get started? Create your health profile to unlock all features!',
-      placement: 'top',
-    },
-  ];
-
-  const handleJoyrideCallback = (data) => {
-    const { status } = data;
-    const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
-
-    if (finishedStatuses.includes(status)) {
-      setRunTour(false);
-      localStorage.setItem('hasSeenTour', 'true');
-    }
-  };
 
   const handleGetStarted = (e) => {
     if (!currentUser) {
@@ -96,245 +26,189 @@ function Home() {
       navigate('/profile');
     } catch (error) {
       console.error('Error signing in:', error);
-      
-      // Check for iOS-specific errors
       if (error.code === 'auth/popup-blocked') {
-        alert('Popup was blocked. Please allow popups for this site in your browser settings.');
-      } else if (error.message?.includes('sessionStorage')) {
-        alert('Authentication requires browser storage. Please:\n1. Disable Private Browsing mode\n2. Enable cookies in Settings\n3. Try again');
+        alert('Authentication window blocked. Please permit popups for this domain.');
       } else {
-        alert('Failed to sign in. Please try again.');
+        alert('Authentication failed. Please attempt again.');
       }
     }
   };
 
-  return (
-    <div className="container home-container">
-      <Joyride
-        steps={tourSteps}
-        run={runTour}
-        continuous
-        showProgress
-        showSkipButton
-        callback={handleJoyrideCallback}
-        styles={{
-          options: {
-            primaryColor: '#6366f1',
-            zIndex: 10000,
-          },
-          tooltip: {
-            borderRadius: '16px',
-            fontSize: '16px',
-          },
-          buttonNext: {
-            borderRadius: '8px',
-            padding: '10px 20px',
-            fontSize: '14px',
-            fontWeight: 'bold',
-          },
-          buttonBack: {
-            borderRadius: '8px',
-            marginRight: '10px',
-          },
-          buttonSkip: {
-            color: '#6366f1',
-          },
-        }}
-      />
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1, 
+      transition: { staggerChildren: 0.1 } 
+    }
+  };
 
-      <div className="hero-section" data-aos="fade-down" data-aos-duration="1200">
-        <div className="floating-shapes">
-          <div className="shape shape-1"></div>
-          <div className="shape shape-2"></div>
-          <div className="shape shape-3"></div>
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { type: "spring", stiffness: 100, damping: 15 }
+    }
+  };
+
+  return (
+    <div className="min-h-screen pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto selection:bg-accent/30">
+      
+      {/* Hero Section */}
+      <motion.section 
+        className="text-center max-w-4xl mx-auto mb-20"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+      >
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-8">
+          <BrainCircuit className="w-4 h-4" />
+          <span>Advanced Clinical Intelligence</span>
         </div>
-        <h1 className="hero-title" data-aos="zoom-in" data-aos-delay="200">
-          Welcome to Your AI Nutrition Assistant
+        
+        <h1 className="text-5xl md:text-7xl font-heading font-bold text-foreground mb-6 leading-tight tracking-tight">
+          Precision Nutrition <br/>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-muted">
+             Driven By Data
+          </span>
         </h1>
-        <p className="hero-subtitle" data-aos="fade-up" data-aos-delay="400">
-          Powered by Google Gemini AI 
-        </p>
-        <p className="hero-description" data-aos="fade-up" data-aos-delay="600">
-          Get personalized meal plans, smart food recommendations, and expert nutrition guidance 
-          tailored to your unique health goals and preferences.
+        
+        <p className="text-xl text-muted mb-10 max-w-2xl mx-auto leading-relaxed">
+          Experience personalized dietary analysis and clinical-grade meal planning, powered by comprehensive health profiles and adaptive machine learning models.
         </p>
         
         {!currentUser ? (
           <button 
             onClick={handleGetStarted}
-            className="btn btn-primary btn-large pulse-btn"
-            data-aos="zoom-in" 
-            data-aos-delay="800"
+            className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-background px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:scale-[1.02] shadow-2xl shadow-accent/20"
           >
-            Get Started - Create Your Profile ✨
+            Initialize Profile
+            <ChevronRight className="w-5 h-5" />
           </button>
         ) : !userProfile ? (
           <Link 
             to="/profile" 
-            className="btn btn-primary btn-large pulse-btn"
-            data-aos="zoom-in" 
-            data-aos-delay="800"
+            className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-background px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:scale-[1.02] shadow-2xl shadow-accent/20"
           >
-            Complete Your Health Profile ✨
+            Complete Assessment
+            <ChevronRight className="w-5 h-5" />
           </Link>
         ) : (
-          <div className="welcome-back-compact" data-aos="zoom-in" data-aos-delay="800">
-            <span className="welcome-icon">👋</span>
-            <div className="welcome-text">
-              <strong>Welcome back, {currentUser.displayName}!</strong>
-              <span className="goal-text">Goal: {userProfile.goal?.replace('_', ' ')}</span>
+          <div className="inline-flex items-center gap-3 glass-panel px-6 py-4">
+            <User className="w-5 h-5 text-accent" />
+            <div className="text-left">
+              <div className="font-semibold text-foreground">Welcome back, {currentUser.displayName}</div>
+              <div className="text-sm text-muted capitalize">Current Objective: {userProfile.goal?.replace('_', ' ')}</div>
             </div>
+            <Link to="/dashboard" className="ml-4 px-4 py-2 border border-white/10 rounded-lg text-sm hover:bg-white/5 transition-colors">
+              Go to Dashboard
+            </Link>
           </div>
         )}
-      </div>
+      </motion.section>
 
-      <div className="features-grid">
-        <div 
-          className="feature-card"
-          data-aos="fade-up"
-          data-aos-delay="100"
-          data-aos-duration="800"
-        >
-          <div className="feature-icon bounce">🎯</div>
-          <h3>Personalized Meal Plans</h3>
-          <p>AI-generated meal plans tailored to your health goals, dietary restrictions, and preferences.</p>
-          <Link to="/meal-planner" className="feature-link glow-on-hover">Create Meal Plan →</Link>
-        </div>
-
-        <div 
-          className="feature-card"
-          data-aos="fade-up"
-          data-aos-delay="200"
-          data-aos-duration="800"
-        >
-          <div className="feature-icon bounce">🔍</div>
-          <h3>Food Analysis</h3>
-          <p>Analyze any food or meal and get detailed nutritional insights and recommendations.</p>
-          <Link to="/food-analyzer" className="feature-link glow-on-hover">Analyze Food →</Link>
-        </div>
-
-        <div 
-          className="feature-card"
-          data-aos="fade-up"
-          data-aos-delay="300"
-          data-aos-duration="800"
-        >
-          <div className="feature-icon bounce">📊</div>
-          <h3>Nutrition Dashboard</h3>
-          <p>Track your daily nutrition, calories, and macros with smart recommendations.</p>
-          <Link to="/dashboard" className="feature-link glow-on-hover">View Dashboard →</Link>
-        </div>
-
-        <div 
-          className="feature-card"
-          data-aos="fade-up"
-          data-aos-delay="400"
-          data-aos-duration="800"
-        >
-          <div className="feature-icon bounce">🗃️</div>
-          <h3>Food Database</h3>
-          <p>Search through thousands of foods and get detailed nutritional information.</p>
-          <Link to="/food-search" className="feature-link glow-on-hover">Search Foods →</Link>
-        </div>
-      </div>
-
-      <div className="info-section" data-aos="fade-up" data-aos-duration="1000">
-        <h2 data-aos="zoom-in">Why Choose Our AI Nutrition Assistant?</h2>
-        <div className="benefits-list">
-          <div 
-            className="benefit-item"
-            data-aos="fade-right"
-            data-aos-delay="100"
-          >
-            <span className="benefit-icon rotate-on-hover">✨</span>
-            <div>
-              <h4>AI-Powered Intelligence</h4>
-              <p>Leveraging Google Gemini AI for accurate, context-aware nutrition guidance</p>
+      {/* Bento Grid Architecture */}
+      <motion.div 
+        className="bento-grid"
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+      >
+        {/* Large Feature 1 */}
+        <motion.div variants={itemVariants} className="bento-item md:col-span-2 lg:col-span-8 flex flex-col justify-between overflow-hidden relative group">
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative z-10">
+            <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center mb-6">
+              <Activity className="w-6 h-6 text-accent" />
             </div>
+            <h3 className="text-2xl font-heading font-semibold mb-3">Clinical Meal Generation</h3>
+            <p className="text-muted mb-6 max-w-md">Algorithmic meal planning strictly calibrated to your specific biometric markers, dietary requirements, and metabolic goals.</p>
+            <Link to="/meal-planner" className="inline-flex items-center text-sm font-medium text-foreground hover:text-accent transition-colors">
+              Generate Plan <ChevronRight className="w-4 h-4 ml-1" />
+            </Link>
           </div>
-          <div 
-            className="benefit-item"
-            data-aos="fade-left"
-            data-aos-delay="200"
-          >
-            <span className="benefit-icon rotate-on-hover">🎨</span>
-            <div>
-              <h4>Personalized Experience</h4>
-              <p>Considers your health conditions, allergies, cultural preferences, and lifestyle</p>
-            </div>
-          </div>
-          <div 
-            className="benefit-item"
-            data-aos="fade-right"
-            data-aos-delay="300"
-          >
-            <span className="benefit-icon rotate-on-hover">🔄</span>
-            <div>
-              <h4>Adaptive Learning</h4>
-              <p>Continuously learns from your feedback to improve recommendations</p>
-            </div>
-          </div>
-          <div 
-            className="benefit-item"
-            data-aos="fade-left"
-            data-aos-delay="400"
-          >
-            <span className="benefit-icon rotate-on-hover">💡</span>
-            <div>
-              <h4>Educational Insights</h4>
-              <p>Understand why certain foods are better for your specific goals</p>
-            </div>
-          </div>
-        </div>
-      </div>
+        </motion.div>
 
-      <div className="cta-section" data-aos="zoom-in-up" data-aos-duration="1000">
-        <h2>Ready to Transform Your Health? 🚀</h2>
-        <p>Join thousands of users achieving their health goals with AI-powered nutrition guidance</p>
-        {!currentUser ? (
-          <button onClick={handleGetStarted} className="btn btn-primary btn-large pulse-btn">
-            Start Your Journey Now →
-          </button>
-        ) : !userProfile && (
-          <Link to="/profile" className="btn btn-primary btn-large pulse-btn">
-            Complete Your Profile →
+        {/* Square Feature 1 */}
+        <motion.div variants={itemVariants} className="bento-item md:col-span-1 lg:col-span-4 flex flex-col justify-between group">
+          <div>
+            <div className="w-12 h-12 rounded-xl bg-surface/80 border border-white/10 flex items-center justify-center mb-6">
+              <Database className="w-6 h-6 text-muted group-hover:text-foreground transition-colors" />
+            </div>
+            <h3 className="text-xl font-heading font-semibold mb-3">Nutritional Analytics</h3>
+            <p className="text-muted text-sm mb-6">Deep inspection of food parameters utilizing the comprehensive USDA database.</p>
+          </div>
+          <Link to="/food-analyzer" className="inline-flex items-center text-sm font-medium text-foreground hover:text-accent transition-colors">
+            Analyze Data <ChevronRight className="w-4 h-4 ml-1" />
           </Link>
-        )}
-      </div>
+        </motion.div>
 
-      {/* Login Modal */}
-      {showLoginModal && (
-        <div className="modal-overlay" onClick={() => setShowLoginModal(false)}>
-          <div className="login-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowLoginModal(false)}>×</button>
-            <div className="modal-content">
-              <div className="modal-icon">🔐</div>
-              <h2>Welcome to AI Nutrition Assistant</h2>
-              <p>Sign in with Google to get started and unlock personalized nutrition guidance!</p>
-              
-              <button 
-                onClick={handleGoogleSignIn} 
-                className="google-signin-btn"
-                disabled={loading}
-              >
-                <img 
-                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
-                  alt="Google" 
-                />
-                {loading ? 'Signing in...' : 'Sign in with Google'}
-              </button>
-              
-              <div className="modal-benefits">
-                <h4>Why sign in?</h4>
-                <ul>
-                  <li>✅ Personalized meal plans and recommendations</li>
-                  <li>✅ Track your nutrition and progress</li>
-                  <li>✅ Save your health profile and preferences</li>
-                  <li>✅ Access your data from any device</li>
-                </ul>
+        {/* Square Feature 2 */}
+        <motion.div variants={itemVariants} className="bento-item md:col-span-1 lg:col-span-5 flex flex-col justify-between group">
+           <div>
+            <div className="w-12 h-12 rounded-xl bg-surface/80 border border-white/10 flex items-center justify-center mb-6">
+              <Sparkles className="w-6 h-6 text-muted group-hover:text-foreground transition-colors" />
+            </div>
+            <h3 className="text-xl font-heading font-semibold mb-3">Adaptive Intelligence</h3>
+            <p className="text-muted text-sm mb-6">The system continuously monitors your adherence and dynamically adjusts caloric and macronutrient targets over time.</p>
+          </div>
+        </motion.div>
+
+        {/* Wide Feature */}
+        <motion.div variants={itemVariants} className="bento-item md:col-span-2 lg:col-span-7 flex flex-col justify-between bg-surface/30 group">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6">
+                <Apple className="w-6 h-6 text-accent" />
               </div>
+              <h3 className="text-2xl font-heading font-semibold mb-3">Comprehensive Food Matrix</h3>
+              <p className="text-muted mb-4 max-w-sm">Access to an extensive repository of validated nutritional compositions for precise dietary tracking.</p>
+              <Link to="/food-search" className="inline-flex items-center text-sm font-medium text-foreground hover:text-accent transition-colors">
+                Query Database <ChevronRight className="w-4 h-4 ml-1" />
+              </Link>
+            </div>
+            <div className="w-full md:w-64 h-32 rounded-xl bg-surface/80 border border-white/5 flex items-center justify-center overflow-hidden relative">
+               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
             </div>
           </div>
+        </motion.div>
+      </motion.div>
+
+      {/* Authentication Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm" onClick={() => setShowLoginModal(false)}>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="glass-panel w-full max-w-md p-8 relative" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button className="absolute top-4 right-4 text-muted hover:text-foreground transition-colors" onClick={() => setShowLoginModal(false)}>✕</button>
+            <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center mb-6 mt-2 mx-auto">
+              <User className="w-6 h-6 text-accent" />
+            </div>
+            <h2 className="text-2xl font-heading font-semibold text-center mb-2">Secure Authentication</h2>
+            <p className="text-muted text-center text-sm mb-8">Authenticate with your provider to initialize your encrypted clinical profile.</p>
+            
+            <button 
+              onClick={handleGoogleSignIn} 
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-3 bg-white text-black hover:bg-white/90 px-4 py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
+            >
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
+              {loading ? 'Authenticating...' : 'Authenticate with Google'}
+            </button>
+            
+            <div className="mt-8 pt-6 border-t border-white/10">
+              <ul className="text-sm text-muted space-y-3">
+                <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-accent" /> Encrypted Health Records</li>
+                <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-accent" /> HIPAA-compliant architecture</li>
+                <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-accent" /> Persistent biometric tracking</li>
+              </ul>
+            </div>
+          </motion.div>
         </div>
       )}
     </div>

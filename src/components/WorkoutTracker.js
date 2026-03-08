@@ -2,40 +2,28 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as poseDetection from '@tensorflow-models/pose-detection';
 import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-backend-webgl';
-import './WorkoutTracker.css';
+
+import { motion, AnimatePresence } from 'framer-motion';
+import { Activity, Play, Square, Settings, User, CheckCircle2, AlertTriangle, ChevronRight, Check } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import voiceAssistantService from '../services/voiceAssistantService';
 import { getHealthProfile } from '../services/firebaseService';
-// Import workout utilities
+import { cn } from '../utils/cn';
 import { 
-  calculateAngle, 
-  calculateVerticalAngle,
-  calculateHorizontalDistance,
-  SquatStateMachine,
-  BenchPressStateMachine,
-  DeadliftStateMachine,
-  PushUpStateMachine,
-  PullUpStateMachine,
-  ShoulderPressStateMachine,
-  LateralRaiseStateMachine,
-  LungeStateMachine
+  calculateAngle, calculateVerticalAngle, calculateHorizontalDistance,
+  SquatStateMachine, BenchPressStateMachine, DeadliftStateMachine,
+  PushUpStateMachine, PullUpStateMachine, ShoulderPressStateMachine,
+  LateralRaiseStateMachine, LungeStateMachine
 } from '../utils/workoutUtils';
 
-// Cookie helpers for calories burned
 const saveCaloriesBurnedToCookie = (date, calories) => {
   const dateKey = date || new Date().toISOString().split('T')[0];
   const cookieKey = `caloriesBurned_${dateKey}`;
-  
-  // Get current value
   const currentValue = parseInt(getCookie(cookieKey)) || 0;
   const newValue = currentValue + calories;
-  
-  // Save with 1 year expiry
   const expires = new Date();
   expires.setFullYear(expires.getFullYear() + 1);
   document.cookie = `${cookieKey}=${newValue}; expires=${expires.toUTCString()}; path=/; SameSite=Strict`;
-  
-  console.log(`✅ Calories burned saved to cookie: ${cookieKey}=${newValue}`);
   return newValue;
 };
 
@@ -47,65 +35,25 @@ const getCookie = (name) => {
 };
 
 const EXERCISES = {
-  squat: { name: 'Squats', icon: '🧍' },
-  bench: { name: 'Bench Press', icon: '💪' },
-  deadlift: { name: 'Deadlift', icon: '🏋️' },
-  pushup: { name: 'Push-ups', icon: '🤸' },
-  pullup: { name: 'Pull-ups', icon: '🔥' },
-  shoulderpress: { name: 'Shoulder Press', icon: '💪' },
-  lateralraise: { name: 'Lateral Raises', icon: '✋' },
-  lunge: { name: 'Lunges', icon: '🚶' }
+  squat: { name: 'Squats' },
+  bench: { name: 'Bench Press' },
+  deadlift: { name: 'Deadlift' },
+  pushup: { name: 'Push-ups' },
+  pullup: { name: 'Pull-ups' },
+  shoulderpress: { name: 'Shoulder Press' },
+  lateralraise: { name: 'Lateral Raises' },
+  lunge: { name: 'Lunges' }
 };
 
 const EXERCISE_INSTRUCTIONS = {
-  squat: [
-    'Stand sideways to camera',
-    'Keep entire body visible',
-    'Squat down until thighs parallel to ground',
-    'Keep knees behind toes'
-  ],
-  bench: [
-    'Face camera or use side view',
-    'Keep arms visible',
-    'Lower arms to 90° elbow angle',
-    'Press back up to full extension'
-  ],
-  deadlift: [
-    'Stand sideways to camera',
-    'Keep back straight',
-    'Lift from bent position to standing',
-    'Fully extend hips at top'
-  ],
-  pushup: [
-    'Position sideways to camera',
-    'Maintain plank position',
-    'Lower chest until elbows at 90°',
-    'Keep body straight - engage core'
-  ],
-  pullup: [
-    'Face camera directly',
-    'Hang with arms extended',
-    'Pull until chin above bar level',
-    'Control the descent'
-  ],
-  shoulderpress: [
-    'Face camera or use side view',
-    'Start with arms at 90° (shoulder level)',
-    'Press weights overhead until arms straight',
-    'Control the descent back to start'
-  ],
-  lateralraise: [
-    'Face camera directly',
-    'Arms start at sides',
-    'Raise arms to shoulder height',
-    'Control the descent'
-  ],
-  lunge: [
-    'Stand sideways to camera',
-    'Step forward into lunge',
-    'Both knees should reach 90°',
-    'Push back to standing'
-  ]
+  squat: ['Stand sideways to camera', 'Keep entire body visible', 'Squat down until thighs parallel to ground', 'Keep knees behind toes'],
+  bench: ['Face camera or use side view', 'Keep arms visible', 'Lower arms to 90° elbow angle', 'Press back up to full extension'],
+  deadlift: ['Stand sideways to camera', 'Keep back straight', 'Lift from bent position to standing', 'Fully extend hips at top'],
+  pushup: ['Position sideways to camera', 'Maintain plank position', 'Lower chest until elbows at 90°', 'Keep body straight - engage core'],
+  pullup: ['Face camera directly', 'Hang with arms extended', 'Pull until chin above bar level', 'Control the descent'],
+  shoulderpress: ['Face camera or use side view', 'Start with arms at 90° (shoulder level)', 'Press weights overhead until arms straight', 'Control descent'],
+  lateralraise: ['Face camera directly', 'Arms start at sides', 'Raise arms to shoulder height', 'Control the descent'],
+  lunge: ['Stand sideways to camera', 'Step forward into lunge', 'Both knees should reach 90°', 'Push back to standing']
 };
 
 function WorkoutTracker() {
@@ -132,11 +80,8 @@ function WorkoutTracker() {
   
   const stateMachineRef = useRef(null);
   const stateMachinesRef = useRef({});
-  
-  // Keep refs in sync with state for animation loop
-  useEffect(() => {
-    isCountingRef.current = isCounting;
-  }, [isCounting]);
+
+  useEffect(() => { isCountingRef.current = isCounting; }, [isCounting]);
   
   useEffect(() => {
     currentExerciseRef.current = currentExercise;
@@ -145,144 +90,71 @@ function WorkoutTracker() {
     }
   }, [currentExercise]);
   
-  // Load user health profile
   useEffect(() => {
     const loadUserProfile = async () => {
       if (currentUser) {
-        try {
-          const profile = await getHealthProfile(currentUser.uid);
-          setUserProfile(profile);
-          console.log('✅ User profile loaded for workout:', profile);
-        } catch (error) {
-          console.error('Error loading user profile:', error);
-        }
+        try { setUserProfile(await getHealthProfile(currentUser.uid)); } catch (error) {}
       }
     };
-    
     loadUserProfile();
   }, [currentUser]);
-  
-  // Initialize TensorFlow and pose detection
+
   useEffect(() => {
     const initializePoseDetection = async () => {
       try {
-        console.log('🧠 Loading pose detection model...');
-        
         await tf.setBackend('webgl');
         await tf.ready();
-        
-        const detectorConfig = {
-          modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
-        };
-        
         const poseDetector = await poseDetection.createDetector(
           poseDetection.SupportedModels.MoveNet,
-          detectorConfig
+          { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
         );
-        
         setDetector(poseDetector);
         setIsModelLoaded(true);
-        console.log('✅ Model loaded successfully');
-        
-        // Initialize state machines
-        initializeStateMachines();
-      } catch (error) {
-        console.error('❌ Error loading model:', error);
-        alert('Failed to load pose detection model. Please refresh the page.');
-      }
+        stateMachinesRef.current = {
+          squat: new SquatStateMachine(), bench: new BenchPressStateMachine(), deadlift: new DeadliftStateMachine(),
+          pushup: new PushUpStateMachine(), pullup: new PullUpStateMachine(), shoulderpress: new ShoulderPressStateMachine(),
+          lateralraise: new LateralRaiseStateMachine(), lunge: new LungeStateMachine()
+        };
+        stateMachineRef.current = stateMachinesRef.current['squat'];
+      } catch (error) { alert('Failed to load TFJS vision model.'); }
     };
-    
     initializePoseDetection();
-    
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
       stopCamera();
     };
   }, []);
   
-  // Initialize camera when workout becomes active
   useEffect(() => {
-    if (isWorkoutActive && isModelLoaded) {
-      startCamera();
-    } else {
-      stopCamera();
-    }
+    if (isWorkoutActive && isModelLoaded) startCamera();
+    else stopCamera();
   }, [isWorkoutActive, isModelLoaded]);
   
-  // Voice command listener
   useEffect(() => {
     if (!currentUser) return;
-    
     const handleVoiceCommand = (command) => {
       const lowerCommand = command.toLowerCase();
-      
       if (lowerCommand.includes('initiate workout') || lowerCommand.includes('start workout session')) {
-        if (!isWorkoutActive) {
-          setIsWorkoutActive(true);
-          speakFeedback('Workout session initiated. Select an exercise to begin.');
-        }
+        if (!isWorkoutActive) { setIsWorkoutActive(true); speakFeedback('Telemetry link active. Specify parameters.'); }
       } else if (lowerCommand.includes('start workout') || lowerCommand.includes('begin counting')) {
-        if (isWorkoutActive && !isCounting) {
-          setIsCounting(true);
-          speakFeedback(`Starting ${EXERCISES[currentExercise].name}. Let's go!`);
-        }
+        if (isWorkoutActive && !isCounting) { setIsCounting(true); speakFeedback(`Tracking ${EXERCISES[currentExercise].name}. Initialized.`); }
       } else if (lowerCommand.includes('stop counting') || lowerCommand.includes('pause counting')) {
-        if (isCounting) {
-          setIsCounting(false);
-          speakFeedback('Counting paused.');
-        }
+        if (isCounting) { setIsCounting(false); speakFeedback('Telemetry suspended.'); }
       } else if (lowerCommand.includes('end workout') || lowerCommand.includes('finish workout')) {
-        if (isWorkoutActive) {
-          handleEndWorkout();
-        }
+        if (isWorkoutActive) handleEndWorkout();
       }
     };
-    
-    // Listen for voice commands via the voice assistant service
     const originalCallback = voiceAssistantService.onTranscriptCallback;
     voiceAssistantService.onTranscriptCallback = (transcript, isFinal) => {
-      if (isFinal) {
-        handleVoiceCommand(transcript);
-      }
+      if (isFinal) handleVoiceCommand(transcript);
       if (originalCallback) originalCallback(transcript, isFinal);
     };
-    
-    return () => {
-      voiceAssistantService.onTranscriptCallback = originalCallback;
-    };
+    return () => { voiceAssistantService.onTranscriptCallback = originalCallback; };
   }, [currentUser, isWorkoutActive, isCounting, currentExercise, workoutLog]);
-  
-  const initializeStateMachines = () => {
-    console.log('🔧 Initializing state machines...');
-    stateMachinesRef.current = {
-      squat: new SquatStateMachine(),
-      bench: new BenchPressStateMachine(),
-      deadlift: new DeadliftStateMachine(),
-      pushup: new PushUpStateMachine(),
-      pullup: new PullUpStateMachine(),
-      shoulderpress: new ShoulderPressStateMachine(),
-      lateralraise: new LateralRaiseStateMachine(),
-      lunge: new LungeStateMachine()
-    };
-    
-    // Default to squat
-    stateMachineRef.current = stateMachinesRef.current['squat'];
-    console.log('✅ State machines initialized. Current:', stateMachineRef.current);
-  };
   
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          facingMode: 'user'
-        },
-        audio: false
-      });
-      
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' }, audio: false });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.onloadedmetadata = () => {
@@ -294,540 +166,339 @@ function WorkoutTracker() {
           detectPose();
         };
       }
-    } catch (error) {
-      console.error('Camera error:', error);
-      alert('Failed to access camera. Please check permissions.');
-    }
+    } catch (error) { alert('Camera access denied. Video telemetry requires permissions.'); }
   };
   
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = videoRef.current.srcObject.getTracks();
-      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject.getTracks().forEach(track => track.stop());
       videoRef.current.srcObject = null;
     }
-    
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-      animationRef.current = null;
-    }
+    if (animationRef.current) { cancelAnimationFrame(animationRef.current); animationRef.current = null; }
   };
   
   const detectPose = async () => {
     if (!detector || !videoRef.current || !canvasRef.current) return;
-    
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     
     const detect = async () => {
       if (video.readyState === 4) {
-        // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Draw video frame
         ctx.save();
         ctx.scale(-1, 1);
         ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
         ctx.restore();
         
-        // Detect poses
         const poses = await detector.estimatePoses(video);
-        
         if (poses.length > 0) {
           const pose = poses[0];
-          console.log('✅ Pose detected with', pose.keypoints.length, 'keypoints');
-          
-          // Mirror keypoint coordinates to match video
-          const mirroredPose = {
-            ...pose,
-            keypoints: pose.keypoints.map(kp => ({
-              ...kp,
-              x: canvas.width - kp.x
-            }))
-          };
-          
+          const mirroredPose = { ...pose, keypoints: pose.keypoints.map(kp => ({ ...kp, x: canvas.width - kp.x })) };
           drawPose(ctx, mirroredPose);
-          
-          // Only count reps when isCounting is true (use ref for animation loop)
-          if (isCountingRef.current) {
-            console.log('🔢 Counting mode - updating exercise state');
-            updateExerciseState(pose); // Use original pose for angle calculations
-          }
-        } else {
-          console.log('⚠️ No pose detected in frame');
+          if (isCountingRef.current) updateExerciseState(pose);
         }
       }
-      
       animationRef.current = requestAnimationFrame(detect);
     };
-    
     detect();
   };
   
   const drawPose = (ctx, pose) => {
     const keypoints = pose.keypoints;
-    
-    // Draw skeleton connections first (underneath keypoints)
     const connections = [
-      ['left_shoulder', 'right_shoulder'],
-      ['left_shoulder', 'left_elbow'],
-      ['left_elbow', 'left_wrist'],
-      ['right_shoulder', 'right_elbow'],
-      ['right_elbow', 'right_wrist'],
-      ['left_shoulder', 'left_hip'],
-      ['right_shoulder', 'right_hip'],
-      ['left_hip', 'right_hip'],
-      ['left_hip', 'left_knee'],
-      ['left_knee', 'left_ankle'],
-      ['right_hip', 'right_knee'],
-      ['right_knee', 'right_ankle']
+      ['left_shoulder', 'right_shoulder'], ['left_shoulder', 'left_elbow'], ['left_elbow', 'left_wrist'],
+      ['right_shoulder', 'right_elbow'], ['right_elbow', 'right_wrist'], ['left_shoulder', 'left_hip'],
+      ['right_shoulder', 'right_hip'], ['left_hip', 'right_hip'], ['left_hip', 'left_knee'],
+      ['left_knee', 'left_ankle'], ['right_hip', 'right_knee'], ['right_knee', 'right_ankle']
     ];
     
     connections.forEach(([start, end]) => {
       const startKp = keypoints.find(kp => kp.name === start);
       const endKp = keypoints.find(kp => kp.name === end);
-      
       if (startKp && endKp && startKp.score > 0.3 && endKp.score > 0.3) {
-        ctx.beginPath();
-        ctx.moveTo(startKp.x, startKp.y);
-        ctx.lineTo(endKp.x, endKp.y);
-        ctx.strokeStyle = '#00ff00';
-        ctx.lineWidth = 3;
-        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(startKp.x, startKp.y); ctx.lineTo(endKp.x, endKp.y);
+        ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 3; ctx.stroke();
       }
     });
     
-    // Draw keypoints on top
     keypoints.forEach(kp => {
       if (kp.score > 0.3) {
-        // Draw outer circle (border)
-        ctx.beginPath();
-        ctx.arc(kp.x, kp.y, 7, 0, 2 * Math.PI);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
-        
-        // Draw inner circle
-        ctx.beginPath();
-        ctx.arc(kp.x, kp.y, 5, 0, 2 * Math.PI);
-        ctx.fillStyle = '#00ff00';
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(kp.x, kp.y, 6, 0, 2 * Math.PI); ctx.fillStyle = '#ffffff'; ctx.fill();
+        ctx.beginPath(); ctx.arc(kp.x, kp.y, 4, 0, 2 * Math.PI); ctx.fillStyle = '#22c55e'; ctx.fill();
       }
     });
   };
   
   const updateExerciseState = (pose) => {
-    if (!stateMachineRef.current) {
-      console.log('❌ State machine not initialized');
-      return;
-    }
-    
+    if (!stateMachineRef.current) return;
     const keypoints = pose.keypoints;
-    
-    // Helper to get keypoint by index with confidence check
     const getPoint = (index, minConfidence = 0.3) => {
       if (!keypoints || !keypoints[index]) return null;
       const kp = keypoints[index];
       return kp.score >= minConfidence ? { x: kp.x, y: kp.y } : null;
     };
     
-    console.log('📊 Current exercise:', currentExerciseRef.current, '| State:', stateMachineRef.current.state, '| Reps:', stateMachineRef.current.repCount);
-    
-    // Calculate angles based on exercise type
-    let angles = {};
-    let distances = {};
+    let angles = {}; let distances = {};
     
     switch (currentExerciseRef.current) {
       case 'squat': {
-        // MoveNet indices: 5=left_shoulder, 11=left_hip, 13=left_knee, 15=left_ankle
-        const leftShoulder = getPoint(5);
-        const leftHip = getPoint(11);
-        const leftKnee = getPoint(13);
-        const leftAnkle = getPoint(15);
-        
-        // Fallback to right side: 6=right_shoulder, 12=right_hip, 14=right_knee, 16=right_ankle
-        const rightShoulder = getPoint(6);
-        const rightHip = getPoint(12);
-        const rightKnee = getPoint(14);
-        const rightAnkle = getPoint(16);
-        
-        // Use whichever side is more visible
-        const shoulder = leftShoulder || rightShoulder;
-        const hip = leftHip || rightHip;
-        const knee = leftKnee || rightKnee;
-        const ankle = leftAnkle || rightAnkle;
-        
+        const shoulder = getPoint(5) || getPoint(6); const hip = getPoint(11) || getPoint(12);
+        const knee = getPoint(13) || getPoint(14); const ankle = getPoint(15) || getPoint(16);
         if (hip && knee && ankle && shoulder) {
-          angles.knee = calculateAngle(hip, knee, ankle);
-          angles.hip = calculateAngle(shoulder, hip, knee);
-          angles.torsoLean = calculateVerticalAngle(shoulder, hip);
-          distances.kneeToe = calculateHorizontalDistance(knee, ankle);
+          angles.knee = calculateAngle(hip, knee, ankle); angles.hip = calculateAngle(shoulder, hip, knee);
+          angles.torsoLean = calculateVerticalAngle(shoulder, hip); distances.kneeToe = calculateHorizontalDistance(knee, ankle);
           distances.legLength = Math.abs(hip.y - ankle.y);
-          console.log('🦵 Squat angles:', {
-            knee: angles.knee?.toFixed(1),
-            hip: angles.hip?.toFixed(1),
-            torsoLean: angles.torsoLean?.toFixed(1)
-          });
-        } else {
-          console.log('⚠️ Missing squat keypoints:', { hip: !!hip, knee: !!knee, ankle: !!ankle, shoulder: !!shoulder });
         }
         break;
       }
-      
-      case 'bench':
-      case 'pushup': {
-        // Use elbow angle for bench press and push-ups
+      case 'bench': case 'pushup': {
         const shoulder = getPoint('left_shoulder') || getPoint('right_shoulder');
         const elbow = getPoint('left_elbow') || getPoint('right_elbow');
         const wrist = getPoint('left_wrist') || getPoint('right_wrist');
-        
-        if (shoulder && elbow && wrist) {
-          angles.elbow = calculateAngle(shoulder, elbow, wrist);
-        }
+        if (shoulder && elbow && wrist) { angles.elbow = calculateAngle(shoulder, elbow, wrist); }
         break;
       }
-      
       case 'deadlift': {
-        const shoulder = getPoint('left_shoulder');
-        const hip = getPoint('left_hip');
-        const knee = getPoint('left_knee');
-        const ankle = getPoint('left_ankle');
-        
+        const shoulder = getPoint('left_shoulder'); const hip = getPoint('left_hip');
+        const knee = getPoint('left_knee'); const ankle = getPoint('left_ankle');
         if (shoulder && hip && knee && ankle) {
-          angles.hip = calculateAngle(shoulder, hip, knee);
-          angles.knee = calculateAngle(hip, knee, ankle);
+          angles.hip = calculateAngle(shoulder, hip, knee); angles.knee = calculateAngle(hip, knee, ankle);
           angles.backAngle = calculateVerticalAngle(shoulder, hip);
         }
         break;
       }
-      
       case 'pullup': {
-        const shoulder = getPoint(5) || getPoint(6);
-        const elbow = getPoint(7) || getPoint(8);
-        const wrist = getPoint(9) || getPoint(10);
-        
-        if (shoulder && elbow && wrist) {
-          angles.elbow = calculateAngle(shoulder, elbow, wrist);
-        }
+        const shoulder = getPoint(5) || getPoint(6); const elbow = getPoint(7) || getPoint(8); const wrist = getPoint(9) || getPoint(10);
+        if (shoulder && elbow && wrist) { angles.elbow = calculateAngle(shoulder, elbow, wrist); }
         break;
       }
-      
       case 'shoulderpress': {
-        const leftShoulder = getPoint(5);
-        const leftElbow = getPoint(7);
-        const leftWrist = getPoint(9);
-        const rightShoulder = getPoint(6);
-        const rightElbow = getPoint(8);
-        const rightWrist = getPoint(10);
-        
-        if (leftShoulder && leftElbow && leftWrist) {
-          angles.leftElbow = calculateAngle(leftShoulder, leftElbow, leftWrist);
-        }
-        if (rightShoulder && rightElbow && rightWrist) {
-          angles.rightElbow = calculateAngle(rightShoulder, rightElbow, rightWrist);
-        }
-        
-        // Pass positions for wrist height check
-        distances = { leftWrist, rightWrist, leftShoulder, rightShoulder };
-        
-        console.log('💪 ShoulderPress angles:', {
-          leftElbow: angles.leftElbow?.toFixed(1),
-          rightElbow: angles.rightElbow?.toFixed(1)
-        });
+        const ls = getPoint(5), le = getPoint(7), lw = getPoint(9), rs = getPoint(6), re = getPoint(8), rw = getPoint(10);
+        if (ls && le && lw) angles.leftElbow = calculateAngle(ls, le, lw);
+        if (rs && re && rw) angles.rightElbow = calculateAngle(rs, re, rw);
+        distances = { leftWrist: lw, rightWrist: rw, leftShoulder: ls, rightShoulder: rs };
         break;
       }
-      
       case 'lateralraise': {
-        const shoulder = getPoint(5) || getPoint(6);
-        const elbow = getPoint(7) || getPoint(8);
-        const hip = getPoint(11) || getPoint(12);
-        
-        if (shoulder && elbow && hip) {
-          angles.shoulder = calculateAngle(hip, shoulder, elbow);
-        }
+        const shoulder = getPoint(5) || getPoint(6); const elbow = getPoint(7) || getPoint(8); const hip = getPoint(11) || getPoint(12);
+        if (shoulder && elbow && hip) angles.shoulder = calculateAngle(hip, shoulder, elbow);
         break;
       }
-      
       case 'lunge': {
-        const hip = getPoint(11) || getPoint(12);
-        const knee = getPoint(13) || getPoint(14);
-        const ankle = getPoint(15) || getPoint(16);
-        
-        if (hip && knee && ankle) {
-          angles.knee = calculateAngle(hip, knee, ankle);
-        }
+        const hip = getPoint(11) || getPoint(12); const knee = getPoint(13) || getPoint(14); const ankle = getPoint(15) || getPoint(16);
+        if (hip && knee && ankle) angles.knee = calculateAngle(hip, knee, ankle);
         break;
       }
     }
     
-    // Update state machine
     const prevRepCount = stateMachineRef.current.repCount;
-    const prevState = stateMachineRef.current.state;
     stateMachineRef.current.update(angles, distances);
     const newState = stateMachineRef.current.state;
     const newRepCount = stateMachineRef.current.repCount;
     
-    // Log state changes
-    if (prevState !== newState) {
-      console.log('🔄 State changed:', prevState, '→', newState);
-    }
-    
-    // Check if rep count increased
-    if (newRepCount > prevRepCount) {
-      console.log('🎉 REP COUNTED! Total:', newRepCount);
-      setRepCount(newRepCount);
-      speakFeedback(`Rep ${newRepCount}`);
-    }
-    
-    // Update UI
+    if (newRepCount > prevRepCount) { setRepCount(newRepCount); speakFeedback(`Rep ${newRepCount}`); }
     setCurrentState(newState);
     
-    // Update form quality based on feedback
     const feedback = stateMachineRef.current.feedbackMessages;
     if (feedback.length > 0) {
-      const hasError = feedback.some(f => f.type === 'error');
-      const hasWarning = feedback.some(f => f.type === 'warning');
-      
-      if (hasError) setFormQuality('Poor');
-      else if (hasWarning) setFormQuality('Good');
+      if (feedback.some(f => f.type === 'error')) setFormQuality('Poor');
+      else if (feedback.some(f => f.type === 'warning')) setFormQuality('Good');
       else setFormQuality('Perfect');
     }
   };
   
-  const speakFeedback = (message) => {
-    if (voiceAssistantService.ttsEnabled) {
-      voiceAssistantService.speak(message);
-    }
-  };
+  const speakFeedback = (message) => { if (voiceAssistantService.ttsEnabled) voiceAssistantService.speak(message); };
   
   const handleExerciseChange = (exercise) => {
-    if (isCounting) {
-      speakFeedback('Please stop counting before changing exercise.');
-      return;
-    }
-    
+    if (isCounting) return speakFeedback('Halt active telemetry before modifying parameters.');
     setCurrentExercise(exercise);
     stateMachineRef.current = stateMachinesRef.current[exercise];
-    setRepCount(0);
-    setCurrentState('Standing');
-    setFormQuality('Perfect');
+    setRepCount(0); setCurrentState('Standing'); setFormQuality('Perfect');
   };
   
-  const handleStartCounting = () => {
-    setIsCounting(true);
-    speakFeedback(`Starting ${EXERCISES[currentExercise].name}. Let's go!`);
-  };
+  const handleStartCounting = () => { setIsCounting(true); speakFeedback(`Tracking initialized.`); };
   
   const handleStopCounting = () => {
     if (isCounting && repCount > 0) {
-      // Log the workout
       const existingLog = workoutLog.find(log => log.exercise === currentExercise);
-      if (existingLog) {
-        existingLog.reps += repCount;
-      } else {
-        setWorkoutLog([...workoutLog, {
-          exercise: currentExercise,
-          reps: repCount,
-          name: EXERCISES[currentExercise].name
-        }]);
-      }
+      if (existingLog) existingLog.reps += repCount;
+      else setWorkoutLog([...workoutLog, { exercise: currentExercise, reps: repCount, name: EXERCISES[currentExercise].name }]);
     }
-    
-    setIsCounting(false);
-    speakFeedback('Counting paused.');
+    setIsCounting(false); speakFeedback('Tracking suspended.');
   };
   
   const handleEndWorkout = async () => {
-    setIsCounting(false);
-    setIsWorkoutActive(false);
-    setIsCalculating(true);
-    
-    // Add current exercise to log if counting
+    setIsCounting(false); setIsWorkoutActive(false); setIsCalculating(true);
     let finalLog = [...workoutLog];
     if (repCount > 0) {
       const existingLog = finalLog.find(log => log.exercise === currentExercise);
-      if (existingLog) {
-        existingLog.reps += repCount;
-      } else {
-        finalLog.push({
-          exercise: currentExercise,
-          reps: repCount,
-          name: EXERCISES[currentExercise].name
-        });
-      }
+      if (existingLog) existingLog.reps += repCount;
+      else finalLog.push({ exercise: currentExercise, reps: repCount, name: EXERCISES[currentExercise].name });
     }
-    
     try {
-      // Send workout data to backend for calorie calculation
       const response = await fetch('https://ai-nutritionist-backend.onrender.com/api/workout/calculate-calories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: currentUser?.uid,
-          workouts: finalLog,
-          userProfile: userProfile // Include user's health profile for personalized calculation
-        })
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentUser?.uid, workouts: finalLog, userProfile })
       });
-      
       const data = await response.json();
-      
-      setCaloriesResult(data.totalCalories);
-      setIsCalculating(false);
-      setShowResult(true);
-      
-      speakFeedback(`Congratulations! You have burned ${Math.round(data.totalCalories)} calories!`);
-
-      // Save calories burned to cookies (persists across refresh and hosting)
-      if (data?.totalCalories) {
-        try {
-          const newTotal = saveCaloriesBurnedToCookie(null, data.totalCalories);
-          console.log(`✅ Total calories burned today: ${newTotal}`);
-        } catch (error) {
-          console.error('❌ Error saving calories to cookie:', error);
-        }
-      }
-      
-      // Hide result after 5 seconds
-      setTimeout(() => {
-        setShowResult(false);
-        resetWorkout();
-      }, 5000);
-    } catch (error) {
-      console.error('Error calculating calories:', error);
-      setIsCalculating(false);
-      alert('Failed to calculate calories. Please try again.');
-    }
+      setCaloriesResult(data.totalCalories); setIsCalculating(false); setShowResult(true);
+      speakFeedback(`Energy depleted: ${Math.round(data.totalCalories)} calories.`);
+      if (data?.totalCalories) saveCaloriesBurnedToCookie(null, data.totalCalories);
+      setTimeout(() => { setShowResult(false); resetWorkout(); }, 5000);
+    } catch (error) { setIsCalculating(false); alert('Telemetry calculation failed.'); }
   };
   
   const resetWorkout = () => {
-    setWorkoutLog([]);
-    setRepCount(0);
-    setCurrentState('Standing');
-    setFormQuality('Perfect');
-    setCaloriesResult(null);
-    
-    // Reset all state machines
+    setWorkoutLog([]); setRepCount(0); setCurrentState('Standing'); setFormQuality('Perfect'); setCaloriesResult(null);
     Object.values(stateMachinesRef.current).forEach(sm => sm.reset());
   };
   
-  return (
-    <div className="workout-tracker">
-      <div className="workout-header">
-        <h1>🏋️ AI Fitness Tracker</h1>
-        <p>Real-time rep counting with AI feedback</p>
+  if (!isWorkoutActive) {
+    return (
+      <div className="min-h-screen max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center justify-center text-center">
+         <div className="w-20 h-20 rounded-2xl bg-accent/20 flex items-center justify-center mb-6">
+           <Activity className="w-10 h-10 text-accent animate-pulse" />
+         </div>
+         <h1 className="text-4xl font-heading font-bold mb-4 tracking-tight">Kinematic Tracking</h1>
+         <p className="text-muted text-lg mb-10 max-w-xl">Initialize hardware visualization payload to track reps via onboard neural models.</p>
+         
+         <button onClick={() => setIsWorkoutActive(true)} disabled={!isModelLoaded} className="flex items-center gap-3 px-8 py-4 bg-accent text-background rounded-xl font-bold text-lg hover:bg-accent/90 disabled:opacity-50 transition-all shadow-[0_0_30px_rgba(34,197,94,0.2)]">
+            {isModelLoaded ? <><Play className="w-5 h-5"/> Initiate Telemetry Payload</> : <><Activity className="w-5 h-5 animate-spin"/> Booting Neural Engine</>}
+         </button>
+         
+         <div className="mt-8 font-mono text-sm text-muted bg-surface/50 p-4 border border-white/5 rounded-xl">
+           [SYS MSG]: Or execute voice command: "<span className="text-foreground">{voiceAssistantService.agentConfig?.name || 'DESIGNATION'} initiate workout</span>"
+         </div>
       </div>
-      
-      {!isWorkoutActive ? (
-        <div className="workout-start-screen">
-          <button 
-            className="start-workout-btn"
-            onClick={() => setIsWorkoutActive(true)}
-            disabled={!isModelLoaded}
-          >
-            {isModelLoaded ? 'Start Workout Session' : 'Loading Model...'}
-          </button>
-          <p className="voice-hint">Or say: "{voiceAssistantService.agentConfig?.name || 'Jarvis'} initiate workout"</p>
-        </div>
-      ) : (
-        <>
-          <div className="exercise-selection">
-            <h3>Select Exercise</h3>
-            <div className="exercise-grid">
-              {Object.entries(EXERCISES).map(([key, { name, icon }]) => (
-                <button
-                  key={key}
-                  className={`exercise-btn ${currentExercise === key ? 'active' : ''}`}
-                  onClick={() => handleExerciseChange(key)}
-                  disabled={isCounting}
-                >
-                  <span className="exercise-icon">{icon}</span>
-                  <span className="exercise-name">{name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          <div className="workout-instructions">
-            <h3>Instructions for {EXERCISES[currentExercise].name}</h3>
-            <ul>
-              {EXERCISE_INSTRUCTIONS[currentExercise].map((instruction, index) => (
-                <li key={index}>{instruction}</li>
-              ))}
-            </ul>
-          </div>
-          
-          <div className="video-section">
-            <div className="video-container">
-              <video ref={videoRef} autoPlay playsInline muted />
-              <canvas ref={canvasRef} />
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-screen flex flex-col">
+      <div className="flex justify-between items-center mb-6">
+         <div>
+           <h1 className="text-3xl font-heading font-bold mb-1 tracking-tight">Telemetry Matrix</h1>
+           <p className="text-sm text-muted">Kinematic capture engaged. Monitoring structural integrity.</p>
+         </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-[600px]">
+         
+         {/* Settings & Parameters */}
+         <div className="lg:col-span-3 flex flex-col gap-6">
+            <div className="glass-panel p-6 flex flex-col min-h-0 h-full overflow-hidden">
+               <h3 className="font-heading font-semibold text-sm uppercase tracking-wider text-muted mb-4 flex items-center gap-2">
+                 <Settings className="w-4 h-4"/> Input Target
+               </h3>
+               
+               <div className="overflow-y-auto custom-scrollbar flex-1 -mx-2 px-2 space-y-2">
+                 {Object.entries(EXERCISES).map(([key, { name }]) => (
+                   <button key={key} disabled={isCounting} onClick={() => handleExerciseChange(key)} className={cn("w-full text-left p-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-between", currentExercise === key ? "bg-accent/10 border-accent/40 text-accent" : "bg-surface/30 border-white/5 hover:border-white/20 text-muted")}>
+                     {name}
+                     {currentExercise === key && <Check className="w-4 h-4"/>}
+                   </button>
+                 ))}
+               </div>
             </div>
             
-            <div className="stats-panel">
-              <div className="stat-card">
-                <div className="stat-label">Reps</div>
-                <div className="stat-value">{repCount}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">State</div>
-                <div className="stat-value small">{currentState}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Form</div>
-                <div className="stat-value small">{formQuality}</div>
-              </div>
+            <div className="glass-panel p-5 bg-surface/30">
+               <h3 className="text-xs font-semibold uppercase tracking-wider text-accent mb-3 flex items-center gap-1.5">
+                 <AlertTriangle className="w-3 h-3"/> Syntax
+               </h3>
+               <ul className="space-y-2">
+                 {EXERCISE_INSTRUCTIONS[currentExercise].map((inst, i) => (
+                   <li key={i} className="text-xs text-muted flex items-start gap-2">
+                     <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-accent/50 mt-1" /> {inst}
+                   </li>
+                 ))}
+               </ul>
             </div>
-          </div>
-          
-          <div className="workout-controls">
-            {!isCounting ? (
-              <button className="control-btn start" onClick={handleStartCounting}>
-                Start Counting
-              </button>
-            ) : (
-              <button className="control-btn pause" onClick={handleStopCounting}>
-                Pause Counting
-              </button>
-            )}
-            <button className="control-btn end" onClick={handleEndWorkout}>
-              End Workout
-            </button>
-          </div>
-          
-          {workoutLog.length > 0 && (
-            <div className="workout-log">
-              <h3>Workout Summary</h3>
-              <ul>
-                {workoutLog.map((log, index) => (
-                  <li key={index}>
-                    {log.name}: {log.reps} reps
-                  </li>
-                ))}
-              </ul>
+         </div>
+         
+         {/* Hardware View & Overlays */}
+         <div className="lg:col-span-9 flex flex-col h-full gap-6">
+            <div className="relative glass-panel rounded-2xl overflow-hidden flex-1 bg-black border border-white/10 flex items-center justify-center isolate">
+               
+               {/* Video Element */}
+               <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover opacity-50 z-0" />
+               <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover z-10" />
+
+               {/* Metric Overlays */}
+               <div className="absolute top-6 left-6 z-20 flex gap-4">
+                  <div className="px-5 py-3 rounded-xl bg-background/80 backdrop-blur-md border border-white/10 flex flex-col items-center min-w-[100px]">
+                    <span className="text-xs font-medium text-muted uppercase tracking-wider mb-1">Count</span>
+                    <span className="text-4xl font-mono font-bold text-foreground leading-none">{repCount}</span>
+                  </div>
+                  <div className="px-5 py-3 rounded-xl bg-background/80 backdrop-blur-md border border-white/10 flex flex-col items-center">
+                    <span className="text-xs font-medium text-muted uppercase tracking-wider mb-1">State Vector</span>
+                    <span className="text-sm font-mono font-bold text-accent uppercase tracking-widest mt-2">{currentState}</span>
+                  </div>
+               </div>
+
+               <div className="absolute top-6 right-6 z-20">
+                  <div className="px-4 py-2 rounded-lg bg-background/80 backdrop-blur-md border border-white/10 flex items-center gap-2">
+                    <span className="text-xs font-medium uppercase text-muted">Integrity:</span>
+                    <span className={cn("text-xs font-bold uppercase", formQuality === 'Perfect' ? "text-accent" : formQuality === 'Good' ? "text-yellow-400" : "text-red-500")}>
+                      {formQuality}
+                    </span>
+                  </div>
+               </div>
+
             </div>
-          )}
-        </>
-      )}
-      
-      {(isCalculating || showResult) && (
-        <div className="result-overlay">
-          <div className="glass-effect">
-            {isCalculating ? (
-              <div className="loading-spinner">
-                <div className="spinner"></div>
-                <p>Calculating calories burned...</p>
-              </div>
-            ) : (
-              <div className="success-popup">
-                <div className="confetti"></div>
-                <h2>🎉 Congratulations! 🎉</h2>
-                <p className="calories-burned">
-                  You burned <span className="calories-number">{Math.round(caloriesResult)}</span> calories!
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+            
+            {/* Controls */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 h-20 shrink-0">
+               {!isCounting ? (
+                 <button onClick={handleStartCounting} className="lg:col-span-2 bg-accent text-background font-bold text-sm tracking-wide rounded-xl hover:bg-accent/90 transition-colors flex items-center justify-center gap-2">
+                   <Play className="w-5 h-5"/> Initiate Capture
+                 </button>
+               ) : (
+                 <button onClick={handleStopCounting} className="lg:col-span-2 bg-yellow-500 text-background font-bold text-sm tracking-wide rounded-xl hover:bg-yellow-400 transition-colors flex items-center justify-center gap-2">
+                   <Square className="w-5 h-5"/> Suspend Capture
+                 </button>
+               )}
+               <button onClick={handleEndWorkout} className="lg:col-span-2 bg-surface border border-white/10 text-foreground font-bold text-sm tracking-wide rounded-xl hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
+                  Terminate Payload
+               </button>
+            </div>
+         </div>
+      </div>
+
+      <AnimatePresence>
+        {isCalculating && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/90 backdrop-blur-xl">
+             <div className="flex flex-col items-center">
+                <Activity className="w-16 h-16 text-accent animate-pulse mb-6" />
+                <h2 className="text-2xl font-bold font-heading mb-2">Calculating Output Matrix</h2>
+                <p className="text-muted font-mono text-sm">Synchronizing repetitions with biological profile variables...</p>
+             </div>
+          </motion.div>
+        )}
+        
+        {showResult && caloriesResult !== null && (
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/90 backdrop-blur-xl">
+             <div className="glass-panel max-w-lg w-full p-12 text-center overflow-hidden relative">
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent"></div>
+                <h2 className="text-xl font-semibold mb-6 uppercase tracking-widest text-muted">Energy Depleted</h2>
+                <div className="text-8xl font-black font-mono text-foreground mb-4 tracking-tighter">
+                  {Math.round(caloriesResult)}
+                </div>
+                <div className="text-sm font-medium text-accent uppercase tracking-widest mb-8">Kilocals (Est.)</div>
+                
+                <div className="space-y-2 bg-surface/30 p-4 rounded-xl text-left border border-white/5">
+                   <p className="text-xs text-muted uppercase font-bold tracking-wider mb-2">Payload Summary</p>
+                   {workoutLog.map((log, i) => (
+                     <div key={i} className="flex justify-between text-sm">
+                       <span className="text-foreground">{log.name}</span>
+                       <span className="font-mono">{log.reps} reps</span>
+                     </div>
+                   ))}
+                </div>
+             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
