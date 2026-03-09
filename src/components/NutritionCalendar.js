@@ -89,10 +89,10 @@ const NutritionCalendar = () => {
         <p className="text-muted max-w-2xl mx-auto text-lg">Historical overview of biological input and physical output cycles.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="flex flex-col items-center gap-10 w-full max-w-3xl mx-auto">
         
         {/* Calendar View */}
-        <div className="lg:col-span-8">
+        <div className="w-full">
            <div className="glass-panel p-6">
               
               <div className="flex items-center justify-between mb-8 px-2">
@@ -160,9 +160,9 @@ const NutritionCalendar = () => {
         </div>
 
         {/* Selected Date Analytics */}
-        <div className="lg:col-span-4">
+        <div className="w-full">
            {selectedDayData && selectedDate ? (
-             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="glass-panel p-6 sticky top-24">
+             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-panel p-6">
                 <div className="border-b border-border/5 pb-4 mb-6">
                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted mb-1 flex items-center gap-2">
                      <CalendarIcon className="w-4 h-4"/> Selected Log
@@ -192,17 +192,17 @@ const NutritionCalendar = () => {
                    </div>
 
                    <div className="bg-surface/50 rounded-xl border border-border/5 p-4 flex justify-between">
-                     <div className="text-center">
+                     <div className="text-center w-1/3">
                        <Beef className="w-4 h-4 text-rose-400 mx-auto mb-1"/>
                        <div className="text-xs text-muted uppercase mb-1">Pro</div>
                        <div className="font-bold text-sm">{selectedDayData.totals?.protein || 0}g</div>
                      </div>
-                     <div className="text-center">
+                     <div className="text-center w-1/3">
                        <Wheat className="w-4 h-4 text-amber-400 mx-auto mb-1"/>
                        <div className="text-xs text-muted uppercase mb-1">Carb</div>
                        <div className="font-bold text-sm">{selectedDayData.totals?.carbohydrates || 0}g</div>
                      </div>
-                     <div className="text-center">
+                     <div className="text-center w-1/3">
                        <Droplets className="w-4 h-4 text-lime-400 mx-auto mb-1"/>
                        <div className="text-xs text-muted uppercase mb-1">Fat</div>
                        <div className="font-bold text-sm">{selectedDayData.totals?.fat || 0}g</div>
@@ -230,7 +230,7 @@ const NutritionCalendar = () => {
                 </div>
              </motion.div>
            ) : (
-             <div className="glass-panel p-10 flex flex-col items-center justify-center text-center h-full min-h-[400px]">
+             <div className="glass-panel p-10 flex flex-col items-center justify-center text-center w-full min-h-[200px]">
                 <div className="w-16 h-16 rounded-full border border-dashed border-border/20 flex items-center justify-center mb-6">
                    <CalendarIcon className="w-6 h-6 text-muted" />
                 </div>
