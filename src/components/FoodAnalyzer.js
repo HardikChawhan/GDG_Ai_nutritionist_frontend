@@ -104,7 +104,7 @@ function FoodAnalyzer() {
                
                <div className="flex items-start gap-2 text-xs text-muted bg-surface/30 p-3 rounded-lg border border-border/5">
                  <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                 <p>Comma segregate discrete structural entities for precise batch analysis.</p>
+                 <p>Separate items with commas for accurate batch analysis.</p>
                </div>
 
                <button 
@@ -122,9 +122,9 @@ function FoodAnalyzer() {
              <h3 className="font-heading font-semibold mb-4 text-sm uppercase tracking-wider text-muted">Capabilities</h3>
              <div className="space-y-3">
                 {[
-                  { icon: ClipboardList, title: "Compound Meals", desc: "Scan aggregate nutrition profiles." },
-                  { icon: Activity, title: "Molecular Tracking", desc: "Retrieve distinct nutrient densities." },
-                  { icon: RefreshCcw, title: "Comparison Matrices", desc: "Perform side-by-side analytics." }
+                  { icon: ClipboardList, title: "Meal Scanner", desc: "Scan meals to see their nutrition details." },
+                  { icon: Activity, title: "Nutrient Tracking", desc: "Track vitamins, protein, carbs, and more." },
+                  { icon: RefreshCcw, title: "Meal Comparison", desc: "Compare nutrition between meals." }
                 ].map((item, idx) => (
                   <div key={idx} className="flex gap-3 items-start p-3 bg-foreground/5 rounded-xl border border-border/5">
                      <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center shrink-0">

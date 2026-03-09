@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import voiceAssistantService from '../services/voiceAssistantService';
 import { getHealthProfile } from '../services/firebaseService';
 import { cn } from '../utils/cn';
-import { 
+import {
   calculateAngle, calculateVerticalAngle, calculateHorizontalDistance,
   SquatStateMachine, BenchPressStateMachine, DeadliftStateMachine,
   PushUpStateMachine, PullUpStateMachine, ShoulderPressStateMachine,
@@ -63,7 +63,7 @@ function WorkoutTracker() {
   const animationRef = useRef(null);
   const isCountingRef = useRef(false);
   const currentExerciseRef = useRef('squat');
-  
+
   const [detector, setDetector] = useState(null);
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [currentExercise, setCurrentExercise] = useState('squat');
@@ -77,23 +77,23 @@ function WorkoutTracker() {
   const [caloriesResult, setCaloriesResult] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
-  
+
   const stateMachineRef = useRef(null);
   const stateMachinesRef = useRef({});
 
   useEffect(() => { isCountingRef.current = isCounting; }, [isCounting]);
-  
+
   useEffect(() => {
     currentExerciseRef.current = currentExercise;
     if (stateMachinesRef.current[currentExercise]) {
       stateMachineRef.current = stateMachinesRef.current[currentExercise];
     }
   }, [currentExercise]);
-  
+
   useEffect(() => {
     const loadUserProfile = async () => {
       if (currentUser) {
-        try { setUserProfile(await getHealthProfile(currentUser.uid)); } catch (error) {}
+        try { setUserProfile(await getHealthProfile(currentUser.uid)); } catch (error) { }
       }
     };
     loadUserProfile();
@@ -124,12 +124,12 @@ function WorkoutTracker() {
       stopCamera();
     };
   }, []);
-  
+
   useEffect(() => {
     if (isWorkoutActive && isModelLoaded) startCamera();
     else stopCamera();
   }, [isWorkoutActive, isModelLoaded]);
-  
+
   useEffect(() => {
     if (!currentUser) return;
     const handleVoiceCommand = (command) => {
@@ -151,7 +151,7 @@ function WorkoutTracker() {
     };
     return () => { voiceAssistantService.onTranscriptCallback = originalCallback; };
   }, [currentUser, isWorkoutActive, isCounting, currentExercise, workoutLog]);
-  
+
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' }, audio: false });
@@ -168,7 +168,7 @@ function WorkoutTracker() {
       }
     } catch (error) { alert('Camera access denied. Activity tracking requires permissions.'); }
   };
-  
+
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       videoRef.current.srcObject.getTracks().forEach(track => track.stop());
@@ -176,13 +176,13 @@ function WorkoutTracker() {
     }
     if (animationRef.current) { cancelAnimationFrame(animationRef.current); animationRef.current = null; }
   };
-  
+
   const detectPose = async () => {
     if (!detector || !videoRef.current || !canvasRef.current) return;
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    
+
     const detect = async () => {
       if (video.readyState === 4) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -190,7 +190,7 @@ function WorkoutTracker() {
         ctx.scale(-1, 1);
         ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
         ctx.restore();
-        
+
         const poses = await detector.estimatePoses(video);
         if (poses.length > 0) {
           const pose = poses[0];
@@ -203,7 +203,7 @@ function WorkoutTracker() {
     };
     detect();
   };
-  
+
   const drawPose = (ctx, pose) => {
     const keypoints = pose.keypoints;
     const connections = [
@@ -212,7 +212,7 @@ function WorkoutTracker() {
       ['right_shoulder', 'right_hip'], ['left_hip', 'right_hip'], ['left_hip', 'left_knee'],
       ['left_knee', 'left_ankle'], ['right_hip', 'right_knee'], ['right_knee', 'right_ankle']
     ];
-    
+
     connections.forEach(([start, end]) => {
       const startKp = keypoints.find(kp => kp.name === start);
       const endKp = keypoints.find(kp => kp.name === end);
@@ -221,7 +221,7 @@ function WorkoutTracker() {
         ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 3; ctx.stroke();
       }
     });
-    
+
     keypoints.forEach(kp => {
       if (kp.score > 0.3) {
         ctx.beginPath(); ctx.arc(kp.x, kp.y, 6, 0, 2 * Math.PI); ctx.fillStyle = '#ffffff'; ctx.fill();
@@ -229,7 +229,7 @@ function WorkoutTracker() {
       }
     });
   };
-  
+
   const updateExerciseState = (pose) => {
     if (!stateMachineRef.current) return;
     const keypoints = pose.keypoints;
@@ -238,9 +238,9 @@ function WorkoutTracker() {
       const kp = keypoints[index];
       return kp.score >= minConfidence ? { x: kp.x, y: kp.y } : null;
     };
-    
+
     let angles = {}; let distances = {};
-    
+
     switch (currentExerciseRef.current) {
       case 'squat': {
         const shoulder = getPoint(5) || getPoint(6); const hip = getPoint(11) || getPoint(12);
@@ -291,15 +291,15 @@ function WorkoutTracker() {
         break;
       }
     }
-    
+
     const prevRepCount = stateMachineRef.current.repCount;
     stateMachineRef.current.update(angles, distances);
     const newState = stateMachineRef.current.state;
     const newRepCount = stateMachineRef.current.repCount;
-    
+
     if (newRepCount > prevRepCount) { setRepCount(newRepCount); speakFeedback(`Rep ${newRepCount}`); }
     setCurrentState(newState);
-    
+
     const feedback = stateMachineRef.current.feedbackMessages;
     if (feedback.length > 0) {
       if (feedback.some(f => f.type === 'error')) setFormQuality('Poor');
@@ -307,18 +307,18 @@ function WorkoutTracker() {
       else setFormQuality('Perfect');
     }
   };
-  
+
   const speakFeedback = (message) => { if (voiceAssistantService.ttsEnabled) voiceAssistantService.speak(message); };
-  
+
   const handleExerciseChange = (exercise) => {
     if (isCounting) return speakFeedback('Stop tracking before changing exercises.');
     setCurrentExercise(exercise);
     stateMachineRef.current = stateMachinesRef.current[exercise];
     setRepCount(0); setCurrentState('Standing'); setFormQuality('Perfect');
   };
-  
+
   const handleStartCounting = () => { setIsCounting(true); speakFeedback(`Tracking initialized.`); };
-  
+
   const handleStopCounting = () => {
     if (isCounting && repCount > 0) {
       const existingLog = workoutLog.find(log => log.exercise === currentExercise);
@@ -327,7 +327,7 @@ function WorkoutTracker() {
     }
     setIsCounting(false); speakFeedback('Tracking suspended.');
   };
-  
+
   const handleEndWorkout = async () => {
     setIsCounting(false); setIsWorkoutActive(false); setIsCalculating(true);
     let finalLog = [...workoutLog];
@@ -348,28 +348,28 @@ function WorkoutTracker() {
       setTimeout(() => { setShowResult(false); resetWorkout(); }, 5000);
     } catch (error) { setIsCalculating(false); alert('Tracking calculation failed.'); }
   };
-  
+
   const resetWorkout = () => {
     setWorkoutLog([]); setRepCount(0); setCurrentState('Standing'); setFormQuality('Perfect'); setCaloriesResult(null);
     Object.values(stateMachinesRef.current).forEach(sm => sm.reset());
   };
-  
+
   if (!isWorkoutActive) {
     return (
       <div className="min-h-screen max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center justify-center text-center">
-         <div className="w-20 h-20 rounded-2xl bg-accent/20 flex items-center justify-center mb-6">
-           <Activity className="w-10 h-10 text-accent animate-pulse" />
-         </div>
-         <h1 className="text-4xl font-heading font-bold mb-4 tracking-tight">Workout Tracker</h1>
-         <p className="text-muted text-lg mb-10 max-w-xl">Use your camera to track your reps automatically with our AI.</p>
-         
-         <button onClick={() => setIsWorkoutActive(true)} disabled={!isModelLoaded} className="flex items-center gap-3 px-8 py-4 bg-accent text-background rounded-xl font-bold text-lg hover:bg-accent/90 disabled:opacity-50 transition-all shadow-[0_0_30px_rgba(34,197,94,0.2)]">
-            {isModelLoaded ? <><Play className="w-5 h-5"/> Start Camera Tracking</> : <><Activity className="w-5 h-5 animate-spin"/> Loading Camera...</>}
-         </button>
-         
-         <div className="mt-8 font-mono text-sm text-muted bg-surface/50 p-4 border border-border/5 rounded-xl">
-           [SYS MSG]: Or execute voice command: "<span className="text-foreground">{voiceAssistantService.agentConfig?.name || 'DESIGNATION'} initiate workout</span>"
-         </div>
+        <div className="w-20 h-20 rounded-2xl bg-accent/20 flex items-center justify-center mb-6">
+          <Activity className="w-10 h-10 text-accent animate-pulse" />
+        </div>
+        <h1 className="text-4xl font-heading font-bold mb-4 tracking-tight">Workout Tracker</h1>
+        <p className="text-muted text-lg mb-10 max-w-xl">Use your camera to track your reps automatically with our AI.</p>
+
+        <button onClick={() => setIsWorkoutActive(true)} disabled={!isModelLoaded} className="flex items-center gap-3 px-8 py-4 bg-accent text-background rounded-xl font-bold text-lg hover:bg-accent/90 disabled:opacity-50 transition-all shadow-[0_0_30px_rgba(34,197,94,0.2)]">
+          {isModelLoaded ? <><Play className="w-5 h-5" /> Start Camera Tracking</> : <><Activity className="w-5 h-5 animate-spin" /> Loading Camera...</>}
+        </button>
+
+        <div className="mt-8 font-mono text-sm text-muted bg-surface/50 p-4 border border-border/5 rounded-xl">
+          [SYS MSG]: Or execute voice command: "<span className="text-foreground">{voiceAssistantService.agentConfig?.name || 'DESIGNATION'} initiate workout</span>"
+        </div>
       </div>
     );
   }
@@ -377,125 +377,125 @@ function WorkoutTracker() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen lg:h-screen flex flex-col overflow-x-hidden">
       <div className="flex justify-between items-center mb-6">
-         <div>
-           <h1 className="text-3xl font-heading font-bold mb-1 tracking-tight">Activity Tracker</h1>
-           <p className="text-sm text-muted">Camera is on. Checking your form.</p>
-         </div>
+        <div>
+          <h1 className="text-3xl font-heading font-bold mb-1 tracking-tight">Activity Tracker</h1>
+          <p className="text-sm text-muted">Camera is on. Checking your form.</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-[600px] lg:min-h-0">
-         
-         {/* Settings & Parameters */}
-         <div className="lg:col-span-3 flex flex-col gap-6 order-2 lg:order-1">
-            <div className="glass-panel p-6 flex flex-col lg:min-h-0 lg:h-full overflow-hidden">
-               <h3 className="font-heading font-semibold text-sm uppercase tracking-wider text-muted mb-4 flex items-center gap-2 shrink-0">
-                 <Settings className="w-4 h-4"/> Input Target
-               </h3>
-               
-               <div className="overflow-x-auto lg:overflow-y-auto lg:overflow-x-hidden custom-scrollbar flex lg:flex-col lg:flex-1 lg:-mx-2 lg:px-2 gap-2 pb-2 lg:pb-0">
-                 {Object.entries(EXERCISES).map(([key, { name }]) => (
-                   <button key={key} disabled={isCounting} onClick={() => handleExerciseChange(key)} className={cn("shrink-0 whitespace-nowrap lg:w-full text-left px-4 py-2.5 lg:p-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-between", currentExercise === key ? "bg-accent/10 border-accent/40 text-accent" : "bg-surface/30 border-border/5 hover:border-border/20 text-muted")}>
-                     {name}
-                     {currentExercise === key && <Check className="w-4 h-4 ml-2"/>}
-                   </button>
-                 ))}
-               </div>
-            </div>
-            
-            <div className="glass-panel p-5 bg-surface/30">
-               <h3 className="text-xs font-semibold uppercase tracking-wider text-accent mb-3 flex items-center gap-1.5">
-                 <AlertTriangle className="w-3 h-3"/> Syntax
-               </h3>
-               <ul className="space-y-2">
-                 {EXERCISE_INSTRUCTIONS[currentExercise].map((inst, i) => (
-                   <li key={i} className="text-xs text-muted flex items-start gap-2">
-                     <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-accent/50 mt-1" /> {inst}
-                   </li>
-                 ))}
-               </ul>
-            </div>
-         </div>
-         
-         {/* Hardware View & Overlays */}
-         <div className="lg:col-span-9 flex flex-col h-full gap-6 order-1 lg:order-2">
-            <div className="relative glass-panel rounded-2xl overflow-hidden flex-1 min-h-[350px] lg:min-h-0 bg-black border border-border/10 flex items-center justify-center isolate">
-               
-               {/* Video Element */}
-               <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover opacity-50 z-0" />
-               <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover z-10" />
 
-               {/* Metric Overlays */}
-               <div className="absolute top-3 left-3 right-3 md:top-6 md:left-6 md:right-6 z-20 flex flex-wrap justify-between gap-2 md:gap-4">
-                 <div className="flex gap-2 md:gap-4">
-                   <div className="px-3 py-2 md:px-5 md:py-3 rounded-xl bg-background/80 backdrop-blur-md border border-border/10 flex flex-col items-center min-w-[70px] md:min-w-[100px]">
-                     <span className="text-[10px] md:text-xs font-medium text-muted uppercase tracking-wider mb-0.5 md:mb-1">Count</span>
-                     <span className="text-2xl md:text-4xl font-mono font-bold text-foreground leading-none">{repCount}</span>
-                   </div>
-                   <div className="px-3 py-2 md:px-5 md:py-3 rounded-xl bg-background/80 backdrop-blur-md border border-border/10 flex flex-col items-center">
-                     <span className="text-[10px] md:text-xs font-medium text-muted uppercase tracking-wider mb-0.5 md:mb-1">State Vector</span>
-                     <span className="text-[11px] md:text-sm font-mono font-bold text-accent uppercase tracking-widest mt-1 md:mt-2">{currentState}</span>
-                   </div>
-                 </div>
-                 
-                 <div className="px-3 py-2 md:px-4 md:py-2 rounded-lg bg-background/80 backdrop-blur-md border border-border/10 flex items-center gap-1.5 md:gap-2 self-start">
-                   <span className="text-[10px] md:text-xs font-medium uppercase text-muted">Integrity:</span>
-                   <span className={cn("text-[10px] md:text-xs font-bold uppercase", formQuality === 'Perfect' ? "text-accent" : formQuality === 'Good' ? "text-yellow-400" : "text-red-500")}>
-                     {formQuality}
-                   </span>
-                 </div>
-               </div>
+        {/* Settings & Parameters */}
+        <div className="lg:col-span-3 flex flex-col gap-6 order-2 lg:order-1">
+          <div className="glass-panel p-6 flex flex-col lg:min-h-0 lg:h-full overflow-hidden">
+            <h3 className="font-heading font-semibold text-sm uppercase tracking-wider text-muted mb-4 flex items-center gap-2 shrink-0">
+              <Settings className="w-4 h-4" /> Input Target
+            </h3>
 
+            <div className="overflow-x-auto lg:overflow-y-auto lg:overflow-x-hidden custom-scrollbar flex lg:flex-col lg:flex-1 lg:-mx-2 lg:px-2 gap-2 pb-2 lg:pb-0">
+              {Object.entries(EXERCISES).map(([key, { name }]) => (
+                <button key={key} disabled={isCounting} onClick={() => handleExerciseChange(key)} className={cn("shrink-0 whitespace-nowrap lg:w-full text-left px-4 py-2.5 lg:p-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-between", currentExercise === key ? "bg-accent/10 border-accent/40 text-accent" : "bg-surface/30 border-border/5 hover:border-border/20 text-muted")}>
+                  {name}
+                  {currentExercise === key && <Check className="w-4 h-4 ml-2" />}
+                </button>
+              ))}
             </div>
-            
-            {/* Controls */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 shrink-0">
-               {!isCounting ? (
-                 <button onClick={handleStartCounting} className="lg:col-span-2 bg-accent text-background font-bold text-[11px] sm:text-sm tracking-wide rounded-xl hover:bg-accent/90 transition-colors flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-4 px-2 sm:px-4 text-center">
-                   <Play className="w-4 h-4 sm:w-5 sm:h-5"/> Initiate Capture
-                 </button>
-               ) : (
-                 <button onClick={handleStopCounting} className="lg:col-span-2 bg-yellow-500 text-background font-bold text-[11px] sm:text-sm tracking-wide rounded-xl hover:bg-yellow-400 transition-colors flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-4 px-2 sm:px-4 text-center">
-                   <Square className="w-4 h-4 sm:w-5 sm:h-5"/> Suspend Capture
-                 </button>
-               )}
-               <button onClick={handleEndWorkout} className="lg:col-span-2 bg-surface border border-border/10 text-foreground font-bold text-[11px] sm:text-sm tracking-wide rounded-xl hover:bg-foreground/5 transition-colors flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-4 px-2 sm:px-4 text-center">
-                  Stop Tracking
-               </button>
+          </div>
+
+          <div className="glass-panel p-5 bg-surface/30">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-accent mb-3 flex items-center gap-1.5">
+              <AlertTriangle className="w-3 h-3" /> Instruction
+            </h3>
+            <ul className="space-y-2">
+              {EXERCISE_INSTRUCTIONS[currentExercise].map((inst, i) => (
+                <li key={i} className="text-xs text-muted flex items-start gap-2">
+                  <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-accent/50 mt-1" /> {inst}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Hardware View & Overlays */}
+        <div className="lg:col-span-9 flex flex-col h-full gap-6 order-1 lg:order-2">
+          <div className="relative glass-panel rounded-2xl overflow-hidden flex-1 min-h-[350px] lg:min-h-0 bg-black border border-border/10 flex items-center justify-center isolate">
+
+            {/* Video Element */}
+            <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover opacity-50 z-0" />
+            <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover z-10" />
+
+            {/* Metric Overlays */}
+            <div className="absolute top-3 left-3 right-3 md:top-6 md:left-6 md:right-6 z-20 flex flex-wrap justify-between gap-2 md:gap-4">
+              <div className="flex gap-2 md:gap-4">
+                <div className="px-3 py-2 md:px-5 md:py-3 rounded-xl bg-background/80 backdrop-blur-md border border-border/10 flex flex-col items-center min-w-[70px] md:min-w-[100px]">
+                  <span className="text-[10px] md:text-xs font-medium text-muted uppercase tracking-wider mb-0.5 md:mb-1">Count</span>
+                  <span className="text-2xl md:text-4xl font-mono font-bold text-foreground leading-none">{repCount}</span>
+                </div>
+                <div className="px-3 py-2 md:px-5 md:py-3 rounded-xl bg-background/80 backdrop-blur-md border border-border/10 flex flex-col items-center">
+                  <span className="text-[10px] md:text-xs font-medium text-muted uppercase tracking-wider mb-0.5 md:mb-1">State Vector</span>
+                  <span className="text-[11px] md:text-sm font-mono font-bold text-accent uppercase tracking-widest mt-1 md:mt-2">{currentState}</span>
+                </div>
+              </div>
+
+              <div className="px-3 py-2 md:px-4 md:py-2 rounded-lg bg-background/80 backdrop-blur-md border border-border/10 flex items-center gap-1.5 md:gap-2 self-start">
+                <span className="text-[10px] md:text-xs font-medium uppercase text-muted">Integrity:</span>
+                <span className={cn("text-[10px] md:text-xs font-bold uppercase", formQuality === 'Perfect' ? "text-accent" : formQuality === 'Good' ? "text-yellow-400" : "text-red-500")}>
+                  {formQuality}
+                </span>
+              </div>
             </div>
-         </div>
+
+          </div>
+
+          {/* Controls */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 shrink-0">
+            {!isCounting ? (
+              <button onClick={handleStartCounting} className="lg:col-span-2 bg-accent text-background font-bold text-[11px] sm:text-sm tracking-wide rounded-xl hover:bg-accent/90 transition-colors flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-4 px-2 sm:px-4 text-center">
+                <Play className="w-4 h-4 sm:w-5 sm:h-5" /> Initiate Capture
+              </button>
+            ) : (
+              <button onClick={handleStopCounting} className="lg:col-span-2 bg-yellow-500 text-background font-bold text-[11px] sm:text-sm tracking-wide rounded-xl hover:bg-yellow-400 transition-colors flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-4 px-2 sm:px-4 text-center">
+                <Square className="w-4 h-4 sm:w-5 sm:h-5" /> Suspend Capture
+              </button>
+            )}
+            <button onClick={handleEndWorkout} className="lg:col-span-2 bg-surface border border-border/10 text-foreground font-bold text-[11px] sm:text-sm tracking-wide rounded-xl hover:bg-foreground/5 transition-colors flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-4 px-2 sm:px-4 text-center">
+              Stop Tracking
+            </button>
+          </div>
+        </div>
       </div>
 
       <AnimatePresence>
         {isCalculating && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/90 backdrop-blur-xl">
-             <div className="flex flex-col items-center">
-                <Activity className="w-16 h-16 text-accent animate-pulse mb-6" />
-                <h2 className="text-2xl font-bold font-heading mb-2">Saving Your Workout</h2>
-                <p className="text-muted font-mono text-sm">Saving your workout data to your profile...</p>
-             </div>
+            <div className="flex flex-col items-center">
+              <Activity className="w-16 h-16 text-accent animate-pulse mb-6" />
+              <h2 className="text-2xl font-bold font-heading mb-2">Saving Your Workout</h2>
+              <p className="text-muted font-mono text-sm">Saving your workout data to your profile...</p>
+            </div>
           </motion.div>
         )}
-        
+
         {showResult && caloriesResult !== null && (
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/90 backdrop-blur-xl">
-             <div className="glass-panel max-w-lg w-full p-12 text-center overflow-hidden relative">
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent"></div>
-                <h2 className="text-xl font-semibold mb-6 uppercase tracking-widest text-muted">Energy Depleted</h2>
-                <div className="text-8xl font-black font-mono text-foreground mb-4 tracking-tighter">
-                  {Math.round(caloriesResult)}
-                </div>
-                <div className="text-sm font-medium text-accent uppercase tracking-widest mb-8">Kilocals (Est.)</div>
-                
-                <div className="space-y-2 bg-surface/30 p-4 rounded-xl text-left border border-border/5">
-                   <p className="text-xs text-muted uppercase font-bold tracking-wider mb-2">Workout Summary</p>
-                   {workoutLog.map((log, i) => (
-                     <div key={i} className="flex justify-between text-sm">
-                       <span className="text-foreground">{log.name}</span>
-                       <span className="font-mono">{log.reps} reps</span>
-                     </div>
-                   ))}
-                </div>
-             </div>
+            <div className="glass-panel max-w-lg w-full p-12 text-center overflow-hidden relative">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent"></div>
+              <h2 className="text-xl font-semibold mb-6 uppercase tracking-widest text-muted">Energy Depleted</h2>
+              <div className="text-8xl font-black font-mono text-foreground mb-4 tracking-tighter">
+                {Math.round(caloriesResult)}
+              </div>
+              <div className="text-sm font-medium text-accent uppercase tracking-widest mb-8">Kilocals (Est.)</div>
+
+              <div className="space-y-2 bg-surface/30 p-4 rounded-xl text-left border border-border/5">
+                <p className="text-xs text-muted uppercase font-bold tracking-wider mb-2">Workout Summary</p>
+                {workoutLog.map((log, i) => (
+                  <div key={i} className="flex justify-between text-sm">
+                    <span className="text-foreground">{log.name}</span>
+                    <span className="font-mono">{log.reps} reps</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
