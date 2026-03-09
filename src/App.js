@@ -30,9 +30,13 @@ function AppContent() {
   const [voiceAssistantEnabled, setVoiceAssistantEnabled] = useState(false);
   const [userContext, setUserContext] = useState(null);
 
-  // Initialize data theme attribute properly
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, [theme]);
 
   // Listen for voice navigation events

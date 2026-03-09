@@ -1,16 +1,18 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: ['class', '[data-theme="dark"]'],
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
     extend: {
       colors: {
-        background: '#09090b', // Deep Slate
-        surface: '#18181b',    // Surface Dark
-        accent: '#22c55e',     // Organic Green
-        border: 'rgba(255, 255, 255, 0.1)',
-        muted: '#a1a1aa',
+        background: 'rgb(var(--background) / <alpha-value>)',
+        foreground: 'rgb(var(--foreground) / <alpha-value>)',
+        surface: 'rgb(var(--surface) / <alpha-value>)',
+        accent: '#22c55e',
+        border: 'rgb(var(--border) / <alpha-value>)',
+        muted: 'rgb(var(--muted) / <alpha-value>)',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

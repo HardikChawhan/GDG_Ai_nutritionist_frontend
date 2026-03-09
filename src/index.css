@@ -4,8 +4,19 @@
 
 @layer base {
   :root {
-    --background: #09090b;
-    --foreground: #f8fafc;
+    --background: 248 250 252;
+    --foreground: 9 9 11;
+    --surface: 255 255 255;
+    --border: 0 0 0;
+    --muted: 100 116 139;
+  }
+  
+  :root[data-theme='dark'] {
+    --background: 9 9 11;
+    --foreground: 248 250 252;
+    --surface: 24 24 27;
+    --border: 255 255 255;
+    --muted: 161 161 170;
   }
   
   html, body, #root {
@@ -15,8 +26,8 @@
   }
   
   body {
-    background-color: var(--background);
-    color: var(--foreground);
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -29,7 +40,7 @@
 
 @layer utilities {
   .glass-panel {
-    @apply bg-surface/50 backdrop-blur-md border border-white/10 shadow-glass rounded-2xl;
+    @apply bg-surface border border-border/10 shadow-glass rounded-2xl dark:bg-surface/50 dark:backdrop-blur-md;
   }
   .bento-grid {
     @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6;
@@ -50,10 +61,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--muted);
 }

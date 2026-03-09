@@ -367,7 +367,7 @@ function WorkoutTracker() {
             {isModelLoaded ? <><Play className="w-5 h-5"/> Initiate Telemetry Payload</> : <><Activity className="w-5 h-5 animate-spin"/> Booting Neural Engine</>}
          </button>
          
-         <div className="mt-8 font-mono text-sm text-muted bg-surface/50 p-4 border border-white/5 rounded-xl">
+         <div className="mt-8 font-mono text-sm text-muted bg-surface/50 p-4 border border-border/5 rounded-xl">
            [SYS MSG]: Or execute voice command: "<span className="text-foreground">{voiceAssistantService.agentConfig?.name || 'DESIGNATION'} initiate workout</span>"
          </div>
       </div>
@@ -394,7 +394,7 @@ function WorkoutTracker() {
                
                <div className="overflow-y-auto custom-scrollbar flex-1 -mx-2 px-2 space-y-2">
                  {Object.entries(EXERCISES).map(([key, { name }]) => (
-                   <button key={key} disabled={isCounting} onClick={() => handleExerciseChange(key)} className={cn("w-full text-left p-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-between", currentExercise === key ? "bg-accent/10 border-accent/40 text-accent" : "bg-surface/30 border-white/5 hover:border-white/20 text-muted")}>
+                   <button key={key} disabled={isCounting} onClick={() => handleExerciseChange(key)} className={cn("w-full text-left p-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-between", currentExercise === key ? "bg-accent/10 border-accent/40 text-accent" : "bg-surface/30 border-border/5 hover:border-border/20 text-muted")}>
                      {name}
                      {currentExercise === key && <Check className="w-4 h-4"/>}
                    </button>
@@ -418,7 +418,7 @@ function WorkoutTracker() {
          
          {/* Hardware View & Overlays */}
          <div className="lg:col-span-9 flex flex-col h-full gap-6">
-            <div className="relative glass-panel rounded-2xl overflow-hidden flex-1 bg-black border border-white/10 flex items-center justify-center isolate">
+            <div className="relative glass-panel rounded-2xl overflow-hidden flex-1 bg-black border border-border/10 flex items-center justify-center isolate">
                
                {/* Video Element */}
                <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover opacity-50 z-0" />
@@ -426,18 +426,18 @@ function WorkoutTracker() {
 
                {/* Metric Overlays */}
                <div className="absolute top-6 left-6 z-20 flex gap-4">
-                  <div className="px-5 py-3 rounded-xl bg-background/80 backdrop-blur-md border border-white/10 flex flex-col items-center min-w-[100px]">
+                  <div className="px-5 py-3 rounded-xl bg-background/80 backdrop-blur-md border border-border/10 flex flex-col items-center min-w-[100px]">
                     <span className="text-xs font-medium text-muted uppercase tracking-wider mb-1">Count</span>
                     <span className="text-4xl font-mono font-bold text-foreground leading-none">{repCount}</span>
                   </div>
-                  <div className="px-5 py-3 rounded-xl bg-background/80 backdrop-blur-md border border-white/10 flex flex-col items-center">
+                  <div className="px-5 py-3 rounded-xl bg-background/80 backdrop-blur-md border border-border/10 flex flex-col items-center">
                     <span className="text-xs font-medium text-muted uppercase tracking-wider mb-1">State Vector</span>
                     <span className="text-sm font-mono font-bold text-accent uppercase tracking-widest mt-2">{currentState}</span>
                   </div>
                </div>
 
                <div className="absolute top-6 right-6 z-20">
-                  <div className="px-4 py-2 rounded-lg bg-background/80 backdrop-blur-md border border-white/10 flex items-center gap-2">
+                  <div className="px-4 py-2 rounded-lg bg-background/80 backdrop-blur-md border border-border/10 flex items-center gap-2">
                     <span className="text-xs font-medium uppercase text-muted">Integrity:</span>
                     <span className={cn("text-xs font-bold uppercase", formQuality === 'Perfect' ? "text-accent" : formQuality === 'Good' ? "text-yellow-400" : "text-red-500")}>
                       {formQuality}
@@ -458,7 +458,7 @@ function WorkoutTracker() {
                    <Square className="w-5 h-5"/> Suspend Capture
                  </button>
                )}
-               <button onClick={handleEndWorkout} className="lg:col-span-2 bg-surface border border-white/10 text-foreground font-bold text-sm tracking-wide rounded-xl hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
+               <button onClick={handleEndWorkout} className="lg:col-span-2 bg-surface border border-border/10 text-foreground font-bold text-sm tracking-wide rounded-xl hover:bg-foreground/5 transition-colors flex items-center justify-center gap-2">
                   Terminate Payload
                </button>
             </div>
@@ -486,7 +486,7 @@ function WorkoutTracker() {
                 </div>
                 <div className="text-sm font-medium text-accent uppercase tracking-widest mb-8">Kilocals (Est.)</div>
                 
-                <div className="space-y-2 bg-surface/30 p-4 rounded-xl text-left border border-white/5">
+                <div className="space-y-2 bg-surface/30 p-4 rounded-xl text-left border border-border/5">
                    <p className="text-xs text-muted uppercase font-bold tracking-wider mb-2">Payload Summary</p>
                    {workoutLog.map((log, i) => (
                      <div key={i} className="flex justify-between text-sm">

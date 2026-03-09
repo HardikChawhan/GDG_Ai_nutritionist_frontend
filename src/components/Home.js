@@ -68,7 +68,7 @@ function Home() {
         
         <h1 className="text-5xl md:text-7xl font-heading font-bold text-foreground mb-6 leading-tight tracking-tight">
           Precision Nutrition <br/>
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-muted">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-foreground to-muted">
              Driven By Data
           </span>
         </h1>
@@ -100,7 +100,7 @@ function Home() {
               <div className="font-semibold text-foreground">Welcome back, {currentUser.displayName}</div>
               <div className="text-sm text-muted capitalize">Current Objective: {userProfile.goal?.replace('_', ' ')}</div>
             </div>
-            <Link to="/dashboard" className="ml-4 px-4 py-2 border border-white/10 rounded-lg text-sm hover:bg-white/5 transition-colors">
+            <Link to="/dashboard" className="ml-4 px-4 py-2 border border-border/10 rounded-lg text-sm hover:bg-foreground/5 transition-colors">
               Go to Dashboard
             </Link>
           </div>
@@ -133,7 +133,7 @@ function Home() {
         {/* Square Feature 1 */}
         <motion.div variants={itemVariants} className="bento-item md:col-span-1 lg:col-span-4 flex flex-col justify-between group">
           <div>
-            <div className="w-12 h-12 rounded-xl bg-surface/80 border border-white/10 flex items-center justify-center mb-6">
+            <div className="w-12 h-12 rounded-xl bg-surface/80 border border-border/10 flex items-center justify-center mb-6">
               <Database className="w-6 h-6 text-muted group-hover:text-foreground transition-colors" />
             </div>
             <h3 className="text-xl font-heading font-semibold mb-3">Nutritional Analytics</h3>
@@ -147,7 +147,7 @@ function Home() {
         {/* Square Feature 2 */}
         <motion.div variants={itemVariants} className="bento-item md:col-span-1 lg:col-span-5 flex flex-col justify-between group">
            <div>
-            <div className="w-12 h-12 rounded-xl bg-surface/80 border border-white/10 flex items-center justify-center mb-6">
+            <div className="w-12 h-12 rounded-xl bg-surface/80 border border-border/10 flex items-center justify-center mb-6">
               <Sparkles className="w-6 h-6 text-muted group-hover:text-foreground transition-colors" />
             </div>
             <h3 className="text-xl font-heading font-semibold mb-3">Adaptive Intelligence</h3>
@@ -168,7 +168,7 @@ function Home() {
                 Query Database <ChevronRight className="w-4 h-4 ml-1" />
               </Link>
             </div>
-            <div className="w-full md:w-64 h-32 rounded-xl bg-surface/80 border border-white/5 flex items-center justify-center overflow-hidden relative">
+            <div className="w-full md:w-64 h-32 rounded-xl bg-surface/80 border border-border/5 flex items-center justify-center overflow-hidden relative">
                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
             </div>
           </div>
@@ -195,13 +195,13 @@ function Home() {
             <button 
               onClick={handleGoogleSignIn} 
               disabled={loading}
-              className="w-full flex items-center justify-center gap-3 bg-white text-black hover:bg-white/90 px-4 py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-3 bg-foreground text-background hover:bg-foreground/90 px-4 py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
             >
               <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
               {loading ? 'Authenticating...' : 'Authenticate with Google'}
             </button>
             
-            <div className="mt-8 pt-6 border-t border-white/10">
+            <div className="mt-8 pt-6 border-t border-border/10">
               <ul className="text-sm text-muted space-y-3">
                 <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-accent" /> Encrypted Health Records</li>
                 <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-accent" /> HIPAA-compliant architecture</li>

@@ -268,9 +268,9 @@ function NutritionDashboard() {
               <AlertTriangle className="w-5 h-5" />
               <div>
                 <h4 className="font-semibold text-sm">Target Threshold Exceeded</h4>
-                <p className="text-xs text-white/90 font-mono mt-0.5">{warningMessage}</p>
+                <p className="text-xs text-foreground/90 font-mono mt-0.5">{warningMessage}</p>
               </div>
-              <button onClick={() => setShowWarning(false)} className="ml-4 p-1 hover:bg-white/20 rounded-md transition-colors"><Trash2 className="w-4 h-4"/></button>
+              <button onClick={() => setShowWarning(false)} className="ml-4 p-1 hover:bg-foreground/20 rounded-md transition-colors"><Trash2 className="w-4 h-4"/></button>
            </motion.div>
         )}
       </AnimatePresence>
@@ -280,7 +280,7 @@ function NutritionDashboard() {
           <h1 className="text-4xl font-heading font-bold mb-2 tracking-tight">Daily Nutrition</h1>
           <p className="text-muted">Monitor and align your intake with computed targets.</p>
         </div>
-        <button onClick={() => setShowCalendar(true)} className="flex items-center gap-2 px-4 py-2 border border-white/10 hover:bg-white/5 bg-surface/30 rounded-xl transition-colors text-sm font-medium">
+        <button onClick={() => setShowCalendar(true)} className="flex items-center gap-2 px-4 py-2 border border-border/10 hover:bg-foreground/5 bg-surface/30 rounded-xl transition-colors text-sm font-medium">
           <CalendarIcon className="w-4 h-4" /> History
         </button>
       </div>
@@ -289,7 +289,7 @@ function NutritionDashboard() {
         {showCalendar && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md">
              <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="glass-panel w-full max-w-3xl flex flex-col max-h-[90vh]">
-               <div className="flex items-center justify-between p-5 border-b border-white/5">
+               <div className="flex items-center justify-between p-5 border-b border-border/5">
                  <h3 className="font-heading font-semibold text-lg flex items-center gap-2"><CalendarIcon className="w-5 h-5"/> Historical Records</h3>
                  <button onClick={() => setShowCalendar(false)} className="p-1 text-muted hover:text-foreground"><Trash2 className="w-4 h-4"/></button>
                </div>
@@ -317,7 +317,7 @@ function NutritionDashboard() {
               ].map((m, idx) => (
                 <div key={idx} className="glass-panel p-5 relative overflow-hidden group">
                    <div className="flex justify-between items-start mb-4">
-                     <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center border border-white/5">
+                     <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center border border-border/5">
                         <m.icon className="w-4 h-4 text-muted group-hover:text-foreground transition-colors" />
                      </div>
                    </div>
@@ -343,7 +343,7 @@ function NutritionDashboard() {
 
           {/* Quick Add Form Section */}
           <div className="glass-panel flex-col p-0 overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-surface/30">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border/5 bg-surface/30">
                <div>
                   <h2 className="font-heading font-semibold flex items-center gap-2"><Utensils className="w-4 h-4 text-accent"/> Dietary Intake Log</h2>
                </div>
@@ -364,7 +364,7 @@ function NutritionDashboard() {
                      onChange={(e) => setFoodInput(e.target.value)}
                      onKeyDown={(e) => e.key === 'Enter' && !isSearching && addFood()}
                      disabled={isSearching}
-                     className="w-full pl-12 pr-4 py-3 bg-surface border border-white/10 rounded-xl focus:ring-1 focus:ring-accent focus:border-accent text-sm transition-all text-foreground placeholder-white/20"
+                     className="w-full pl-12 pr-4 py-3 bg-surface border border-border/10 rounded-xl focus:ring-1 focus:ring-accent focus:border-accent text-sm transition-all text-foreground placeholder-white/20"
                      placeholder="Query database for items (e.g. 200g grilled salmon)"
                    />
                  </div>
@@ -379,16 +379,16 @@ function NutritionDashboard() {
                    {[...dailyFoods].reverse().map((food, reversedIndex) => {
                      const idx = dailyFoods.length - 1 - reversedIndex;
                      return (
-                       <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} key={idx} className="flex items-center justify-between p-4 rounded-xl border border-white/5 bg-surface/20 hover:bg-surface/50 transition-colors group">
+                       <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} key={idx} className="flex items-center justify-between p-4 rounded-xl border border-border/5 bg-surface/20 hover:bg-surface/50 transition-colors group">
                           <div>
                             <div className="font-medium text-sm text-foreground mb-1 capitalize">{food.description || food.name}</div>
                             <div className="flex items-center gap-3 text-xs text-muted font-mono">
                                <span>{food.calories || food.nutrition?.calories || 0}kcal</span>
-                               <span className="w-1 h-1 rounded-full bg-white/10" />
+                               <span className="w-1 h-1 rounded-full bg-foreground/10" />
                                <span>{food.protein || food.nutrition?.protein || 0}g Pro</span>
-                               <span className="w-1 h-1 rounded-full bg-white/10" />
+                               <span className="w-1 h-1 rounded-full bg-foreground/10" />
                                <span>{food.carbohydrates || food.nutrition?.carbohydrates || 0}g Carb</span>
-                               <span className="w-1 h-1 rounded-full bg-white/10" />
+                               <span className="w-1 h-1 rounded-full bg-foreground/10" />
                                <span>{food.fat || food.nutrition?.fat || 0}g Fat</span>
                             </div>
                           </div>
@@ -401,7 +401,7 @@ function NutritionDashboard() {
                  </div>
                ) : (
                  <div className="py-12 text-center text-muted flex flex-col items-center">
-                   <div className="w-12 h-12 rounded-full border border-dashed border-white/20 flex items-center justify-center mb-3">
+                   <div className="w-12 h-12 rounded-full border border-dashed border-border/20 flex items-center justify-center mb-3">
                      <Target className="w-5 h-5 opacity-50" />
                    </div>
                    <p className="text-sm">Database query ready. Awaiting dietary input.</p>
@@ -430,7 +430,7 @@ function NutritionDashboard() {
                </div>
              </div>
 
-             <button onClick={() => navigate('/workout')} className="w-full flex items-center justify-center gap-2 py-3 border border-white/10 rounded-xl font-medium text-sm hover:bg-white/5 transition-colors">
+             <button onClick={() => navigate('/workout')} className="w-full flex items-center justify-center gap-2 py-3 border border-border/10 rounded-xl font-medium text-sm hover:bg-foreground/5 transition-colors">
                Launch Activity Protocol <Plus className="w-4 h-4"/>
              </button>
           </div>
@@ -438,11 +438,11 @@ function NutritionDashboard() {
           <div className="glass-panel p-6">
             <h3 className="text-sm font-semibold text-muted uppercase tracking-wider mb-4">Diagnostics Sync</h3>
             <div className="space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-white/5">
+              <div className="flex items-center justify-between pb-3 border-b border-border/5">
                 <div className="flex items-center gap-2 text-sm"><Target className="w-4 h-4 text-muted"/> Current Objective</div>
                 <div className="text-sm font-mono capitalize">{userProfile.goal?.replace('_', ' ')}</div>
               </div>
-              <div className="flex items-center justify-between pb-3 border-b border-white/5">
+              <div className="flex items-center justify-between pb-3 border-b border-border/5">
                 <div className="flex items-center gap-2 text-sm"><Activity className="w-4 h-4 text-muted"/> Base Multiplier</div>
                 <div className="text-sm font-mono capitalize">{userProfile.activityLevel?.replace('_', ' ')}</div>
               </div>

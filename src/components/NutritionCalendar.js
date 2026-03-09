@@ -96,13 +96,13 @@ const NutritionCalendar = () => {
            <div className="glass-panel p-6">
               
               <div className="flex items-center justify-between mb-8 px-2">
-                 <button onClick={handlePrevMonth} className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors">
+                 <button onClick={handlePrevMonth} className="w-10 h-10 rounded-full border border-border/10 flex items-center justify-center hover:bg-foreground/5 transition-colors">
                    <ChevronLeft className="w-5 h-5 text-muted"/>
                  </button>
                  <h2 className="text-xl font-heading font-bold uppercase tracking-wider">
                    {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
                  </h2>
-                 <button onClick={handleNextMonth} className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors">
+                 <button onClick={handleNextMonth} className="w-10 h-10 rounded-full border border-border/10 flex items-center justify-center hover:bg-foreground/5 transition-colors">
                    <ChevronRight className="w-5 h-5 text-muted"/>
                  </button>
               </div>
@@ -134,8 +134,8 @@ const NutritionCalendar = () => {
                         onClick={() => handleDateClick(date)}
                         className={cn(
                           "aspect-square p-2 rounded-xl flex flex-col items-center border transition-all cursor-pointer relative overflow-hidden group",
-                          !date ? "border-transparent cursor-default" : "border-white/5 hover:border-white/20 bg-surface/30",
-                          hasData && "bg-surface/80 border-white/10",
+                          !date ? "border-transparent cursor-default" : "border-border/5 hover:border-border/20 bg-surface/30",
+                          hasData && "bg-surface/80 border-border/10",
                           isSelected && "ring-2 ring-accent border-accent bg-accent/10",
                           today && !isSelected && "border-blue-500/50"
                         )}
@@ -163,7 +163,7 @@ const NutritionCalendar = () => {
         <div className="lg:col-span-4">
            {selectedDayData && selectedDate ? (
              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="glass-panel p-6 sticky top-24">
-                <div className="border-b border-white/5 pb-4 mb-6">
+                <div className="border-b border-border/5 pb-4 mb-6">
                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted mb-1 flex items-center gap-2">
                      <CalendarIcon className="w-4 h-4"/> Selected Log
                    </h3>
@@ -175,17 +175,17 @@ const NutritionCalendar = () => {
                 <div className="space-y-6">
                    {/* Macros */}
                    <div className="grid grid-cols-2 gap-3">
-                     <div className="bg-surface/80 p-3 rounded-xl border border-white/5">
+                     <div className="bg-surface/80 p-3 rounded-xl border border-border/5">
                         <div className="flex items-center gap-2 mb-1"><Flame className="w-4 h-4 text-emerald-400"/><span className="text-xs text-muted uppercase">Intake</span></div>
                         <div className="text-xl font-bold">{selectedDayData.totals?.calories || 0} <span className="text-xs text-muted font-normal">kcal</span></div>
                      </div>
-                     <div className="bg-surface/80 p-3 rounded-xl border border-white/5">
+                     <div className="bg-surface/80 p-3 rounded-xl border border-border/5">
                         <div className="flex items-center gap-2 mb-1"><Activity className="w-4 h-4 text-orange-400"/><span className="text-xs text-muted uppercase">Output</span></div>
                         <div className="text-xl font-bold">{selectedDayData.caloriesBurned || 0} <span className="text-xs text-muted font-normal">kcal</span></div>
                      </div>
                    </div>
 
-                   <div className="bg-surface/50 rounded-xl border border-white/5 p-4 flex justify-between">
+                   <div className="bg-surface/50 rounded-xl border border-border/5 p-4 flex justify-between">
                      <div className="text-center">
                        <Beef className="w-4 h-4 text-rose-400 mx-auto mb-1"/>
                        <div className="text-xs text-muted uppercase mb-1">Pro</div>
@@ -209,13 +209,13 @@ const NutritionCalendar = () => {
                      <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
                        {selectedDayData.foods && selectedDayData.foods.length > 0 ? (
                          selectedDayData.foods.map((food, index) => (
-                           <div key={index} className="flex justify-between items-center p-3 rounded-lg bg-surface/30 border border-white/5 hover:border-white/10 transition-colors">
+                           <div key={index} className="flex justify-between items-center p-3 rounded-lg bg-surface/30 border border-border/5 hover:border-border/10 transition-colors">
                              <span className="text-sm font-medium capitalize truncate pr-4">{food.name}</span>
                              <span className="text-sm font-mono text-muted shrink-0">{food.calories} kcal</span>
                            </div>
                          ))
                        ) : (
-                         <div className="text-center p-4 text-sm text-muted bg-surface/30 rounded-lg border border-dashed border-white/10">
+                         <div className="text-center p-4 text-sm text-muted bg-surface/30 rounded-lg border border-dashed border-border/10">
                             No nutritional inputs logged on this day.
                          </div>
                        )}
@@ -225,7 +225,7 @@ const NutritionCalendar = () => {
              </motion.div>
            ) : (
              <div className="glass-panel p-10 flex flex-col items-center justify-center text-center h-full min-h-[400px]">
-                <div className="w-16 h-16 rounded-full border border-dashed border-white/20 flex items-center justify-center mb-6">
+                <div className="w-16 h-16 rounded-full border border-dashed border-border/20 flex items-center justify-center mb-6">
                    <CalendarIcon className="w-6 h-6 text-muted" />
                 </div>
                 <h3 className="text-lg font-heading font-semibold mb-2">Unselected Temporal Coordinate</h3>

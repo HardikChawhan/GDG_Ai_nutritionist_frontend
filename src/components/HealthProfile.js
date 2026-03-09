@@ -209,11 +209,11 @@ function HealthProfile() {
               <h2 className="text-2xl font-heading font-semibold mb-2">Authentication Required</h2>
               <p className="text-muted text-sm mb-8">Clinical data requires secure authentication.</p>
               
-              <button onClick={() => signInWithGoogle()} className="w-full flex items-center justify-center gap-3 bg-white text-black hover:bg-white/90 px-4 py-3 rounded-xl font-medium transition-colors mb-4">
+              <button onClick={() => signInWithGoogle()} className="w-full flex items-center justify-center gap-3 bg-foreground text-black hover:bg-foreground/90 px-4 py-3 rounded-xl font-medium transition-colors mb-4">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
                 Authenticate with Google
               </button>
-              <button onClick={() => navigate('/')} className="w-full border border-white/10 hover:bg-white/5 py-3 rounded-xl font-medium text-muted transition-colors">
+              <button onClick={() => navigate('/')} className="w-full border border-border/10 hover:bg-foreground/5 py-3 rounded-xl font-medium text-muted transition-colors">
                 Return to Dashboard
               </button>
             </motion.div>
@@ -233,7 +233,7 @@ function HealthProfile() {
           <div className="glass-panel p-8">
             
             {/* Progress indicators */}
-            <div className="flex items-center justify-between mb-8 pb-8 border-b border-white/5 text-sm font-medium">
+            <div className="flex items-center justify-between mb-8 pb-8 border-b border-border/5 text-sm font-medium">
               {[
                 { step: 1, label: 'Biometrics', icon: UserCircle },
                 { step: 2, label: 'Parameters', icon: Target },
@@ -243,12 +243,12 @@ function HealthProfile() {
                   <div className={cn(
                     "flex items-center justify-center w-8 h-8 rounded-full border-2 transition-colors",
                     currentStep === s.step ? "border-accent text-accent bg-accent/10" : 
-                    currentStep > s.step ? "border-transparent bg-accent text-white" : "border-white/10 text-muted"
+                    currentStep > s.step ? "border-transparent bg-accent text-white" : "border-border/10 text-muted"
                   )}>
                     {currentStep > s.step ? <CheckCircle2 className="w-4 h-4" /> : <s.icon className="w-4 h-4" />}
                   </div>
                   <span className={cn("ml-3 hidden sm:block", currentStep >= s.step ? "text-foreground" : "text-muted")}>{s.label}</span>
-                  {idx < 2 && <div className={cn("hidden sm:block w-12 h-px mx-4", currentStep > s.step ? "bg-accent" : "bg-white/10")} />}
+                  {idx < 2 && <div className={cn("hidden sm:block w-12 h-px mx-4", currentStep > s.step ? "bg-accent" : "bg-foreground/10")} />}
                 </div>
               ))}
             </div>
@@ -273,11 +273,11 @@ function HealthProfile() {
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
                          <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><Calendar className="w-4 h-4 text-accent/70"/> Age</label>
-                         <input type="number" name="age" required value={formData.age} onChange={handleChange} className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-white/20" placeholder="Years" />
+                         <input type="number" name="age" required value={formData.age} onChange={handleChange} className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-foreground/20" placeholder="Years" />
                       </div>
                       <div className="space-y-2">
                          <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><UserCircle className="w-4 h-4 text-accent/70"/> Genotype/Sex</label>
-                         <div className="flex bg-surface/50 p-1 rounded-xl border border-white/5">
+                         <div className="flex bg-surface/50 p-1 rounded-xl border border-border/5">
                            {['male', 'female'].map(g => (
                              <button key={g} type="button" onClick={() => setFormData(p => ({...p, gender: g}))} className={cn("flex-1 py-1.5 rounded-lg text-sm font-medium capitalize transition-all", formData.gender === g ? "bg-surface shadow-[0_1px_4px_rgba(0,0,0,0.2)] text-foreground" : "text-muted hover:text-foreground")}>{g}</button>
                            ))}
@@ -287,18 +287,18 @@ function HealthProfile() {
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
                          <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><Scale className="w-4 h-4 text-accent/70"/> Mass (kg)</label>
-                         <input type="number" name="weight" step="0.1" required value={formData.weight} onChange={handleChange} className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-white/20" placeholder="0.0" />
+                         <input type="number" name="weight" step="0.1" required value={formData.weight} onChange={handleChange} className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-foreground/20" placeholder="0.0" />
                       </div>
                       <div className="space-y-2">
                          <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><Ruler className="w-4 h-4 text-accent/70"/> Stature (cm)</label>
-                         <input type="number" name="height" required value={formData.height} onChange={handleChange} className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-white/20" placeholder="170" />
+                         <input type="number" name="height" required value={formData.height} onChange={handleChange} className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-foreground/20" placeholder="170" />
                       </div>
                     </div>
 
                     {getBMI() && (
-                      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mt-8 p-4 rounded-xl border border-white/5 bg-gradient-to-br from-surface to-background flex items-center justify-between">
+                      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mt-8 p-4 rounded-xl border border-border/5 bg-gradient-to-br from-surface to-background flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-surface/80 flex items-center justify-center border border-white/10 font-mono text-sm font-medium">BMI</div>
+                          <div className="w-10 h-10 rounded-full bg-surface/80 flex items-center justify-center border border-border/10 font-mono text-sm font-medium">BMI</div>
                           <div>
                              <div className="text-2xl font-bold font-heading">{getBMI()}</div>
                              <div className={cn("text-xs font-semibold uppercase tracking-wider", getBMICategory(parseFloat(getBMI())).color)}>{getBMICategory(parseFloat(getBMI())).label}</div>
@@ -321,7 +321,7 @@ function HealthProfile() {
                             { value: 'moderate', label: 'Moderate', desc: '3-5 sessions/week' },
                             { value: 'active', label: 'Active', desc: '6-7 sessions/week' }
                           ].map(act => (
-                            <button key={act.value} type="button" onClick={() => setFormData(p => ({...p, activityLevel: act.value}))} className={cn("p-4 rounded-xl border text-left transition-all", formData.activityLevel === act.value ? "bg-accent/10 border-accent/40 shadow-[0_0_15px_rgba(34,197,94,0.1)]" : "bg-surface/30 border-white/5 hover:border-white/20")}>
+                            <button key={act.value} type="button" onClick={() => setFormData(p => ({...p, activityLevel: act.value}))} className={cn("p-4 rounded-xl border text-left transition-all", formData.activityLevel === act.value ? "bg-accent/10 border-accent/40 shadow-[0_0_15px_rgba(34,197,94,0.1)]" : "bg-surface/30 border-border/5 hover:border-border/20")}>
                                <div className={cn("font-medium mb-1", formData.activityLevel === act.value ? "text-accent" : "text-foreground")}>{act.label}</div>
                                <div className="text-xs text-muted">{act.desc}</div>
                             </button>
@@ -337,7 +337,7 @@ function HealthProfile() {
                             { value: 'maintenance', label: 'Equilibrium' },
                             { value: 'general_health', label: 'Optimization' }
                           ].map(goal => (
-                            <button key={goal.value} type="button" onClick={() => setFormData(p => ({...p, goal: goal.value}))} className={cn("p-4 rounded-xl border text-left transition-all", formData.goal === goal.value ? "bg-accent/10 border-accent/40 shadow-[0_0_15px_rgba(34,197,94,0.1)]" : "bg-surface/30 border-white/5 hover:border-white/20")}>
+                            <button key={goal.value} type="button" onClick={() => setFormData(p => ({...p, goal: goal.value}))} className={cn("p-4 rounded-xl border text-left transition-all", formData.goal === goal.value ? "bg-accent/10 border-accent/40 shadow-[0_0_15px_rgba(34,197,94,0.1)]" : "bg-surface/30 border-border/5 hover:border-border/20")}>
                                <div className={cn("font-medium", formData.goal === goal.value ? "text-accent" : "text-foreground")}>{goal.label}</div>
                             </button>
                           ))}
@@ -350,7 +350,7 @@ function HealthProfile() {
                   <motion.div key="step3" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="space-y-6">
                     <div className="space-y-3">
                       <label className="flex items-center gap-2 text-sm font-medium text-muted"><Wheat className="w-4 h-4 text-accent/70"/> Dietary Restrictions</label>
-                      <select onChange={(e) => handleMultiSelect(e, 'dietaryRestrictions')} value="" className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none">
+                      <select onChange={(e) => handleMultiSelect(e, 'dietaryRestrictions')} value="" className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none">
                         <option value="">Select restrictions to append...</option>
                         <option value="Vegetarian">Vegetarian</option>
                         <option value="Vegan">Vegan</option>
@@ -370,7 +370,7 @@ function HealthProfile() {
 
                     <div className="space-y-3">
                       <label className="flex items-center gap-2 text-sm font-medium text-muted"><Ban className="w-4 h-4 text-accent/70"/> Known Allergens</label>
-                      <select onChange={(e) => handleMultiSelect(e, 'allergies')} value="" className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none">
+                      <select onChange={(e) => handleMultiSelect(e, 'allergies')} value="" className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none">
                         <option value="">Select allergens to append...</option>
                         <option value="Peanuts">Peanuts</option>
                         <option value="Tree Nuts">Tree Nuts</option>
@@ -390,7 +390,7 @@ function HealthProfile() {
 
                     <div className="space-y-3">
                       <label className="flex items-center gap-2 text-sm font-medium text-muted"><HeartPulse className="w-4 h-4 text-accent/70"/> Diagnosed Conditions</label>
-                      <select onChange={(e) => handleMultiSelect(e, 'healthConditions')} value="" className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none">
+                      <select onChange={(e) => handleMultiSelect(e, 'healthConditions')} value="" className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none">
                         <option value="">Select conditions to append...</option>
                         <option value="Diabetes">Diabetes</option>
                         <option value="Hypertension">Hypertension</option>
@@ -413,9 +413,9 @@ function HealthProfile() {
               </AnimatePresence>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-between mt-10 pt-6 border-t border-white/5">
+              <div className="flex items-center justify-between mt-10 pt-6 border-t border-border/5">
                 {currentStep > 1 ? (
-                  <button type="button" onClick={() => setCurrentStep(c => c - 1)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-sm font-medium transition-colors">
+                  <button type="button" onClick={() => setCurrentStep(c => c - 1)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border/10 hover:bg-foreground/5 text-sm font-medium transition-colors">
                     <ChevronLeft className="w-4 h-4" /> Go Back
                   </button>
                 ) : <div/>}
@@ -448,12 +448,12 @@ function HealthProfile() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mb-8">
-                   <div className="p-4 rounded-xl border border-white/5 bg-surface/50">
+                   <div className="p-4 rounded-xl border border-border/5 bg-surface/50">
                      <p className="text-xs text-muted font-medium mb-1">Target Energy</p>
                      <p className="text-2xl font-bold text-accent font-heading">{recommendations.targetCalories} <span className="text-sm font-normal text-muted">kcal</span></p>
                      <p className="text-[10px] text-muted uppercase tracking-wider mt-2">Optimal Threshold</p>
                    </div>
-                   <div className="p-4 rounded-xl border border-white/5 bg-surface/50">
+                   <div className="p-4 rounded-xl border border-border/5 bg-surface/50">
                      <p className="text-xs text-muted font-medium mb-1">Basal Metabolic Rate</p>
                      <p className="text-2xl font-bold font-heading">{recommendations.bmr} <span className="text-sm font-normal text-muted">kcal</span></p>
                      <p className="text-[10px] text-muted uppercase tracking-wider mt-2">Resting Base</p>
@@ -492,12 +492,12 @@ function HealthProfile() {
             <div className="glass-panel p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-heading font-semibold text-lg flex items-center gap-2"><BookOpen className="w-4 h-4 text-muted" /> Generated Plans</h3>
-                <span className="px-2.5 py-1 rounded-full bg-surface text-xs font-medium border border-white/5">{savedMealPlans.length} records</span>
+                <span className="px-2.5 py-1 rounded-full bg-surface text-xs font-medium border border-border/5">{savedMealPlans.length} records</span>
               </div>
               
               <div className="space-y-3">
                 {savedMealPlans.map(plan => (
-                  <div key={plan.id} className="p-4 rounded-xl border border-white/5 bg-surface/30 hover:bg-surface/60 transition-colors group cursor-pointer" onClick={() => setSelectedPlan(plan)}>
+                  <div key={plan.id} className="p-4 rounded-xl border border-border/5 bg-surface/30 hover:bg-surface/60 transition-colors group cursor-pointer" onClick={() => setSelectedPlan(plan)}>
                      <div className="flex justify-between items-start mb-2">
                        <div>
                          <p className="font-medium text-sm text-foreground">Clinical Plan • {plan.preferences.duration} Day(s)</p>
@@ -508,8 +508,8 @@ function HealthProfile() {
                        </button>
                      </div>
                      <div className="flex gap-2 text-xs font-medium">
-                       <span className="px-2 py-1 bg-white/5 rounded-md">{plan.preferences.mealsPerDay} meals/day</span>
-                       {plan.preferences.cuisinePreferences.length > 0 && <span className="px-2 py-1 bg-white/5 rounded-md text-ellipsis overflow-hidden whitespace-nowrap max-w-[120px]">{plan.preferences.cuisinePreferences[0]}</span>}
+                       <span className="px-2 py-1 bg-foreground/5 rounded-md">{plan.preferences.mealsPerDay} meals/day</span>
+                       {plan.preferences.cuisinePreferences.length > 0 && <span className="px-2 py-1 bg-foreground/5 rounded-md text-ellipsis overflow-hidden whitespace-nowrap max-w-[120px]">{plan.preferences.cuisinePreferences[0]}</span>}
                      </div>
                   </div>
                 ))}
@@ -524,7 +524,7 @@ function HealthProfile() {
         {selectedPlan && (
            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md" onClick={() => setSelectedPlan(null)}>
               <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="glass-panel w-full max-w-2xl max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                 <div className="flex items-center justify-between p-5 border-b border-white/5">
+                 <div className="flex items-center justify-between p-5 border-b border-border/5">
                    <h2 className="font-heading font-semibold text-lg">Protocol Documentation • {selectedPlan.preferences.duration} Days</h2>
                    <button onClick={() => setSelectedPlan(null)} className="p-1"><X className="w-5 h-5 text-muted hover:text-foreground" /></button>
                  </div>
@@ -533,7 +533,7 @@ function HealthProfile() {
                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{selectedPlan.mealPlan}</ReactMarkdown>
                  </div>
 
-                 <div className="p-4 border-t border-white/5 bg-surface/30 flex justify-end gap-3">
+                 <div className="p-4 border-t border-border/5 bg-surface/30 flex justify-end gap-3">
                    <button onClick={() => setSelectedPlan(null)} className="px-4 py-2 text-sm font-medium text-muted hover:text-foreground">Close</button>
                    <button onClick={() => { navigator.clipboard.writeText(selectedPlan.mealPlan); alert('Data copied to clipboard'); }} className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-accent text-background rounded-lg hover:bg-accent/90">
                      <Copy className="w-4 h-4" /> Copy Protocol

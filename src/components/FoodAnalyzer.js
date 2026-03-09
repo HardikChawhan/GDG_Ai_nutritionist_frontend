@@ -94,7 +94,7 @@ function FoodAnalyzer() {
 
              <div className="space-y-4">
                <textarea
-                 className="w-full bg-surface border border-white/10 rounded-xl p-4 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none resize-none transition-all placeholder:text-white/20 custom-scrollbar"
+                 className="w-full bg-surface border border-border/10 rounded-xl p-4 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none resize-none transition-all placeholder:text-foreground/20 custom-scrollbar"
                  placeholder="e.g. 200g grilled salmon, 1 cup quinoa, 2tbsp olive oil"
                  value={foodInput}
                  onChange={(e) => setFoodInput(e.target.value)}
@@ -102,7 +102,7 @@ function FoodAnalyzer() {
                  rows={5}
                />
                
-               <div className="flex items-start gap-2 text-xs text-muted bg-surface/30 p-3 rounded-lg border border-white/5">
+               <div className="flex items-start gap-2 text-xs text-muted bg-surface/30 p-3 rounded-lg border border-border/5">
                  <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
                  <p>Comma segregate discrete structural entities for precise batch analysis.</p>
                </div>
@@ -118,7 +118,7 @@ function FoodAnalyzer() {
              </div>
            </div>
 
-           <div className="glass-panel p-6 bg-gradient-to-br from-surface to-background border-white/5">
+           <div className="glass-panel p-6 bg-gradient-to-br from-surface to-background border-border/5">
              <h3 className="font-heading font-semibold mb-4 text-sm uppercase tracking-wider text-muted">Capabilities</h3>
              <div className="space-y-3">
                 {[
@@ -126,7 +126,7 @@ function FoodAnalyzer() {
                   { icon: Activity, title: "Molecular Tracking", desc: "Retrieve distinct nutrient densities." },
                   { icon: RefreshCcw, title: "Comparison Matrices", desc: "Perform side-by-side analytics." }
                 ].map((item, idx) => (
-                  <div key={idx} className="flex gap-3 items-start p-3 bg-white/5 rounded-xl border border-white/5">
+                  <div key={idx} className="flex gap-3 items-start p-3 bg-foreground/5 rounded-xl border border-border/5">
                      <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center shrink-0">
                        <item.icon className="w-4 h-4 text-muted" />
                      </div>
@@ -156,7 +156,7 @@ function FoodAnalyzer() {
 
              {!loading && !analysis && (
                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-panel h-[600px] flex flex-col items-center justify-center bg-surface/30">
-                 <div className="w-16 h-16 rounded-full border border-dashed border-white/20 flex items-center justify-center mb-4">
+                 <div className="w-16 h-16 rounded-full border border-dashed border-border/20 flex items-center justify-center mb-4">
                     <Activity className="w-6 h-6 text-muted opacity-50" />
                  </div>
                  <p className="text-muted text-sm">Telemetry screen is standing by.</p>
@@ -165,7 +165,7 @@ function FoodAnalyzer() {
 
              {!loading && analysis && (
                <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel overflow-hidden flex flex-col h-[700px]">
-                 <div className="p-6 border-b border-white/5 bg-surface/80 backdrop-blur-md flex items-start justify-between">
+                 <div className="p-6 border-b border-border/5 bg-surface/80 backdrop-blur-md flex items-start justify-between">
                    <div>
                      <h2 className="font-heading font-semibold text-lg flex items-center gap-2 mb-1">
                        <Scanner className="w-5 h-5 text-accent"/> Diagnostic Report
@@ -182,15 +182,15 @@ function FoodAnalyzer() {
                     </ReactMarkdown>
                  </div>
 
-                 <div className="p-4 border-t border-white/5 bg-surface mt-auto">
+                 <div className="p-4 border-t border-border/5 bg-surface mt-auto">
                     <div className="flex gap-3 justify-end">
-                       <button onClick={() => { setFoodInput(''); setAnalysis(null); }} className="px-4 py-2 text-sm font-medium text-muted hover:text-foreground hover:bg-white/5 rounded-lg transition-colors border border-transparent">
+                       <button onClick={() => { setFoodInput(''); setAnalysis(null); }} className="px-4 py-2 text-sm font-medium text-muted hover:text-foreground hover:bg-foreground/5 rounded-lg transition-colors border border-transparent">
                           Clear Output
                        </button>
-                       <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-white/10 hover:bg-white/10 rounded-lg transition-colors">
+                       <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border/10 hover:bg-foreground/10 rounded-lg transition-colors">
                           <Printer className="w-4 h-4"/> Print
                        </button>
-                       <button onClick={() => { navigator.clipboard.writeText(analysis.analysis); alert('Copied to clipboard'); }} className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white text-black hover:bg-white/90 rounded-lg transition-colors">
+                       <button onClick={() => { navigator.clipboard.writeText(analysis.analysis); alert('Copied to clipboard'); }} className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-foreground text-black hover:bg-foreground/90 rounded-lg transition-colors">
                           Copy Diagnostic
                        </button>
                     </div>

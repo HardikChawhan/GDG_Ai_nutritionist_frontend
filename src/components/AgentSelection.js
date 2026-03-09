@@ -76,7 +76,7 @@ const AgentSelection = ({ onComplete }) => {
           <p className="text-muted text-sm mb-6">Continuous hardware access is required for passive voice recognition. Data is processed locally on-device.</p>
           
           <div className="space-y-4 mb-8">
-            <div className="bg-surface/50 border border-white/5 rounded-xl p-4">
+            <div className="bg-surface/50 border border-border/5 rounded-xl p-4">
               <h3 className="text-sm font-semibold uppercase tracking-wider text-muted mb-3 flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4"/> Security Architecture
               </h3>
@@ -88,8 +88,8 @@ const AgentSelection = ({ onComplete }) => {
             </div>
           </div>
           
-          <label className="flex items-start gap-3 cursor-pointer p-4 border border-white/10 rounded-xl hover:bg-white/5 transition-colors mb-6 group">
-             <input type="checkbox" className="mt-1 w-4 h-4 rounded border-white/20 text-accent focus:ring-accent focus:ring-offset-background" checked={acceptedDisclaimer} onChange={e => setAcceptedDisclaimer(e.target.checked)} />
+          <label className="flex items-start gap-3 cursor-pointer p-4 border border-border/10 rounded-xl hover:bg-foreground/5 transition-colors mb-6 group">
+             <input type="checkbox" className="mt-1 w-4 h-4 rounded border-border/20 text-accent focus:ring-accent focus:ring-offset-background" checked={acceptedDisclaimer} onChange={e => setAcceptedDisclaimer(e.target.checked)} />
              <span className="text-sm font-medium group-hover:text-white transition-colors">I acknowledge and authorize continuous hardware microphone access for localized audio processing.</span>
           </label>
           
@@ -110,8 +110,8 @@ const AgentSelection = ({ onComplete }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {PRESET_AGENTS.map((agent) => (
-          <motion.button whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }} key={agent.id} onClick={() => handleAgentSelect(agent)} className={cn("text-left glass-panel p-6 border-2 transition-all group flex flex-col h-full", selectedAgent?.id === agent.id ? "border-accent bg-accent/5" : "border-transparent hover:border-white/20")}>
-             <div className="w-12 h-12 rounded-xl bg-surface flex items-center justify-center mb-4 border border-white/10 group-hover:scale-110 transition-transform">
+          <motion.button whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }} key={agent.id} onClick={() => handleAgentSelect(agent)} className={cn("text-left glass-panel p-6 border-2 transition-all group flex flex-col h-full", selectedAgent?.id === agent.id ? "border-accent bg-accent/5" : "border-transparent hover:border-border/20")}>
+             <div className="w-12 h-12 rounded-xl bg-surface flex items-center justify-center mb-4 border border-border/10 group-hover:scale-110 transition-transform">
                <agent.icon className="w-6 h-6 text-foreground" />
              </div>
              <h3 className="font-heading font-semibold text-lg mb-1">{agent.name}</h3>
@@ -122,8 +122,8 @@ const AgentSelection = ({ onComplete }) => {
           </motion.button>
         ))}
 
-        <motion.button whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }} onClick={() => handleAgentSelect({ id: 'custom' })} className={cn("text-left glass-panel p-6 border-2 transition-all flex flex-col h-full relative", selectedAgent?.id === 'custom' ? "border-blue-500 bg-blue-500/5" : "border-transparent hover:border-white/20")}>
-           <div className="w-12 h-12 rounded-xl bg-surface flex items-center justify-center mb-4 border border-white/10">
+        <motion.button whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }} onClick={() => handleAgentSelect({ id: 'custom' })} className={cn("text-left glass-panel p-6 border-2 transition-all flex flex-col h-full relative", selectedAgent?.id === 'custom' ? "border-blue-500 bg-blue-500/5" : "border-transparent hover:border-border/20")}>
+           <div className="w-12 h-12 rounded-xl bg-surface flex items-center justify-center mb-4 border border-border/10">
              <Cpu className="w-6 h-6 text-foreground" />
            </div>
            <h3 className="font-heading font-semibold text-lg mb-1">Custom Protocol</h3>
@@ -139,11 +139,11 @@ const AgentSelection = ({ onComplete }) => {
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                    <label className="text-sm font-medium text-muted block mb-2">Designation (Wake Word)</label>
-                   <input type="text" maxLength={20} value={customName} onChange={e => setCustomName(e.target.value)} className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-white/20" placeholder="e.g. JARVIS" />
+                   <input type="text" maxLength={20} value={customName} onChange={e => setCustomName(e.target.value)} className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-foreground/20" placeholder="e.g. JARVIS" />
                 </div>
                 <div>
                    <label className="text-sm font-medium text-muted block mb-2">Vocal Synthesis Model</label>
-                   <select value={customVoice} onChange={e => setCustomVoice(e.target.value)} className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none">
+                   <select value={customVoice} onChange={e => setCustomVoice(e.target.value)} className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none">
                      {availableVoices.map((v, i) => <option key={i} value={v.name}>{v.name}</option>)}
                    </select>
                 </div>
@@ -152,8 +152,8 @@ const AgentSelection = ({ onComplete }) => {
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col items-center max-w-lg mx-auto border-t border-white/10 pt-8 mt-8">
-         <p className="text-sm text-center text-muted mb-6 bg-surface p-4 rounded-xl border border-white/5 font-mono">
+      <div className="flex flex-col items-center max-w-lg mx-auto border-t border-border/10 pt-8 mt-8">
+         <p className="text-sm text-center text-muted mb-6 bg-surface p-4 rounded-xl border border-border/5 font-mono">
            [SYS MSG]: Invoke system by broadcasting "<span className="text-foreground font-semibold">{selectedAgent?.id === 'custom' ? (customName || 'DESIGNATION') : (selectedAgent?.name || 'DESIGNATION')}</span>" followed by your physiological input stream.
          </p>
          

@@ -48,7 +48,7 @@ function FoodSearch() {
            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
              <Search className="w-5 h-5 text-muted group-focus-within:text-accent transition-colors" />
            </div>
-           <input type="text" className="w-full bg-surface/50 border border-white/10 rounded-2xl pl-12 pr-32 py-4 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none shadow-xl placeholder:text-white/20 transition-all text-lg" placeholder="e.g., chicken breast, quinoa, avocado" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyPress={handleKeyPress} />
+           <input type="text" className="w-full bg-surface/50 border border-border/10 rounded-2xl pl-12 pr-32 py-4 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none shadow-xl placeholder:text-foreground/20 transition-all text-lg" placeholder="e.g., chicken breast, quinoa, avocado" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyPress={handleKeyPress} />
            <div className="absolute inset-y-2 right-2">
               <button disabled={loading} onClick={handleSearch} className="px-6 h-full bg-accent text-background rounded-xl font-bold hover:bg-accent/90 disabled:opacity-50 transition-colors flex items-center gap-2">
                 {loading ? <Loader2 className="w-4 h-4 animate-spin"/> : 'Search'}
@@ -60,7 +60,7 @@ function FoodSearch() {
 
       {searchResults.length > 0 && !loading && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-          <div className="flex items-center justify-between border-b border-white/5 pb-4">
+          <div className="flex items-center justify-between border-b border-border/5 pb-4">
              <h2 className="text-lg font-heading font-semibold">Matched Entities</h2>
              <span className="text-sm font-mono text-accent bg-accent/10 py-1 px-3 rounded-full">{searchResults.length} Hits</span>
           </div>
@@ -73,7 +73,7 @@ function FoodSearch() {
                   <h3 className="font-heading font-semibold text-lg leading-tight mb-4 group-hover:text-accent transition-colors capitalize">{food.description.toLowerCase()}</h3>
                 </div>
                 
-                <div className="flex items-center gap-4 mt-auto pt-4 border-t border-white/5">
+                <div className="flex items-center gap-4 mt-auto pt-4 border-t border-border/5">
                    <div className="flex items-center gap-1.5 basis-1/2">
                      <Flame className="w-4 h-4 text-orange-400" />
                      <span className="text-sm font-bold text-foreground">{food.nutrients['Energy']?.amount.toFixed(0) || '0'}</span>
@@ -97,7 +97,7 @@ function FoodSearch() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md" onClick={() => setSelectedFood(null)}>
              <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="glass-panel w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
                
-               <div className="p-6 border-b border-white/5 bg-surface/50 flex items-start justify-between">
+               <div className="p-6 border-b border-border/5 bg-surface/50 flex items-start justify-between">
                  <div>
                    <div className="text-xs font-mono text-accent uppercase tracking-wider mb-1">Entity Profile [{selectedFood.fdcId}]</div>
                    <h2 className="text-2xl font-heading font-semibold capitalize pr-8">{selectedFood.description.toLowerCase()}</h2>
@@ -105,7 +105,7 @@ function FoodSearch() {
                      <p className="text-sm text-muted mt-2">Serving Basis: {selectedFood.servingSize} {selectedFood.servingSizeUnit}</p>
                    )}
                  </div>
-                 <button onClick={() => setSelectedFood(null)} className="w-8 h-8 rounded-full bg-surface border border-white/10 flex items-center justify-center text-muted hover:text-white transition-colors shrink-0">
+                 <button onClick={() => setSelectedFood(null)} className="w-8 h-8 rounded-full bg-surface border border-border/10 flex items-center justify-center text-muted hover:text-white transition-colors shrink-0">
                     <X className="w-4 h-4" />
                  </button>
                </div>
@@ -136,13 +136,13 @@ function FoodSearch() {
                  </div>
 
                  <h3 className="text-sm font-semibold uppercase tracking-wider text-muted mb-4">Micronutrient Profile</h3>
-                 <div className="bg-surface border border-white/5 rounded-xl overflow-hidden divide-y divide-white/5">
+                 <div className="bg-surface border border-border/5 rounded-xl overflow-hidden divide-y divide-white/5">
                    {Object.entries(selectedFood.nutrients)
                     .filter(([name]) => !['Energy', 'Protein', 'Carbohydrate, by difference', 'Total lipid (fat)'].includes(name))
                     .sort((a,b) => b[1].amount - a[1].amount)
                     .slice(0, 15)
                     .map(([name, data]) => (
-                      <div key={name} className="flex justify-between items-center py-3 px-4 hover:bg-white/[0.02] transition-colors">
+                      <div key={name} className="flex justify-between items-center py-3 px-4 hover:bg-foreground/[0.02] transition-colors">
                         <span className="text-sm font-medium text-foreground">{name}</span>
                         <span className="text-sm font-mono text-muted">{formatNutrientValue(data)}</span>
                       </div>

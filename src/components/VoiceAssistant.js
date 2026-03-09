@@ -157,7 +157,7 @@ const VoiceAssistant = ({ agentConfig, userContext, isEnabled }) => {
               "w-14 h-14 rounded-full flex items-center justify-center shadow-glass transition-all border",
               isMobileRecording 
                 ? "bg-red-500/10 border-red-500 text-red-500 animate-pulse" 
-                : "bg-surface border-white/10 text-muted hover:text-foreground"
+                : "bg-surface border-border/10 text-muted hover:text-foreground"
             )}
           >
             {isMobileRecording ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
@@ -174,7 +174,7 @@ const VoiceAssistant = ({ agentConfig, userContext, isEnabled }) => {
         >
           <button 
             onClick={() => { setIsVisible(true); setIsMinimized(false); enableTTS(); }}
-            className="glass-panel flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors group cursor-pointer"
+            className="glass-panel flex items-center gap-3 px-4 py-3 hover:bg-foreground/5 transition-colors group cursor-pointer"
           >
             <div className="relative">
               <Mic className="w-5 h-5 text-accent" />
@@ -205,7 +205,7 @@ const VoiceAssistant = ({ agentConfig, userContext, isEnabled }) => {
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", stiffness: 200, damping: 25 }}
             className={cn(
-               "fixed z-50 flex flex-col bg-surface/90 backdrop-blur-xl shadow-2xl border border-white/10",
+               "fixed z-50 flex flex-col bg-surface/90 backdrop-blur-xl shadow-2xl border border-border/10",
                isMobile ? "rounded-t-2xl sm:rounded-2xl" : "rounded-2xl overflow-hidden"
             )}
             style={{ 
@@ -216,12 +216,12 @@ const VoiceAssistant = ({ agentConfig, userContext, isEnabled }) => {
             {/* Header */}
             <div 
               className={cn(
-                "flex items-center justify-between px-4 py-3 border-b border-white/5",
+                "flex items-center justify-between px-4 py-3 border-b border-border/5",
                 isListening ? "bg-accent/5" : ""
               )}
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-surface border border-white/10 flex items-center justify-center overflow-hidden">
+                <div className="w-8 h-8 rounded-full bg-surface border border-border/10 flex items-center justify-center overflow-hidden">
                    {/* Removed emoji avatar support; use icon if no valid image */}
                    <span className="text-sm font-bold text-accent">{agentConfig.name.charAt(0)}</span>
                 </div>
@@ -239,12 +239,12 @@ const VoiceAssistant = ({ agentConfig, userContext, isEnabled }) => {
               
               <div className="flex items-center gap-1">
                 {!ttsEnabled && (
-                  <button onClick={enableTTS} className="p-1.5 text-muted hover:text-foreground hover:bg-white/5 rounded-md" title="Enable Voice Audio">
+                  <button onClick={enableTTS} className="p-1.5 text-muted hover:text-foreground hover:bg-foreground/5 rounded-md" title="Enable Voice Audio">
                     <Volume2 className="w-4 h-4" />
                   </button>
                 )}
                 {!isMobile && (
-                  <button onClick={toggleMinimize} className="p-1.5 text-muted hover:text-foreground hover:bg-white/5 rounded-md">
+                  <button onClick={toggleMinimize} className="p-1.5 text-muted hover:text-foreground hover:bg-foreground/5 rounded-md">
                     {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
                   </button>
                 )}
@@ -266,13 +266,13 @@ const VoiceAssistant = ({ agentConfig, userContext, isEnabled }) => {
                 >
                   {messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center flex-1 h-full text-center p-6 mt-10">
-                      <div className="w-16 h-16 rounded-2xl bg-surface border border-white/5 flex items-center justify-center mb-6 shadow-inner">
+                      <div className="w-16 h-16 rounded-2xl bg-surface border border-border/5 flex items-center justify-center mb-6 shadow-inner">
                         <Mic className="w-8 h-8 text-muted" />
                       </div>
                       <h3 className="font-medium text-foreground mb-2">I'm listening...</h3>
                       <p className="text-sm text-muted mb-6">Say my name, "{agentConfig.name}", followed by a command.</p>
                       
-                      <div className="w-full text-left space-y-2 bg-black/20 p-4 rounded-xl border border-white/5">
+                      <div className="w-full text-left space-y-2 bg-black/20 p-4 rounded-xl border border-border/5">
                         <p className="text-xs font-medium text-muted uppercase tracking-wider mb-3">Example Commands</p>
                         <p className="text-sm text-foreground/80">"Log 200g of chicken breast"</p>
                         <p className="text-sm text-foreground/80">"What are my macros today?"</p>
@@ -285,13 +285,13 @@ const VoiceAssistant = ({ agentConfig, userContext, isEnabled }) => {
                         <div key={idx} className={cn("flex gap-3", msg.type === 'user' ? "flex-row-reverse" : "")}>
                           <div className={cn(
                             "w-7 h-7 shrink-0 rounded-full flex items-center justify-center mt-1",
-                            msg.type === 'user' ? "bg-white/10" : "bg-accent/10 border border-accent/20"
+                            msg.type === 'user' ? "bg-foreground/10" : "bg-accent/10 border border-accent/20"
                           )}>
                             {msg.type === 'user' ? <User className="w-3.5 h-3.5 text-muted" /> : <Mic className="w-3.5 h-3.5 text-accent" />}
                           </div>
                           <div className={cn(
                             "max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed",
-                            msg.type === 'user' ? "bg-surface border border-white/10 text-foreground rounded-tr-sm" : "bg-accent/5 text-foreground/90 rounded-tl-sm"
+                            msg.type === 'user' ? "bg-surface border border-border/10 text-foreground rounded-tr-sm" : "bg-accent/5 text-foreground/90 rounded-tl-sm"
                           )}>
                             {msg.text}
                           </div>
@@ -300,10 +300,10 @@ const VoiceAssistant = ({ agentConfig, userContext, isEnabled }) => {
 
                       {currentTranscript && (
                         <div className="flex gap-3 flex-row-reverse opacity-70">
-                          <div className="w-7 h-7 shrink-0 rounded-full bg-white/10 flex items-center justify-center mt-1">
+                          <div className="w-7 h-7 shrink-0 rounded-full bg-foreground/10 flex items-center justify-center mt-1">
                             <User className="w-3.5 h-3.5 text-muted" />
                           </div>
-                          <div className="max-w-[80%] px-4 py-2.5 rounded-2xl text-sm bg-surface border border-white/5 text-foreground rounded-tr-sm border-dashed">
+                          <div className="max-w-[80%] px-4 py-2.5 rounded-2xl text-sm bg-surface border border-border/5 text-foreground rounded-tr-sm border-dashed">
                             {currentTranscript}
                           </div>
                         </div>
@@ -331,10 +331,10 @@ const VoiceAssistant = ({ agentConfig, userContext, isEnabled }) => {
 
             {/* Footer */}
             {!isMinimized && messages.length > 0 && (
-              <div className="p-3 border-t border-white/5 bg-background/50">
+              <div className="p-3 border-t border-border/5 bg-background/50">
                 <button 
                   onClick={clearChat}
-                  className="w-full flex items-center justify-center gap-2 text-xs font-medium text-muted hover:text-red-400 py-2 rounded-lg hover:bg-white/5 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 text-xs font-medium text-muted hover:text-red-400 py-2 rounded-lg hover:bg-foreground/5 transition-colors"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   Clear Conversation Context
