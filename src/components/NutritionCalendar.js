@@ -172,16 +172,22 @@ const NutritionCalendar = () => {
                    </div>
                 </div>
 
-                <div className="space-y-6">
+                 <div className="space-y-6">
                    {/* Macros */}
                    <div className="grid grid-cols-2 gap-3">
                      <div className="bg-surface/80 p-3 rounded-xl border border-border/5">
                         <div className="flex items-center gap-2 mb-1"><Flame className="w-4 h-4 text-emerald-400"/><span className="text-xs text-muted uppercase">Intake</span></div>
-                        <div className="text-xl font-bold">{selectedDayData.totals?.calories || 0} <span className="text-xs text-muted font-normal">kcal</span></div>
+                        <div className="flex items-baseline gap-1 flex-wrap">
+                          <span className="text-xl font-bold leading-none">{selectedDayData.totals?.calories || 0}</span>
+                          <span className="text-xs text-muted font-normal">kcal</span>
+                        </div>
                      </div>
                      <div className="bg-surface/80 p-3 rounded-xl border border-border/5">
                         <div className="flex items-center gap-2 mb-1"><Activity className="w-4 h-4 text-orange-400"/><span className="text-xs text-muted uppercase">Output</span></div>
-                        <div className="text-xl font-bold">{selectedDayData.caloriesBurned || 0} <span className="text-xs text-muted font-normal">kcal</span></div>
+                        <div className="flex items-baseline gap-1 flex-wrap">
+                          <span className="text-xl font-bold leading-none">{selectedDayData.caloriesBurned || 0}</span>
+                          <span className="text-xs text-muted font-normal">kcal</span>
+                        </div>
                      </div>
                    </div>
 
@@ -209,9 +215,9 @@ const NutritionCalendar = () => {
                      <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
                        {selectedDayData.foods && selectedDayData.foods.length > 0 ? (
                          selectedDayData.foods.map((food, index) => (
-                           <div key={index} className="flex justify-between items-center p-3 rounded-lg bg-surface/30 border border-border/5 hover:border-border/10 transition-colors">
-                             <span className="text-sm font-medium capitalize truncate pr-4">{food.name}</span>
-                             <span className="text-sm font-mono text-muted shrink-0">{food.calories} kcal</span>
+                           <div key={index} className="flex justify-between items-center p-3 rounded-lg bg-surface/30 border border-border/5 hover:border-border/10 transition-colors gap-3">
+                             <span className="text-sm font-medium capitalize truncate">{food.description || food.name}</span>
+                             <span className="text-sm font-mono text-muted shrink-0 whitespace-nowrap">{food.calories || food.nutrition?.calories || 0} kcal</span>
                            </div>
                          ))
                        ) : (
