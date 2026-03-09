@@ -48,6 +48,11 @@ export const foodAnalysisAPI = {
     api.post('/food-analysis/meal-insights', { mealName, foodItems, userProfile }),
 };
 
+// Voice Assistant API
+export const voiceAssistantAPI = {
+  processCommand: (payload) => api.post('/voice-assistant', payload)
+};
+
 // Health check
 export const healthCheck = () => api.get('/health');
 

@@ -4,10 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Flame, Beef, Wheat, Droplets, Target, Activity, 
   Calendar as CalendarIcon, Plus, Search, Trash2,
-  AlertTriangle, RotateCcw, Utensils, Zap, CheckCircle2, Settings, X, Mic
+  AlertTriangle, RotateCcw, Utensils, Zap, CheckCircle2, Settings, X, Mic, BrainCircuit
 } from 'lucide-react';
 
-import { nutritionAPI } from '../services/api';
+import { nutritionAPI, voiceAssistantAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import firebaseService from '../services/firebaseService';
 import NutritionCalendar from './NutritionCalendar';
@@ -173,43 +173,57 @@ function NutritionDashboard() {
   const searchAndAddFood = async (foodName) => {
     setIsSearching(true);
     try {
-      const response = await nutritionAPI.searchFoods(foodName, 1);
-      if (response.data.data && response.data.data.length > 0) {
-        const foodData = response.data.data[0];
-        const nutrients = foodData.nutrients || {};
-        
-        const extractNutrient = (name) => nutrients[name]?.amount || 0;
-        
-        const foodEntry = {
-          name: foodName,
-          fdcId: foodData.fdcId,
-          description: foodData.description,
-          nutrition: {
-            calories: Math.round(extractNutrient('Energy')),
-            protein: Math.round(extractNutrient('Protein') * 10) / 10,
-            carbohydrates: Math.round(extractNutrient('Carbohydrate, by difference') * 10) / 10,
-            fat: Math.round(extractNutrient('Total lipid (fat)') * 10) / 10,
-            fiber: Math.round(extractNutrient('Fiber, total dietary') * 10) / 10
-          }
-        };
+      // Use AI Assistant endpoint for intelligent food parsing instead of direct text search
+      const promptContext = `User Command: "${foodName}"\nIntent: nutrition_log\n(Nutrition data will be fetched automatically)`;
+      const response = await voiceAssistantAPI.processCommand({
+         prompt: promptContext,
+         agentName: agentSettings?.name || 'Assistant',
+         intent: 'nutrition_log',
+         payload: {
+           intent: 'nutrition_log',
+           foods: [foodName],
+           command: foodName,
+           userContext: { healthProfile: userProfile }
+         }
+      });
+      
+      const aiResponse = response.data;
+      if (aiResponse && aiResponse.data && aiResponse.data.totals) {
+         const totals = aiResponse.data.totals;
+         // Ensure accurate name extraction if provided by AI or rely on user text
+         const foodDisplayName = (aiResponse.data.foods && aiResponse.data.foods.length > 0) 
+                                 ? aiResponse.data.foods[0].name 
+                                 : foodName;
+                                 
+         const foodEntry = {
+            name: foodDisplayName,
+            description: foodDisplayName,
+            nutrition: {
+               calories: Math.round(totals.calories) || 0,
+               protein: Math.round(totals.protein * 10) / 10 || 0,
+               carbohydrates: Math.round(totals.carbs * 10) / 10 || 0,
+               fat: Math.round(totals.fat * 10) / 10 || 0,
+               fiber: Math.round((totals.fiber || 0) * 10) / 10
+            }
+         };
 
-        setDailyFoods([...dailyFoods, foodEntry]);
-        setCurrentNutrition(prev => {
-          const updated = {
-            calories: prev.calories + foodEntry.nutrition.calories,
-            protein: Math.round((prev.protein + foodEntry.nutrition.protein) * 10) / 10,
-            carbohydrates: Math.round((prev.carbohydrates + foodEntry.nutrition.carbohydrates) * 10) / 10,
-            fat: Math.round((prev.fat + foodEntry.nutrition.fat) * 10) / 10,
-            fiber: Math.round((prev.fiber + foodEntry.nutrition.fiber) * 10) / 10
-          };
-          checkMacroLimits(updated);
-          return updated;
-        });
+         setDailyFoods([...dailyFoods, foodEntry]);
+         setCurrentNutrition(prev => {
+            const updated = {
+               calories: prev.calories + foodEntry.nutrition.calories,
+               protein: Math.round((prev.protein + foodEntry.nutrition.protein) * 10) / 10,
+               carbohydrates: Math.round((prev.carbohydrates + foodEntry.nutrition.carbohydrates) * 10) / 10,
+               fat: Math.round((prev.fat + foodEntry.nutrition.fat) * 10) / 10,
+               fiber: Math.round((prev.fiber + foodEntry.nutrition.fiber) * 10) / 10
+            };
+            checkMacroLimits(updated);
+            return updated;
+         });
       } else {
-        alert(`Entry "${foodName}" not located in our food database.`);
+        alert(`AI could not identify nutritional properties for "${foodName}". Try being more specific.`);
       }
     } catch (error) {
-      alert('Network issue communicating with USDA database.');
+      alert('Network issue communicating with the AI Engine.');
     } finally {
       setIsSearching(false);
     }
@@ -282,7 +296,7 @@ function NutritionDashboard() {
       }
       setAgentSettings(newConfig);
       setShowAgentSettings(false);
-      alert('Assistant configuration updated successfully!');
+      // alert('Assistant configuration updated successfully!');
 
       // Need to reload window to reinitialize voice assistant with new voice
       // since the context is scoped globally
@@ -421,10 +435,10 @@ function NutritionDashboard() {
           )}
 
           {/* Quick Add Form Section */}
-          <div className="glass-panel flex-col p-0 overflow-hidden">
+          <div className="glass-panel flex-col p-0 overflow-hidden border-accent/20">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border/5 bg-surface/30">
                <div>
-                  <h2 className="font-heading font-semibold flex items-center gap-2"><Utensils className="w-4 h-4 text-accent"/> Dietary Intake Log</h2>
+                  <h2 className="font-heading font-semibold flex items-center gap-2 text-accent"><BrainCircuit className="w-4 h-4"/> AI Dietary Logger</h2>
                </div>
                {dailyFoods.length > 0 && (
                 <button onClick={resetDay} className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 text-muted hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors">
@@ -435,21 +449,22 @@ function NutritionDashboard() {
             
             <div className="p-6">
                <div className="flex gap-3 mb-6">
-                 <div className="relative flex-1">
-                   <Search className="absolute left-4 top-[14px] w-5 h-5 text-muted" />
+                 <div className="relative flex-1 group">
+                   <div className="absolute inset-0 bg-accent/5 rounded-xl border border-accent/20 transition-all opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-events-none"></div>
+                   <BrainCircuit className="absolute left-4 top-[14px] w-5 h-5 text-accent/50 group-focus-within:text-accent transition-colors" />
                    <input
                      type="text"
                      value={foodInput}
                      onChange={(e) => setFoodInput(e.target.value)}
                      onKeyDown={(e) => e.key === 'Enter' && !isSearching && addFood()}
                      disabled={isSearching}
-                     className="w-full pl-12 pr-4 py-3 bg-surface border border-border/10 rounded-xl focus:ring-1 focus:ring-accent focus:border-accent text-sm transition-all text-foreground placeholder-white/20"
-                     placeholder="Query database for items (e.g. 200g grilled salmon)"
+                     className="w-full pl-12 pr-4 py-3 bg-surface border border-border/10 rounded-xl focus:ring-1 focus:ring-accent focus:border-accent text-sm text-foreground placeholder-white/30 relative z-10 bg-transparent"
+                     placeholder="Type naturally... e.g. 'I had 2 scrambled eggs and toast'"
                    />
                  </div>
-                 <button onClick={addFood} disabled={isSearching || !foodInput.trim()} className="px-6 rounded-xl bg-accent text-background font-semibold hover:bg-accent/90 disabled:opacity-50 transition-colors flex items-center gap-2">
+                 <button onClick={addFood} disabled={isSearching || !foodInput.trim()} className="px-6 rounded-xl bg-accent text-background font-semibold hover:bg-accent/90 disabled:opacity-50 transition-colors flex items-center gap-2 relative z-10 shadow-lg shadow-accent/20">
                    {isSearching ? <Activity className="w-4 h-4 animate-spin"/> : <Plus className="w-5 h-5" />}
-                   <span className="hidden sm:inline">Append</span>
+                   <span className="hidden sm:inline">Log</span>
                  </button>
                </div>
 
