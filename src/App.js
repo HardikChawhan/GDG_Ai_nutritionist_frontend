@@ -127,12 +127,12 @@ function AppContent() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground font-sans selection:bg-accent/30">
       <ScrollToTop />
-      
+
       {/* Modern Glass Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass-panel !rounded-none !border-t-0 !border-x-0 bg-surface/80 backdrop-blur-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            
+
             {/* Brand */}
             <Link to="/" className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg overflow-hidden bg-accent/20 flex items-center justify-center p-1">
@@ -162,7 +162,7 @@ function AppContent() {
               <button onClick={toggleTheme} className="text-muted hover:text-foreground transition-colors p-2 rounded-full hover:bg-white/5">
                 {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
-              
+
               {currentUser ? (
                 <div className="flex items-center gap-4">
                   <div className="hidden sm:flex items-center gap-2">
@@ -174,8 +174,8 @@ function AppContent() {
                       </div>
                     )}
                   </div>
-                  <button 
-                    onClick={() => setShowLogoutModal(true)} 
+                  <button
+                    onClick={() => setShowLogoutModal(true)}
                     className="flex items-center gap-2 text-sm font-medium text-muted hover:text-red-400 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
@@ -234,7 +234,7 @@ function AppContent() {
       </main>
 
       <footer className="w-full py-8 text-center text-sm text-muted border-t border-white/5 mt-auto">
-        <p>© 2026 AI Clinical Nutrition Coordinator | Secure Infrastructure</p>
+        <p>© 2026 AI Nutritionist | Secure Platform</p>
       </footer>
 
       {/* Logout Modal */}
@@ -247,13 +247,13 @@ function AppContent() {
             <h3 className="text-xl font-heading font-semibold text-center mb-2">Terminate Session</h3>
             <p className="text-muted text-center text-sm mb-6">Confirming session termination. Your clinical profile and biometric data strictly remain encrypted.</p>
             <div className="flex gap-3">
-              <button 
+              <button
                 className="flex-1 py-2 rounded-lg bg-surface hover:bg-surface/80 text-foreground transition-colors border border-white/10"
                 onClick={() => setShowLogoutModal(false)}
               >
                 Cancel
               </button>
-              <button 
+              <button
                 className="flex-1 py-2 rounded-lg bg-red-500/80 hover:bg-red-500 text-white transition-colors"
                 onClick={handleLogout}
               >
@@ -266,7 +266,7 @@ function AppContent() {
 
       {/* Voice Assistant Module */}
       {currentUser && voiceAssistantEnabled && agentConfig && (
-        <VoiceAssistant 
+        <VoiceAssistant
           agentConfig={agentConfig}
           userContext={userContext}
           isEnabled={voiceAssistantEnabled}
