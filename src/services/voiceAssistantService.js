@@ -666,12 +666,19 @@ class VoiceAssistantService {
     // Set voice if available
     if (this.agentConfig?.voice) {
       const voices = this.synthesis.getVoices();
-      const selectedVoice = voices.find(v => v.name === this.agentConfig.voice);
+      let selectedVoice = voices.find(v => v.name === this.agentConfig.voice);
+      
+      // Intelligent fallback logic for "male" presets if the precise requested voice isn't present
+      if (!selectedVoice && this.agentConfig.voice.includes('Male')) {
+        selectedVoice = voices.find(v => v.name.includes('Male') && v.lang.startsWith('en')) 
+                     || voices.find(v => (v.name.includes('Mark') || v.name.includes('David') || v.name.includes('Arthur') || v.name.includes('Daniel')) && v.lang.startsWith('en'));
+      }
+      
       if (selectedVoice) {
         utterance.voice = selectedVoice;
         console.log('🎙️ Using voice:', selectedVoice.name);
       } else {
-        console.log('⚠️ Voice not found, using default');
+        console.log('⚠️ Voice not found, using default OS voice');
       }
     }
 

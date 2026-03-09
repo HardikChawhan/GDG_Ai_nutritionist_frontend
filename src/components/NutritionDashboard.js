@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Flame, Beef, Wheat, Droplets, Target, Activity, 
   Calendar as CalendarIcon, Plus, Search, Trash2,
-  AlertTriangle, RotateCcw, Utensils, Zap, CheckCircle2
+  AlertTriangle, RotateCcw, Utensils, Zap, CheckCircle2, Settings, X, Mic
 } from 'lucide-react';
 
 import { nutritionAPI } from '../services/api';
@@ -42,6 +42,21 @@ function NutritionDashboard() {
   const [showWarning, setShowWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
 
+  // Agent Settings Modal State
+  const [showAgentSettings, setShowAgentSettings] = useState(false);
+  const [agentName, setAgentName] = useState('');
+  const [selectedVoice, setSelectedVoice] = useState('');
+  const [availableVoices, setAvailableVoices] = useState([]);
+
+  useEffect(() => {
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      setAvailableVoices(voices);
+    };
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }, []);
+
   const getTodayKey = () => {
     const today = new Date();
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -68,6 +83,10 @@ function NutritionDashboard() {
           try {
             const agent = await firebaseService.getAgentSettings(currentUser.uid);
             setAgentSettings(agent);
+            if (agent) {
+              setAgentName(agent.name || 'Ronnie');
+              setSelectedVoice(agent.voice || '');
+            }
           } catch (error) {}
         } else {
           loadFromLocalStorage(todayKey);
@@ -244,6 +263,35 @@ function NutritionDashboard() {
 
   const getProgressPercentage = (current, target) => !target ? 0 : Math.min((current / target) * 100, 100);
 
+  const saveAgentConfiguration = async () => {
+    if (!agentName.trim()) {
+      alert("Assistant name cannot be empty.");
+      return;
+    }
+    
+    const newConfig = {
+      ...(agentSettings || {}),
+      id: agentSettings?.id === 'ronnie' && agentName !== 'Ronnie' ? 'custom' : (agentSettings?.id || 'ronnie'),
+      name: agentName.trim(),
+      voice: selectedVoice
+    };
+
+    try {
+      if (currentUser) {
+         await firebaseService.saveAgentSettings(currentUser.uid, newConfig);
+      }
+      setAgentSettings(newConfig);
+      setShowAgentSettings(false);
+      alert('Assistant configuration updated successfully!');
+
+      // Need to reload window to reinitialize voice assistant with new voice
+      // since the context is scoped globally
+      window.location.reload();
+    } catch (e) {
+      alert("Failed to save assistant settings.");
+    }
+  };
+
   if (!userProfile) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center p-4">
@@ -295,6 +343,37 @@ function NutritionDashboard() {
                </div>
                <div className="p-6 overflow-y-auto">
                  <NutritionCalendar />
+               </div>
+             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showAgentSettings && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md">
+             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="glass-panel w-full max-w-md flex flex-col pt-6 pb-8 px-8 border border-accent/20">
+               <div className="flex items-center justify-between mb-6">
+                 <h3 className="font-heading font-semibold text-2xl flex items-center gap-2"><Mic className="w-6 h-6 text-accent"/> Assistant Settings</h3>
+                 <button onClick={() => setShowAgentSettings(false)} className="p-1 text-muted hover:text-foreground"><X className="w-5 h-5"/></button>
+               </div>
+               
+               <div className="space-y-6 mb-8">
+                 <div>
+                    <label className="text-sm font-medium text-muted block mb-2">Designation (Wake Word)</label>
+                    <input type="text" maxLength={20} value={agentName} onChange={e => setAgentName(e.target.value)} className="w-full bg-surface/50 border border-border/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none" placeholder="e.g. Ronnie" />
+                 </div>
+                 <div>
+                    <label className="text-sm font-medium text-muted block mb-2">Vocal Synthesis Model</label>
+                    <select value={selectedVoice} onChange={e => setSelectedVoice(e.target.value)} className="w-full bg-surface/50 border border-border/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none custom-scrollbar">
+                      {availableVoices.length > 0 ? availableVoices.map((v, i) => <option key={i} value={v.name}>{v.name}</option>) : <option value="">No voices available</option>}
+                    </select>
+                 </div>
+               </div>
+
+               <div className="flex gap-3">
+                 <button onClick={saveAgentConfiguration} className="flex-1 bg-accent text-background font-semibold py-3 rounded-xl hover:bg-accent/90 transition-colors">Apply Changes</button>
+                 <button onClick={() => setShowAgentSettings(false)} className="flex-1 min-w-[100px] border border-border/10 text-muted font-semibold py-3 rounded-xl hover:bg-foreground/5 transition-colors">Cancel</button>
                </div>
              </motion.div>
           </motion.div>
@@ -448,7 +527,12 @@ function NutritionDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-accent"/> AI Assistant</div>
-                <div className="text-sm font-mono text-accent">Active</div>
+                <div className="flex items-center gap-3">
+                   <span className="text-sm font-mono text-accent">{agentSettings?.name || 'Ronnie'}</span>
+                   <button onClick={() => setShowAgentSettings(true)} className="p-1.5 rounded-lg border border-border/10 bg-surface/50 hover:bg-foreground/10 text-muted hover:text-foreground transition-colors mix-blend-screen">
+                     <Settings className="w-4 h-4" />
+                   </button>
+                </div>
               </div>
             </div>
           </div>

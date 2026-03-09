@@ -7,7 +7,7 @@ import { saveAgentSettings } from '../services/firebaseService';
 import { cn } from '../utils/cn';
 
 const PRESET_AGENTS = [
-  { id: 'alex', name: 'Alex', voice: 'Google US English', personality: 'Empathetic & motivational coach', icon: UserCircle },
+  { id: 'ronnie', name: 'Ronnie', voice: 'Google UK English Male', personality: 'Empathetic & motivational coach', icon: UserCircle },
   { id: 'nova', name: 'Nova', voice: 'Google UK English Female', personality: 'Precise & professional nutritionist', icon: Activity },
   { id: 'kai', name: 'Kai', voice: 'Google UK English Male', personality: 'Energetic & direct wellness guide', icon: Cpu }
 ];
