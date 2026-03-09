@@ -36,16 +36,16 @@ function Home() {
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1, 
-      transition: { staggerChildren: 0.1 } 
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
     }
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: { type: "spring", stiffness: 100, damping: 15 }
     }
@@ -53,9 +53,9 @@ function Home() {
 
   return (
     <div className="min-h-screen pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto selection:bg-accent/30">
-      
+
       {/* Hero Section */}
-      <motion.section 
+      <motion.section
         className="text-center max-w-4xl mx-auto mb-20"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -65,20 +65,20 @@ function Home() {
           <BrainCircuit className="w-4 h-4" />
           <span>Advanced Clinical Intelligence</span>
         </div>
-        
+
         <h1 className="text-5xl md:text-7xl font-heading font-bold text-foreground mb-6 leading-tight tracking-tight">
-          Precision Nutrition <br/>
+          Precision Nutrition <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-foreground to-muted">
-             Driven By Data
+            Driven By Data
           </span>
         </h1>
-        
+
         <p className="text-xl text-muted mb-10 max-w-2xl mx-auto leading-relaxed">
           Experience personalized dietary analysis and clinical-grade meal planning, powered by comprehensive health profiles and adaptive machine learning models.
         </p>
-        
+
         {!currentUser ? (
-          <button 
+          <button
             onClick={handleGetStarted}
             className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-background px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:scale-[1.02] shadow-2xl shadow-accent/20"
           >
@@ -86,8 +86,8 @@ function Home() {
             <ChevronRight className="w-5 h-5" />
           </button>
         ) : !userProfile ? (
-          <Link 
-            to="/profile" 
+          <Link
+            to="/profile"
             className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-background px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:scale-[1.02] shadow-2xl shadow-accent/20"
           >
             Complete Assessment
@@ -108,7 +108,7 @@ function Home() {
       </motion.section>
 
       {/* Bento Grid Architecture */}
-      <motion.div 
+      <motion.div
         className="bento-grid"
         variants={containerVariants}
         initial="hidden"
@@ -122,7 +122,7 @@ function Home() {
             <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center mb-6">
               <Activity className="w-6 h-6 text-accent" />
             </div>
-            <h3 className="text-2xl font-heading font-semibold mb-3">Clinical Meal Generation</h3>
+            <h3 className="text-2xl font-heading font-semibold mb-3">Meal Generation</h3>
             <p className="text-muted mb-6 max-w-md">Algorithmic meal planning strictly calibrated to your specific biometric markers, dietary requirements, and metabolic goals.</p>
             <Link to="/meal-planner" className="inline-flex items-center text-sm font-medium text-foreground hover:text-accent transition-colors">
               Generate Plan <ChevronRight className="w-4 h-4 ml-1" />
@@ -137,7 +137,7 @@ function Home() {
               <Database className="w-6 h-6 text-muted group-hover:text-foreground transition-colors" />
             </div>
             <h3 className="text-xl font-heading font-semibold mb-3">Nutritional Analytics</h3>
-            <p className="text-muted text-sm mb-6">Deep inspection of food parameters utilizing the comprehensive USDA database.</p>
+            <p className="text-muted text-sm mb-6">Deep inspection of food parameters utilizing the power of AI.</p>
           </div>
           <Link to="/food-analyzer" className="inline-flex items-center text-sm font-medium text-foreground hover:text-accent transition-colors">
             Analyze Data <ChevronRight className="w-4 h-4 ml-1" />
@@ -146,7 +146,7 @@ function Home() {
 
         {/* Square Feature 2 */}
         <motion.div variants={itemVariants} className="bento-item md:col-span-1 lg:col-span-5 flex flex-col justify-between group">
-           <div>
+          <div>
             <div className="w-12 h-12 rounded-xl bg-surface/80 border border-border/10 flex items-center justify-center mb-6">
               <Sparkles className="w-6 h-6 text-muted group-hover:text-foreground transition-colors" />
             </div>
@@ -169,7 +169,7 @@ function Home() {
               </Link>
             </div>
             <div className="w-full md:w-64 h-32 rounded-xl bg-surface/80 border border-border/5 flex items-center justify-center overflow-hidden relative">
-               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
             </div>
           </div>
         </motion.div>
@@ -178,11 +178,11 @@ function Home() {
       {/* Authentication Modal */}
       {showLoginModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm" onClick={() => setShowLoginModal(false)}>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="glass-panel w-full max-w-md p-8 relative" 
+            className="glass-panel w-full max-w-md p-8 relative"
             onClick={(e) => e.stopPropagation()}
           >
             <button className="absolute top-4 right-4 text-muted hover:text-foreground transition-colors" onClick={() => setShowLoginModal(false)}>✕</button>
@@ -191,16 +191,16 @@ function Home() {
             </div>
             <h2 className="text-2xl font-heading font-semibold text-center mb-2">Secure Authentication</h2>
             <p className="text-muted text-center text-sm mb-8">Authenticate with your provider to initialize your encrypted clinical profile.</p>
-            
-            <button 
-              onClick={handleGoogleSignIn} 
+
+            <button
+              onClick={handleGoogleSignIn}
               disabled={loading}
               className="w-full flex items-center justify-center gap-3 bg-foreground text-background hover:bg-foreground/90 px-4 py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
             >
               <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
               {loading ? 'Authenticating...' : 'Authenticate with Google'}
             </button>
-            
+
             <div className="mt-8 pt-6 border-t border-border/10">
               <ul className="text-sm text-muted space-y-3">
                 <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-accent" /> Encrypted Health Records</li>
