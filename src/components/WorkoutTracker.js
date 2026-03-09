@@ -375,7 +375,7 @@ function WorkoutTracker() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-screen flex flex-col">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen lg:h-screen flex flex-col overflow-x-hidden">
       <div className="flex justify-between items-center mb-6">
          <div>
            <h1 className="text-3xl font-heading font-bold mb-1 tracking-tight">Telemetry Matrix</h1>
@@ -383,20 +383,20 @@ function WorkoutTracker() {
          </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-[600px]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-[600px] lg:min-h-0">
          
          {/* Settings & Parameters */}
-         <div className="lg:col-span-3 flex flex-col gap-6">
-            <div className="glass-panel p-6 flex flex-col min-h-0 h-full overflow-hidden">
-               <h3 className="font-heading font-semibold text-sm uppercase tracking-wider text-muted mb-4 flex items-center gap-2">
+         <div className="lg:col-span-3 flex flex-col gap-6 order-2 lg:order-1">
+            <div className="glass-panel p-6 flex flex-col lg:min-h-0 lg:h-full overflow-hidden">
+               <h3 className="font-heading font-semibold text-sm uppercase tracking-wider text-muted mb-4 flex items-center gap-2 shrink-0">
                  <Settings className="w-4 h-4"/> Input Target
                </h3>
                
-               <div className="overflow-y-auto custom-scrollbar flex-1 -mx-2 px-2 space-y-2">
+               <div className="overflow-x-auto lg:overflow-y-auto lg:overflow-x-hidden custom-scrollbar flex lg:flex-col lg:flex-1 lg:-mx-2 lg:px-2 gap-2 pb-2 lg:pb-0">
                  {Object.entries(EXERCISES).map(([key, { name }]) => (
-                   <button key={key} disabled={isCounting} onClick={() => handleExerciseChange(key)} className={cn("w-full text-left p-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-between", currentExercise === key ? "bg-accent/10 border-accent/40 text-accent" : "bg-surface/30 border-border/5 hover:border-border/20 text-muted")}>
+                   <button key={key} disabled={isCounting} onClick={() => handleExerciseChange(key)} className={cn("shrink-0 whitespace-nowrap lg:w-full text-left px-4 py-2.5 lg:p-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-between", currentExercise === key ? "bg-accent/10 border-accent/40 text-accent" : "bg-surface/30 border-border/5 hover:border-border/20 text-muted")}>
                      {name}
-                     {currentExercise === key && <Check className="w-4 h-4"/>}
+                     {currentExercise === key && <Check className="w-4 h-4 ml-2"/>}
                    </button>
                  ))}
                </div>
@@ -417,48 +417,48 @@ function WorkoutTracker() {
          </div>
          
          {/* Hardware View & Overlays */}
-         <div className="lg:col-span-9 flex flex-col h-full gap-6">
-            <div className="relative glass-panel rounded-2xl overflow-hidden flex-1 bg-black border border-border/10 flex items-center justify-center isolate">
+         <div className="lg:col-span-9 flex flex-col h-full gap-6 order-1 lg:order-2">
+            <div className="relative glass-panel rounded-2xl overflow-hidden flex-1 min-h-[350px] lg:min-h-0 bg-black border border-border/10 flex items-center justify-center isolate">
                
                {/* Video Element */}
                <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover opacity-50 z-0" />
                <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover z-10" />
 
                {/* Metric Overlays */}
-               <div className="absolute top-6 left-6 z-20 flex gap-4">
-                  <div className="px-5 py-3 rounded-xl bg-background/80 backdrop-blur-md border border-border/10 flex flex-col items-center min-w-[100px]">
-                    <span className="text-xs font-medium text-muted uppercase tracking-wider mb-1">Count</span>
-                    <span className="text-4xl font-mono font-bold text-foreground leading-none">{repCount}</span>
-                  </div>
-                  <div className="px-5 py-3 rounded-xl bg-background/80 backdrop-blur-md border border-border/10 flex flex-col items-center">
-                    <span className="text-xs font-medium text-muted uppercase tracking-wider mb-1">State Vector</span>
-                    <span className="text-sm font-mono font-bold text-accent uppercase tracking-widest mt-2">{currentState}</span>
-                  </div>
-               </div>
-
-               <div className="absolute top-6 right-6 z-20">
-                  <div className="px-4 py-2 rounded-lg bg-background/80 backdrop-blur-md border border-border/10 flex items-center gap-2">
-                    <span className="text-xs font-medium uppercase text-muted">Integrity:</span>
-                    <span className={cn("text-xs font-bold uppercase", formQuality === 'Perfect' ? "text-accent" : formQuality === 'Good' ? "text-yellow-400" : "text-red-500")}>
-                      {formQuality}
-                    </span>
-                  </div>
+               <div className="absolute top-3 left-3 right-3 md:top-6 md:left-6 md:right-6 z-20 flex flex-wrap justify-between gap-2 md:gap-4">
+                 <div className="flex gap-2 md:gap-4">
+                   <div className="px-3 py-2 md:px-5 md:py-3 rounded-xl bg-background/80 backdrop-blur-md border border-border/10 flex flex-col items-center min-w-[70px] md:min-w-[100px]">
+                     <span className="text-[10px] md:text-xs font-medium text-muted uppercase tracking-wider mb-0.5 md:mb-1">Count</span>
+                     <span className="text-2xl md:text-4xl font-mono font-bold text-foreground leading-none">{repCount}</span>
+                   </div>
+                   <div className="px-3 py-2 md:px-5 md:py-3 rounded-xl bg-background/80 backdrop-blur-md border border-border/10 flex flex-col items-center">
+                     <span className="text-[10px] md:text-xs font-medium text-muted uppercase tracking-wider mb-0.5 md:mb-1">State Vector</span>
+                     <span className="text-[11px] md:text-sm font-mono font-bold text-accent uppercase tracking-widest mt-1 md:mt-2">{currentState}</span>
+                   </div>
+                 </div>
+                 
+                 <div className="px-3 py-2 md:px-4 md:py-2 rounded-lg bg-background/80 backdrop-blur-md border border-border/10 flex items-center gap-1.5 md:gap-2 self-start">
+                   <span className="text-[10px] md:text-xs font-medium uppercase text-muted">Integrity:</span>
+                   <span className={cn("text-[10px] md:text-xs font-bold uppercase", formQuality === 'Perfect' ? "text-accent" : formQuality === 'Good' ? "text-yellow-400" : "text-red-500")}>
+                     {formQuality}
+                   </span>
+                 </div>
                </div>
 
             </div>
             
             {/* Controls */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 h-20 shrink-0">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 shrink-0">
                {!isCounting ? (
-                 <button onClick={handleStartCounting} className="lg:col-span-2 bg-accent text-background font-bold text-sm tracking-wide rounded-xl hover:bg-accent/90 transition-colors flex items-center justify-center gap-2">
-                   <Play className="w-5 h-5"/> Initiate Capture
+                 <button onClick={handleStartCounting} className="lg:col-span-2 bg-accent text-background font-bold text-[11px] sm:text-sm tracking-wide rounded-xl hover:bg-accent/90 transition-colors flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-4 px-2 sm:px-4 text-center">
+                   <Play className="w-4 h-4 sm:w-5 sm:h-5"/> Initiate Capture
                  </button>
                ) : (
-                 <button onClick={handleStopCounting} className="lg:col-span-2 bg-yellow-500 text-background font-bold text-sm tracking-wide rounded-xl hover:bg-yellow-400 transition-colors flex items-center justify-center gap-2">
-                   <Square className="w-5 h-5"/> Suspend Capture
+                 <button onClick={handleStopCounting} className="lg:col-span-2 bg-yellow-500 text-background font-bold text-[11px] sm:text-sm tracking-wide rounded-xl hover:bg-yellow-400 transition-colors flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-4 px-2 sm:px-4 text-center">
+                   <Square className="w-4 h-4 sm:w-5 sm:h-5"/> Suspend Capture
                  </button>
                )}
-               <button onClick={handleEndWorkout} className="lg:col-span-2 bg-surface border border-border/10 text-foreground font-bold text-sm tracking-wide rounded-xl hover:bg-foreground/5 transition-colors flex items-center justify-center gap-2">
+               <button onClick={handleEndWorkout} className="lg:col-span-2 bg-surface border border-border/10 text-foreground font-bold text-[11px] sm:text-sm tracking-wide rounded-xl hover:bg-foreground/5 transition-colors flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-4 px-2 sm:px-4 text-center">
                   Terminate Payload
                </button>
             </div>
