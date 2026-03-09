@@ -21,7 +21,7 @@ function FoodAnalyzer() {
 
   const analyzeFoodText = async () => {
     if (!userProfile) {
-      setError('Clinical profile required for contextual analysis.');
+      setError('Health profile required for tailored analysis.');
       return;
     }
 
@@ -159,7 +159,7 @@ function FoodAnalyzer() {
                  <div className="w-16 h-16 rounded-full border border-dashed border-border/20 flex items-center justify-center mb-4">
                     <Activity className="w-6 h-6 text-muted opacity-50" />
                  </div>
-                 <p className="text-muted text-sm">Telemetry screen is standing by.</p>
+                 <p className="text-muted text-sm">Scanner is standing by.</p>
                </motion.div>
              )}
 

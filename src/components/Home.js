@@ -63,7 +63,7 @@ function Home() {
       >
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-8">
           <BrainCircuit className="w-4 h-4" />
-          <span>Advanced Clinical Intelligence</span>
+          <span>Advanced Health Intelligence</span>
         </div>
 
         <h1 className="text-5xl md:text-7xl font-heading font-bold text-foreground mb-6 leading-tight tracking-tight">
@@ -74,7 +74,7 @@ function Home() {
         </h1>
 
         <p className="text-xl text-muted mb-10 max-w-2xl mx-auto leading-relaxed">
-          Experience personalized dietary analysis and clinical-grade meal planning, powered by comprehensive health profiles and adaptive machine learning models.
+          Experience personalized dietary analysis and customized meal planning, powered by your health goals and smart AI.
         </p>
 
         {!currentUser ? (
@@ -82,7 +82,7 @@ function Home() {
             onClick={handleGetStarted}
             className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-background px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:scale-[1.02] shadow-2xl shadow-accent/20"
           >
-            Initialize Profile
+            Set Up Profile
             <ChevronRight className="w-5 h-5" />
           </button>
         ) : !userProfile ? (
@@ -190,7 +190,7 @@ function Home() {
               <User className="w-6 h-6 text-accent" />
             </div>
             <h2 className="text-2xl font-heading font-semibold text-center mb-2">Secure Authentication</h2>
-            <p className="text-muted text-center text-sm mb-8">Authenticate with your provider to initialize your encrypted clinical profile.</p>
+            <p className="text-muted text-center text-sm mb-8">Sign in with your account to set up your personal health profile.</p>
 
             <button
               onClick={handleGoogleSignIn}

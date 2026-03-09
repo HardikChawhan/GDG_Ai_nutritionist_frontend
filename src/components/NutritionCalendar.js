@@ -35,17 +35,17 @@ const NutritionCalendar = () => {
       for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
         const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-        
+
         try {
           const nutritionData = await firebaseService.getDailyNutrition(currentUser.uid, dateKey);
           const caloriesBurned = getCaloriesBurnedFromCookie(dateKey);
           if ((nutritionData && nutritionData.foods && nutritionData.foods.length > 0) || caloriesBurned > 0) {
             data[dateKey] = { ...nutritionData, caloriesBurned };
           }
-        } catch (error) {}
+        } catch (error) { }
       }
       setMonthData(data);
-    } catch (error) {} finally { setLoading(false); }
+    } catch (error) { } finally { setLoading(false); }
   };
 
   const getDaysInMonth = (date) => {
@@ -83,161 +83,161 @@ const NutritionCalendar = () => {
     <div className="min-h-screen max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-12 text-center">
         <div className="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center mx-auto mb-6">
-           <CalendarIcon className="w-8 h-8 text-accent" />
+          <CalendarIcon className="w-8 h-8 text-accent" />
         </div>
-        <h1 className="text-4xl font-heading font-bold mb-4 tracking-tight">Temporal Telemetry Log</h1>
-        <p className="text-muted max-w-2xl mx-auto text-lg">Historical overview of biological input and physical output cycles.</p>
+        <h1 className="text-4xl font-heading font-bold mb-4 tracking-tight">Daily Activity Log</h1>
+        <p className="text-muted max-w-2xl mx-auto text-lg">Overview of your daily food intake and activity</p>
       </div>
 
       <div className="flex flex-col items-center gap-10 w-full max-w-3xl mx-auto">
-        
+
         {/* Calendar View */}
         <div className="w-full">
-           <div className="glass-panel p-6">
-              
-              <div className="flex items-center justify-between mb-8 px-2">
-                 <button onClick={handlePrevMonth} className="w-10 h-10 rounded-full border border-border/10 flex items-center justify-center hover:bg-foreground/5 transition-colors">
-                   <ChevronLeft className="w-5 h-5 text-muted"/>
-                 </button>
-                 <h2 className="text-xl font-heading font-bold uppercase tracking-wider">
-                   {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-                 </h2>
-                 <button onClick={handleNextMonth} className="w-10 h-10 rounded-full border border-border/10 flex items-center justify-center hover:bg-foreground/5 transition-colors">
-                   <ChevronRight className="w-5 h-5 text-muted"/>
-                 </button>
+          <div className="glass-panel p-6">
+
+            <div className="flex items-center justify-between mb-8 px-2">
+              <button onClick={handlePrevMonth} className="w-10 h-10 rounded-full border border-border/10 flex items-center justify-center hover:bg-foreground/5 transition-colors">
+                <ChevronLeft className="w-5 h-5 text-muted" />
+              </button>
+              <h2 className="text-xl font-heading font-bold uppercase tracking-wider">
+                {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+              </h2>
+              <button onClick={handleNextMonth} className="w-10 h-10 rounded-full border border-border/10 flex items-center justify-center hover:bg-foreground/5 transition-colors">
+                <ChevronRight className="w-5 h-5 text-muted" />
+              </button>
+            </div>
+
+            {loading ? (
+              <div className="h-[400px] flex flex-col items-center justify-center">
+                <Activity className="w-8 h-8 text-accent animate-pulse mb-4" />
+                <span className="text-sm font-mono text-muted">Retrieving temporal logs...</span>
               </div>
+            ) : (
+              <div className="grid grid-cols-7 gap-2">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                  <div key={day} className="text-center text-xs font-semibold uppercase tracking-wider text-muted pb-4">
+                    {day}
+                  </div>
+                ))}
 
-              {loading ? (
-                <div className="h-[400px] flex flex-col items-center justify-center">
-                  <Activity className="w-8 h-8 text-accent animate-pulse mb-4"/>
-                  <span className="text-sm font-mono text-muted">Retrieving temporal logs...</span>
-                </div>
-              ) : (
-                <div className="grid grid-cols-7 gap-2">
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                    <div key={day} className="text-center text-xs font-semibold uppercase tracking-wider text-muted pb-4">
-                      {day}
-                    </div>
-                  ))}
+                {days.map((date, index) => {
+                  const dateKey = date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : null;
+                  const calories = date ? getCaloriesForDate(date) : null;
+                  const hasData = dateKey ? monthData[dateKey] : false;
+                  const isSelected = selectedDate === dateKey;
+                  const today = isToday(date);
 
-                  {days.map((date, index) => {
-                    const dateKey = date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : null;
-                    const calories = date ? getCaloriesForDate(date) : null;
-                    const hasData = dateKey ? monthData[dateKey] : false;
-                    const isSelected = selectedDate === dateKey;
-                    const today = isToday(date);
+                  return (
+                    <button
+                      key={index}
+                      disabled={!date}
+                      onClick={() => handleDateClick(date)}
+                      className={cn(
+                        "aspect-square p-2 rounded-xl flex flex-col items-center border transition-all cursor-pointer relative overflow-hidden group",
+                        !date ? "border-transparent cursor-default" : "border-border/5 hover:border-border/20 bg-surface/30",
+                        hasData && "bg-surface/80 border-border/10",
+                        isSelected && "ring-2 ring-accent border-accent bg-accent/10",
+                        today && !isSelected && "border-blue-500/50"
+                      )}
+                    >
+                      {today && <div className="absolute top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-blue-500 rounded-full"></div>}
 
-                    return (
-                      <button
-                        key={index}
-                        disabled={!date}
-                        onClick={() => handleDateClick(date)}
-                        className={cn(
-                          "aspect-square p-2 rounded-xl flex flex-col items-center border transition-all cursor-pointer relative overflow-hidden group",
-                          !date ? "border-transparent cursor-default" : "border-border/5 hover:border-border/20 bg-surface/30",
-                          hasData && "bg-surface/80 border-border/10",
-                          isSelected && "ring-2 ring-accent border-accent bg-accent/10",
-                          today && !isSelected && "border-blue-500/50"
-                        )}
-                      >
-                        {today && <div className="absolute top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-blue-500 rounded-full"></div>}
-                        
-                        <div className={cn("text-lg font-heading font-semibold mt-auto", hasData ? "text-foreground" : "text-muted", isSelected && "text-accent")}>
-                           {date ? date.getDate() : ''}
+                      <div className={cn("text-lg font-heading font-semibold mt-auto", hasData ? "text-foreground" : "text-muted", isSelected && "text-accent")}>
+                        {date ? date.getDate() : ''}
+                      </div>
+
+                      {hasData && calories > 0 && (
+                        <div className={cn("text-[10px] uppercase font-bold tracking-wider mt-1 w-full text-center truncate px-1", isSelected ? "text-accent" : "text-emerald-400")}>
+                          {calories} cal
                         </div>
-                        
-                        {hasData && calories > 0 && (
-                          <div className={cn("text-[10px] uppercase font-bold tracking-wider mt-1 w-full text-center truncate px-1", isSelected ? "text-accent" : "text-emerald-400")}>
-                             {calories} cal
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-           </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Selected Date Analytics */}
         <div className="w-full">
-           {selectedDayData && selectedDate ? (
-             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-panel p-6">
-                <div className="border-b border-border/5 pb-4 mb-6">
-                   <h3 className="text-sm font-semibold uppercase tracking-wider text-muted mb-1 flex items-center gap-2">
-                     <CalendarIcon className="w-4 h-4"/> Selected Log
-                   </h3>
-                   <div className="text-2xl font-heading font-bold">
-                      {new Date(selectedDate + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric'})}
-                   </div>
+          {selectedDayData && selectedDate ? (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-panel p-6">
+              <div className="border-b border-border/5 pb-4 mb-6">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted mb-1 flex items-center gap-2">
+                  <CalendarIcon className="w-4 h-4" /> Selected Log
+                </h3>
+                <div className="text-2xl font-heading font-bold">
+                  {new Date(selectedDate + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                {/* Macros */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-surface/80 p-3 rounded-xl border border-border/5">
+                    <div className="flex items-center gap-2 mb-1"><Flame className="w-4 h-4 text-emerald-400" /><span className="text-xs text-muted uppercase">Intake</span></div>
+                    <div className="flex items-baseline gap-1 flex-wrap">
+                      <span className="text-xl font-bold leading-none">{selectedDayData.totals?.calories || 0}</span>
+                      <span className="text-xs text-muted font-normal">kcal</span>
+                    </div>
+                  </div>
+                  <div className="bg-surface/80 p-3 rounded-xl border border-border/5">
+                    <div className="flex items-center gap-2 mb-1"><Activity className="w-4 h-4 text-orange-400" /><span className="text-xs text-muted uppercase">Output</span></div>
+                    <div className="flex items-baseline gap-1 flex-wrap">
+                      <span className="text-xl font-bold leading-none">{selectedDayData.caloriesBurned || 0}</span>
+                      <span className="text-xs text-muted font-normal">kcal</span>
+                    </div>
+                  </div>
                 </div>
 
-                 <div className="space-y-6">
-                   {/* Macros */}
-                   <div className="grid grid-cols-2 gap-3">
-                     <div className="bg-surface/80 p-3 rounded-xl border border-border/5">
-                        <div className="flex items-center gap-2 mb-1"><Flame className="w-4 h-4 text-emerald-400"/><span className="text-xs text-muted uppercase">Intake</span></div>
-                        <div className="flex items-baseline gap-1 flex-wrap">
-                          <span className="text-xl font-bold leading-none">{selectedDayData.totals?.calories || 0}</span>
-                          <span className="text-xs text-muted font-normal">kcal</span>
+                <div className="bg-surface/50 rounded-xl border border-border/5 p-4 flex justify-between">
+                  <div className="text-center w-1/3">
+                    <Beef className="w-4 h-4 text-rose-400 mx-auto mb-1" />
+                    <div className="text-xs text-muted uppercase mb-1">Pro</div>
+                    <div className="font-bold text-sm">{selectedDayData.totals?.protein || 0}g</div>
+                  </div>
+                  <div className="text-center w-1/3">
+                    <Wheat className="w-4 h-4 text-amber-400 mx-auto mb-1" />
+                    <div className="text-xs text-muted uppercase mb-1">Carb</div>
+                    <div className="font-bold text-sm">{selectedDayData.totals?.carbohydrates || 0}g</div>
+                  </div>
+                  <div className="text-center w-1/3">
+                    <Droplets className="w-4 h-4 text-lime-400 mx-auto mb-1" />
+                    <div className="text-xs text-muted uppercase mb-1">Fat</div>
+                    <div className="font-bold text-sm">{selectedDayData.totals?.fat || 0}g</div>
+                  </div>
+                </div>
+
+                {/* Food List */}
+                <div>
+                  <h4 className="text-sm font-semibold uppercase tracking-wider text-muted mb-3 flex items-center gap-2"><Utensils className="w-4 h-4" /> Input Log</h4>
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                    {selectedDayData.foods && selectedDayData.foods.length > 0 ? (
+                      selectedDayData.foods.map((food, index) => (
+                        <div key={index} className="flex justify-between items-center p-3 rounded-lg bg-surface/30 border border-border/5 hover:border-border/10 transition-colors gap-3">
+                          <span className="text-sm font-medium capitalize truncate">{food.description || food.name}</span>
+                          <span className="text-sm font-mono text-muted shrink-0 whitespace-nowrap">{food.calories || food.nutrition?.calories || 0} kcal</span>
                         </div>
-                     </div>
-                     <div className="bg-surface/80 p-3 rounded-xl border border-border/5">
-                        <div className="flex items-center gap-2 mb-1"><Activity className="w-4 h-4 text-orange-400"/><span className="text-xs text-muted uppercase">Output</span></div>
-                        <div className="flex items-baseline gap-1 flex-wrap">
-                          <span className="text-xl font-bold leading-none">{selectedDayData.caloriesBurned || 0}</span>
-                          <span className="text-xs text-muted font-normal">kcal</span>
-                        </div>
-                     </div>
-                   </div>
-
-                   <div className="bg-surface/50 rounded-xl border border-border/5 p-4 flex justify-between">
-                     <div className="text-center w-1/3">
-                       <Beef className="w-4 h-4 text-rose-400 mx-auto mb-1"/>
-                       <div className="text-xs text-muted uppercase mb-1">Pro</div>
-                       <div className="font-bold text-sm">{selectedDayData.totals?.protein || 0}g</div>
-                     </div>
-                     <div className="text-center w-1/3">
-                       <Wheat className="w-4 h-4 text-amber-400 mx-auto mb-1"/>
-                       <div className="text-xs text-muted uppercase mb-1">Carb</div>
-                       <div className="font-bold text-sm">{selectedDayData.totals?.carbohydrates || 0}g</div>
-                     </div>
-                     <div className="text-center w-1/3">
-                       <Droplets className="w-4 h-4 text-lime-400 mx-auto mb-1"/>
-                       <div className="text-xs text-muted uppercase mb-1">Fat</div>
-                       <div className="font-bold text-sm">{selectedDayData.totals?.fat || 0}g</div>
-                     </div>
-                   </div>
-
-                   {/* Food List */}
-                   <div>
-                     <h4 className="text-sm font-semibold uppercase tracking-wider text-muted mb-3 flex items-center gap-2"><Utensils className="w-4 h-4"/> Input Log</h4>
-                     <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
-                       {selectedDayData.foods && selectedDayData.foods.length > 0 ? (
-                         selectedDayData.foods.map((food, index) => (
-                           <div key={index} className="flex justify-between items-center p-3 rounded-lg bg-surface/30 border border-border/5 hover:border-border/10 transition-colors gap-3">
-                             <span className="text-sm font-medium capitalize truncate">{food.description || food.name}</span>
-                             <span className="text-sm font-mono text-muted shrink-0 whitespace-nowrap">{food.calories || food.nutrition?.calories || 0} kcal</span>
-                           </div>
-                         ))
-                       ) : (
-                         <div className="text-center p-4 text-sm text-muted bg-surface/30 rounded-lg border border-dashed border-border/10">
-                            No nutritional inputs logged on this day.
-                         </div>
-                       )}
-                     </div>
-                   </div>
+                      ))
+                    ) : (
+                      <div className="text-center p-4 text-sm text-muted bg-surface/30 rounded-lg border border-dashed border-border/10">
+                        No nutritional inputs logged on this day.
+                      </div>
+                    )}
+                  </div>
                 </div>
-             </motion.div>
-           ) : (
-             <div className="glass-panel p-10 flex flex-col items-center justify-center text-center w-full min-h-[200px]">
-                <div className="w-16 h-16 rounded-full border border-dashed border-border/20 flex items-center justify-center mb-6">
-                   <CalendarIcon className="w-6 h-6 text-muted" />
-                </div>
-                <h3 className="text-lg font-heading font-semibold mb-2">Unselected Temporal Coordinate</h3>
-                <p className="text-sm text-muted">Select a date from the calendar matrix to decode its stored biological telemetry.</p>
-             </div>
-           )}
+              </div>
+            </motion.div>
+          ) : (
+            <div className="glass-panel p-10 flex flex-col items-center justify-center text-center w-full min-h-[200px]">
+              <div className="w-16 h-16 rounded-full border border-dashed border-border/20 flex items-center justify-center mb-6">
+                <CalendarIcon className="w-6 h-6 text-muted" />
+              </div>
+              <h3 className="text-lg font-heading font-semibold mb-2">No Date Selected</h3>
+              <p className="text-sm text-muted">Select a date from the calendar to view your recorded data</p>
+            </div>
+          )}
         </div>
 
       </div>

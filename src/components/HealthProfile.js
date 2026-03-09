@@ -106,7 +106,7 @@ function HealthProfile() {
       const plans = savedMealPlans.filter(plan => plan.id !== planId);
       localStorage.setItem('savedMealPlans', JSON.stringify(plans));
       setSavedMealPlans(plans);
-      setMessage({ type: 'success', text: 'Clinical plan purged successfully.' });
+      setMessage({ type: 'success', text: 'Meal Plan deleted successfully.' });
       setTimeout(() => setMessage(null), 3000);
     } catch (err) {
       setMessage({ type: 'error', text: 'Error executing deletion.' });
@@ -207,7 +207,7 @@ function HealthProfile() {
                 <Lock className="w-6 h-6 text-accent" />
               </div>
               <h2 className="text-2xl font-heading font-semibold mb-2">Authentication Required</h2>
-              <p className="text-muted text-sm mb-8">Clinical data requires secure authentication.</p>
+              <p className="text-muted text-sm mb-8">Your health data requires secure sign in.</p>
               
               <button onClick={() => signInWithGoogle()} className="w-full flex items-center justify-center gap-3 bg-foreground text-black hover:bg-foreground/90 px-4 py-3 rounded-xl font-medium transition-colors mb-4">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
@@ -222,7 +222,7 @@ function HealthProfile() {
       </AnimatePresence>
 
       <div className="mb-12">
-        <h1 className="text-4xl font-heading font-bold mb-4">Clinical Profile</h1>
+        <h1 className="text-4xl font-heading font-bold mb-4">Health Profile</h1>
         <p className="text-muted max-w-2xl text-lg">Manage your biometric data, dietary requirements, and computational health models.</p>
       </div>
 
@@ -329,7 +329,7 @@ function HealthProfile() {
                         </div>
                      </div>
                      <div className="space-y-4">
-                        <label className="flex items-center gap-2 text-sm font-medium text-muted mb-3"><Target className="w-4 h-4 text-accent/70"/> Biological Objective</label>
+                        <label className="flex items-center gap-2 text-sm font-medium text-muted mb-3"><Target className="w-4 h-4 text-accent/70"/> Primary Goal</label>
                         <div className="grid grid-cols-2 gap-3">
                           {[
                             { value: 'weight_loss', label: 'Deficit (Cut)' },
@@ -500,7 +500,7 @@ function HealthProfile() {
                   <div key={plan.id} className="p-4 rounded-xl border border-border/5 bg-surface/30 hover:bg-surface/60 transition-colors group cursor-pointer" onClick={() => setSelectedPlan(plan)}>
                      <div className="flex justify-between items-start mb-2">
                        <div>
-                         <p className="font-medium text-sm text-foreground">Clinical Plan • {plan.preferences.duration} Day(s)</p>
+                         <p className="font-medium text-sm text-foreground">Meal Plan • {plan.preferences.duration} Day(s)</p>
                          <p className="text-xs text-muted">{new Date(plan.savedAt).toLocaleDateString()}</p>
                        </div>
                        <button onClick={(e) => { e.stopPropagation(); deleteMealPlan(plan.id); }} className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">

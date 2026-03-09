@@ -50,7 +50,7 @@ function MealPlanner() {
 
   const generateMealPlan = async () => {
     if (!userProfile) {
-      setError('Clinical profile initialization required.');
+      setError('Health profile setup required.');
       return;
     }
 
@@ -109,8 +109,8 @@ function MealPlanner() {
         <div className="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center mx-auto mb-6">
            <CalendarDays className="w-8 h-8 text-accent" />
         </div>
-        <h1 className="text-4xl font-heading font-bold mb-4">Intelligence Planner</h1>
-        <p className="text-muted max-w-2xl mx-auto text-lg">Generate customized clinical dietary protocols using biological parameters.</p>
+        <h1 className="text-4xl font-heading font-bold mb-4">Smart Meal Planner</h1>
+        <p className="text-muted max-w-2xl mx-auto text-lg">Create personalized meal plans based on your unique body metrics.</p>
       </div>
 
       <AnimatePresence>
@@ -181,7 +181,7 @@ function MealPlanner() {
 
                  <button onClick={generateMealPlan} disabled={loading} className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-accent text-background hover:bg-accent/90 text-sm font-semibold transition-colors disabled:opacity-50 mt-8">
                     {loading ? <Activity className="w-4 h-4 animate-spin"/> : <Sparkles className="w-4 h-4" />}
-                    {loading ? 'Synthesizing Protocol...' : 'Initialize Generation'}
+                    {loading ? 'Creating Meal Plan...' : 'Generate Meal Plan'}
                  </button>
               </div>
            </div>
@@ -195,8 +195,8 @@ function MealPlanner() {
                  <div className="w-16 h-16 w-16 mb-6">
                     <Activity className="w-full h-full text-accent animate-pulse" />
                  </div>
-                 <h3 className="text-xl font-heading font-semibold mb-2">Analyzing Biomarkers</h3>
-                 <p className="text-muted text-sm max-w-xs mx-auto mb-6">Cross-referencing biological targets with macro-nutrient profiles.</p>
+                 <h3 className="text-xl font-heading font-semibold mb-2">Personalizing Your Plan</h3>
+                 <p className="text-muted text-sm max-w-xs mx-auto mb-6">Matching your goals with the right nutrients...</p>
                  <div className="flex gap-1">
                    <div className="w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '0ms' }}></div>
                    <div className="w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '150ms' }}></div>
@@ -262,8 +262,8 @@ function MealPlanner() {
                  <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-4 border border-accent/20">
                     <Save className="w-6 h-6 text-accent" />
                  </div>
-                 <h3 className="font-heading font-semibold text-lg mb-2">Synchronize Protocol?</h3>
-                 <p className="text-sm text-muted mb-8">This data will be stored in your clinical records for future reference.</p>
+                 <h3 className="font-heading font-semibold text-lg mb-2">Save Your Meal Plan?</h3>
+                 <p className="text-sm text-muted mb-8">This plan will be saved to your profile for future use.</p>
                  
                  <div className="flex flex-col gap-3">
                    <button onClick={saveMealPlanToProfile} className="w-full bg-accent text-background font-semibold py-3 rounded-xl hover:bg-accent/90 transition-colors">Confirm Sync</button>

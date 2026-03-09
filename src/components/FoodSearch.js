@@ -39,8 +39,8 @@ function FoodSearch() {
         <div className="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center mx-auto mb-6">
            <Database className="w-8 h-8 text-accent" />
         </div>
-        <h1 className="text-4xl font-heading font-bold mb-4 tracking-tight">FDA Nutrition Matrix</h1>
-        <p className="text-muted max-w-2xl mx-auto text-lg">Cross-referencing global database with 8,000+ biological entities.</p>
+        <h1 className="text-4xl font-heading font-bold mb-4 tracking-tight">Food Database</h1>
+        <p className="text-muted max-w-2xl mx-auto text-lg">Search through our extensive database of over 8,000 foods.</p>
       </div>
 
       <div className="max-w-2xl mx-auto mb-12">

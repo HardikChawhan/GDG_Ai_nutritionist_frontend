@@ -8,7 +8,7 @@ import { cn } from '../utils/cn';
 
 const PRESET_AGENTS = [
   { id: 'alex', name: 'Alex', voice: 'Google US English', personality: 'Empathetic & motivational coach', icon: UserCircle },
-  { id: 'nova', name: 'Nova', voice: 'Google UK English Female', personality: 'Clinical & precise nutritionist', icon: Activity },
+  { id: 'nova', name: 'Nova', voice: 'Google UK English Female', personality: 'Precise & professional nutritionist', icon: Activity },
   { id: 'kai', name: 'Kai', voice: 'Google UK English Male', personality: 'Energetic & direct wellness guide', icon: Cpu }
 ];
 
@@ -39,7 +39,7 @@ const AgentSelection = ({ onComplete }) => {
   };
 
   const handleContinue = async () => {
-    if (!acceptedDisclaimer) return alert('Audio telemetry consent required.');
+    if (!acceptedDisclaimer) return alert('Microphone permission is required.');
     if (!selectedAgent) return alert('Intelligence selection required.');
     if (selectedAgent.id === 'custom' && !customName.trim()) return alert('Custom designation required.');
 
@@ -51,7 +51,7 @@ const AgentSelection = ({ onComplete }) => {
 
       try { await navigator.mediaDevices.getUserMedia({ audio: true }); } 
       catch (error) {
-        alert('Hardware access denied. Voice telemetry requires microphone permissions.');
+        alert('Microphone access denied. Voice tracking requires microphone permissions.');
         setSaving(false); return;
       }
 
@@ -72,7 +72,7 @@ const AgentSelection = ({ onComplete }) => {
             <Mic className="w-8 h-8 text-orange-400" />
           </div>
           
-          <h2 className="text-2xl font-heading font-semibold mb-4">Audio Telemetry Consent</h2>
+          <h2 className="text-2xl font-heading font-semibold mb-4">Microphone Permission Required</h2>
           <p className="text-muted text-sm mb-6">Continuous hardware access is required for passive voice recognition. Data is processed locally on-device.</p>
           
           <div className="space-y-4 mb-8">
@@ -82,7 +82,7 @@ const AgentSelection = ({ onComplete }) => {
               </h3>
               <ul className="space-y-2 text-sm text-foreground/80">
                 <li className="flex gap-2 items-start"><CheckCircle2 className="w-4 h-4 text-accent mt-0.5 shrink-0"/> Client-side voice processing via Web Speech API</li>
-                <li className="flex gap-2 items-start"><CheckCircle2 className="w-4 h-4 text-accent mt-0.5 shrink-0"/> No audio payloads transmitted to external servers</li>
+                <li className="flex gap-2 items-start"><CheckCircle2 className="w-4 h-4 text-accent mt-0.5 shrink-0"/> No audio data is saved or sent to external servers</li>
                 <li className="flex gap-2 items-start"><CheckCircle2 className="w-4 h-4 text-accent mt-0.5 shrink-0"/> Actionable on explicit wake-word invocation</li>
               </ul>
             </div>
@@ -127,7 +127,7 @@ const AgentSelection = ({ onComplete }) => {
              <Cpu className="w-6 h-6 text-foreground" />
            </div>
            <h3 className="font-heading font-semibold text-lg mb-1">Custom Protocol</h3>
-           <p className="text-sm text-muted">Initialize custom parameters</p>
+           <p className="text-sm text-muted">Set personal preferences</p>
            {selectedAgent?.id === 'custom' && <div className="absolute top-4 right-4"><CheckCircle2 className="w-5 h-5 text-blue-500"/></div>}
         </motion.button>
       </div>

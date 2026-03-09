@@ -135,11 +135,11 @@ function WorkoutTracker() {
     const handleVoiceCommand = (command) => {
       const lowerCommand = command.toLowerCase();
       if (lowerCommand.includes('initiate workout') || lowerCommand.includes('start workout session')) {
-        if (!isWorkoutActive) { setIsWorkoutActive(true); speakFeedback('Telemetry link active. Specify parameters.'); }
+        if (!isWorkoutActive) { setIsWorkoutActive(true); speakFeedback('Camera is active. Ready to track.'); }
       } else if (lowerCommand.includes('start workout') || lowerCommand.includes('begin counting')) {
         if (isWorkoutActive && !isCounting) { setIsCounting(true); speakFeedback(`Tracking ${EXERCISES[currentExercise].name}. Initialized.`); }
       } else if (lowerCommand.includes('stop counting') || lowerCommand.includes('pause counting')) {
-        if (isCounting) { setIsCounting(false); speakFeedback('Telemetry suspended.'); }
+        if (isCounting) { setIsCounting(false); speakFeedback('Tracking paused.'); }
       } else if (lowerCommand.includes('end workout') || lowerCommand.includes('finish workout')) {
         if (isWorkoutActive) handleEndWorkout();
       }
@@ -166,7 +166,7 @@ function WorkoutTracker() {
           detectPose();
         };
       }
-    } catch (error) { alert('Camera access denied. Video telemetry requires permissions.'); }
+    } catch (error) { alert('Camera access denied. Activity tracking requires permissions.'); }
   };
   
   const stopCamera = () => {
@@ -311,7 +311,7 @@ function WorkoutTracker() {
   const speakFeedback = (message) => { if (voiceAssistantService.ttsEnabled) voiceAssistantService.speak(message); };
   
   const handleExerciseChange = (exercise) => {
-    if (isCounting) return speakFeedback('Halt active telemetry before modifying parameters.');
+    if (isCounting) return speakFeedback('Stop tracking before changing exercises.');
     setCurrentExercise(exercise);
     stateMachineRef.current = stateMachinesRef.current[exercise];
     setRepCount(0); setCurrentState('Standing'); setFormQuality('Perfect');
@@ -346,7 +346,7 @@ function WorkoutTracker() {
       speakFeedback(`Energy depleted: ${Math.round(data.totalCalories)} calories.`);
       if (data?.totalCalories) saveCaloriesBurnedToCookie(null, data.totalCalories);
       setTimeout(() => { setShowResult(false); resetWorkout(); }, 5000);
-    } catch (error) { setIsCalculating(false); alert('Telemetry calculation failed.'); }
+    } catch (error) { setIsCalculating(false); alert('Tracking calculation failed.'); }
   };
   
   const resetWorkout = () => {
@@ -360,11 +360,11 @@ function WorkoutTracker() {
          <div className="w-20 h-20 rounded-2xl bg-accent/20 flex items-center justify-center mb-6">
            <Activity className="w-10 h-10 text-accent animate-pulse" />
          </div>
-         <h1 className="text-4xl font-heading font-bold mb-4 tracking-tight">Kinematic Tracking</h1>
-         <p className="text-muted text-lg mb-10 max-w-xl">Initialize hardware visualization payload to track reps via onboard neural models.</p>
+         <h1 className="text-4xl font-heading font-bold mb-4 tracking-tight">Workout Tracker</h1>
+         <p className="text-muted text-lg mb-10 max-w-xl">Use your camera to track your reps automatically with our AI.</p>
          
          <button onClick={() => setIsWorkoutActive(true)} disabled={!isModelLoaded} className="flex items-center gap-3 px-8 py-4 bg-accent text-background rounded-xl font-bold text-lg hover:bg-accent/90 disabled:opacity-50 transition-all shadow-[0_0_30px_rgba(34,197,94,0.2)]">
-            {isModelLoaded ? <><Play className="w-5 h-5"/> Initiate Telemetry Payload</> : <><Activity className="w-5 h-5 animate-spin"/> Booting Neural Engine</>}
+            {isModelLoaded ? <><Play className="w-5 h-5"/> Start Camera Tracking</> : <><Activity className="w-5 h-5 animate-spin"/> Loading Camera...</>}
          </button>
          
          <div className="mt-8 font-mono text-sm text-muted bg-surface/50 p-4 border border-border/5 rounded-xl">
@@ -378,8 +378,8 @@ function WorkoutTracker() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen lg:h-screen flex flex-col overflow-x-hidden">
       <div className="flex justify-between items-center mb-6">
          <div>
-           <h1 className="text-3xl font-heading font-bold mb-1 tracking-tight">Telemetry Matrix</h1>
-           <p className="text-sm text-muted">Kinematic capture engaged. Monitoring structural integrity.</p>
+           <h1 className="text-3xl font-heading font-bold mb-1 tracking-tight">Activity Tracker</h1>
+           <p className="text-sm text-muted">Camera is on. Checking your form.</p>
          </div>
       </div>
 
@@ -459,7 +459,7 @@ function WorkoutTracker() {
                  </button>
                )}
                <button onClick={handleEndWorkout} className="lg:col-span-2 bg-surface border border-border/10 text-foreground font-bold text-[11px] sm:text-sm tracking-wide rounded-xl hover:bg-foreground/5 transition-colors flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-4 px-2 sm:px-4 text-center">
-                  Terminate Payload
+                  Stop Tracking
                </button>
             </div>
          </div>
@@ -470,8 +470,8 @@ function WorkoutTracker() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/90 backdrop-blur-xl">
              <div className="flex flex-col items-center">
                 <Activity className="w-16 h-16 text-accent animate-pulse mb-6" />
-                <h2 className="text-2xl font-bold font-heading mb-2">Calculating Output Matrix</h2>
-                <p className="text-muted font-mono text-sm">Synchronizing repetitions with biological profile variables...</p>
+                <h2 className="text-2xl font-bold font-heading mb-2">Saving Your Workout</h2>
+                <p className="text-muted font-mono text-sm">Saving your workout data to your profile...</p>
              </div>
           </motion.div>
         )}
@@ -487,7 +487,7 @@ function WorkoutTracker() {
                 <div className="text-sm font-medium text-accent uppercase tracking-widest mb-8">Kilocals (Est.)</div>
                 
                 <div className="space-y-2 bg-surface/30 p-4 rounded-xl text-left border border-border/5">
-                   <p className="text-xs text-muted uppercase font-bold tracking-wider mb-2">Payload Summary</p>
+                   <p className="text-xs text-muted uppercase font-bold tracking-wider mb-2">Workout Summary</p>
                    {workoutLog.map((log, i) => (
                      <div key={i} className="flex justify-between text-sm">
                        <span className="text-foreground">{log.name}</span>

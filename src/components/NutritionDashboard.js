@@ -187,7 +187,7 @@ function NutritionDashboard() {
           return updated;
         });
       } else {
-        alert(`Entry "${foodName}" not located in clinical database.`);
+        alert(`Entry "${foodName}" not located in our food database.`);
       }
     } catch (error) {
       alert('Network issue communicating with USDA database.');
@@ -251,9 +251,9 @@ function NutritionDashboard() {
           <div className="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center mx-auto mb-6">
              <Activity className="w-8 h-8 text-accent" />
           </div>
-          <h2 className="text-2xl font-heading font-semibold mb-3">Clinical Profile Required</h2>
-          <p className="text-muted mb-8">Baseline biometrics are required before accessing the nutrition intelligence dashboard.</p>
-          <button onClick={() => navigate('/profile')} className="w-full bg-accent hover:bg-accent/90 text-background font-semibold py-3 rounded-xl transition-all">Initialize Profile</button>
+          <h2 className="text-2xl font-heading font-semibold mb-3">Health Profile Required</h2>
+          <p className="text-muted mb-8">Please set up your health profile before using the nutrition dashboard.</p>
+          <button onClick={() => navigate('/profile')} className="w-full bg-accent hover:bg-accent/90 text-background font-semibold py-3 rounded-xl transition-all">Set Up Profile</button>
         </motion.div>
       </div>
     );
@@ -278,7 +278,7 @@ function NutritionDashboard() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-4xl font-heading font-bold mb-2 tracking-tight">Daily Nutrition</h1>
-          <p className="text-muted">Monitor and align your intake with computed targets.</p>
+          <p className="text-muted">Monitor and manage your daily food intake.</p>
         </div>
         <button onClick={() => setShowCalendar(true)} className="flex items-center gap-2 px-4 py-2 border border-border/10 hover:bg-foreground/5 bg-surface/30 rounded-xl transition-colors text-sm font-medium">
           <CalendarIcon className="w-4 h-4" /> History
@@ -349,7 +349,7 @@ function NutritionDashboard() {
                </div>
                {dailyFoods.length > 0 && (
                 <button onClick={resetDay} className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 text-muted hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors">
-                  <RotateCcw className="w-3.5 h-3.5" /> Initialize Zero
+                  <RotateCcw className="w-3.5 h-3.5" /> Reset Log
                 </button>
                )}
             </div>
@@ -404,7 +404,7 @@ function NutritionDashboard() {
                    <div className="w-12 h-12 rounded-full border border-dashed border-border/20 flex items-center justify-center mb-3">
                      <Target className="w-5 h-5 opacity-50" />
                    </div>
-                   <p className="text-sm">Database query ready. Awaiting dietary input.</p>
+                   <p className="text-sm">Ready to search. What did you eat today?</p>
                  </div>
                )}
             </div>
@@ -419,7 +419,7 @@ function NutritionDashboard() {
                <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
                  <Zap className="w-4 h-4 text-orange-400" />
                </div>
-               <h3 className="font-heading font-semibold">Expenditure Model</h3>
+               <h3 className="font-heading font-semibold">Calories Burned</h3>
              </div>
              
              <div className="flex flex-col items-center justify-center py-4 mb-6 relative">
@@ -431,12 +431,12 @@ function NutritionDashboard() {
              </div>
 
              <button onClick={() => navigate('/workout')} className="w-full flex items-center justify-center gap-2 py-3 border border-border/10 rounded-xl font-medium text-sm hover:bg-foreground/5 transition-colors">
-               Launch Activity Protocol <Plus className="w-4 h-4"/>
+               Log Activity <Plus className="w-4 h-4"/>
              </button>
           </div>
 
           <div className="glass-panel p-6">
-            <h3 className="text-sm font-semibold text-muted uppercase tracking-wider mb-4">Diagnostics Sync</h3>
+            <h3 className="text-sm font-semibold text-muted uppercase tracking-wider mb-4">Current Settings</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-border/5">
                 <div className="flex items-center gap-2 text-sm"><Target className="w-4 h-4 text-muted"/> Current Objective</div>
@@ -447,7 +447,7 @@ function NutritionDashboard() {
                 <div className="text-sm font-mono capitalize">{userProfile.activityLevel?.replace('_', ' ')}</div>
               </div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-accent"/> Intelligence Model</div>
+                <div className="flex items-center gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-accent"/> AI Assistant</div>
                 <div className="text-sm font-mono text-accent">Active</div>
               </div>
             </div>
