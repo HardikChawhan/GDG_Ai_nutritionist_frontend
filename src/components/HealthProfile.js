@@ -3,9 +3,9 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  UserCircle, Activity, HeartPulse, Scale, Ruler, 
-  Target, AlertCircle, Calendar, Save, Copy, Trash2, 
+import {
+  UserCircle, Activity, HeartPulse, Scale, Ruler,
+  Target, AlertCircle, Calendar, Save, Copy, Trash2,
   ChevronRight, ChevronLeft, Lock, ArrowRight, BookOpen,
   Wheat, Ban, Info, CheckCircle2, X
 } from 'lucide-react';
@@ -85,7 +85,7 @@ function HealthProfile() {
       try {
         const plans = JSON.parse(localStorage.getItem('savedMealPlans') || '[]');
         setSavedMealPlans(plans);
-      } catch (err) {}
+      } catch (err) { }
       return;
     }
     try {
@@ -158,8 +158,8 @@ function HealthProfile() {
       await updateProfile(formData);
       await healthProfileAPI.create(formData);
       await fetchRecommendations(formData);
-      setMessage({ type: 'success', text: 'Biometric profile synchronized.' });
-      
+      setMessage({ type: 'success', text: 'Biometric profile Saved' });
+
       const agentSettings = await firebaseService.getAgentSettings(currentUser.uid);
       if (!agentSettings) setTimeout(() => navigate('/agent-setup'), 1500);
     } catch (error) {
@@ -192,14 +192,14 @@ function HealthProfile() {
 
   return (
     <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      
+
       <AnimatePresence>
         {showLoginPrompt && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md"
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
               className="glass-panel w-full max-w-md p-8 text-center"
             >
@@ -208,7 +208,7 @@ function HealthProfile() {
               </div>
               <h2 className="text-2xl font-heading font-semibold mb-2">Authentication Required</h2>
               <p className="text-muted text-sm mb-8">Your health data requires secure sign in.</p>
-              
+
               <button onClick={() => signInWithGoogle()} className="w-full flex items-center justify-center gap-3 bg-foreground text-black hover:bg-foreground/90 px-4 py-3 rounded-xl font-medium transition-colors mb-4">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
                 Authenticate with Google
@@ -227,23 +227,23 @@ function HealthProfile() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
+
         {/* Left Column: Form Setup */}
         <div className="lg:col-span-7">
           <div className="glass-panel p-8">
-            
+
             {/* Progress indicators */}
             <div className="flex items-center justify-between mb-8 pb-8 border-b border-border/5 text-sm font-medium">
               {[
-                { step: 1, label: 'Biometrics', icon: UserCircle },
-                { step: 2, label: 'Parameters', icon: Target },
-                { step: 3, label: 'Pathology', icon: HeartPulse }
+                { step: 1, label: 'Body Info', icon: UserCircle },
+                { step: 2, label: 'Activity & Goals', icon: Target },
+                { step: 3, label: 'Health Conditions', icon: HeartPulse }
               ].map((s, idx) => (
                 <div key={s.step} className="flex items-center">
                   <div className={cn(
                     "flex items-center justify-center w-8 h-8 rounded-full border-2 transition-colors",
-                    currentStep === s.step ? "border-accent text-accent bg-accent/10" : 
-                    currentStep > s.step ? "border-transparent bg-accent text-white" : "border-border/10 text-muted"
+                    currentStep === s.step ? "border-accent text-accent bg-accent/10" :
+                      currentStep > s.step ? "border-transparent bg-accent text-white" : "border-border/10 text-muted"
                   )}>
                     {currentStep > s.step ? <CheckCircle2 className="w-4 h-4" /> : <s.icon className="w-4 h-4" />}
                   </div>
@@ -267,31 +267,31 @@ function HealthProfile() {
 
             <form onSubmit={handleSubmit}>
               <AnimatePresence mode="wait">
-                
+
                 {currentStep === 1 && (
                   <motion.div key="step1" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="space-y-6">
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
-                         <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><Calendar className="w-4 h-4 text-accent/70"/> Age</label>
-                         <input type="number" name="age" required value={formData.age} onChange={handleChange} className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-foreground/20" placeholder="Years" />
+                        <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><Calendar className="w-4 h-4 text-accent/70" /> Age</label>
+                        <input type="number" name="age" required value={formData.age} onChange={handleChange} className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-foreground/20" placeholder="Years" />
                       </div>
                       <div className="space-y-2">
-                         <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><UserCircle className="w-4 h-4 text-accent/70"/> Genotype/Sex</label>
-                         <div className="flex bg-surface/50 p-1 rounded-xl border border-border/5">
-                           {['male', 'female'].map(g => (
-                             <button key={g} type="button" onClick={() => setFormData(p => ({...p, gender: g}))} className={cn("flex-1 py-1.5 rounded-lg text-sm font-medium capitalize transition-all", formData.gender === g ? "bg-surface shadow-[0_1px_4px_rgba(0,0,0,0.2)] text-foreground" : "text-muted hover:text-foreground")}>{g}</button>
-                           ))}
-                         </div>
+                        <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><UserCircle className="w-4 h-4 text-accent/70" /> Genotype/Sex</label>
+                        <div className="flex bg-surface/50 p-1 rounded-xl border border-border/5">
+                          {['male', 'female'].map(g => (
+                            <button key={g} type="button" onClick={() => setFormData(p => ({ ...p, gender: g }))} className={cn("flex-1 py-1.5 rounded-lg text-sm font-medium capitalize transition-all", formData.gender === g ? "bg-surface shadow-[0_1px_4px_rgba(0,0,0,0.2)] text-foreground" : "text-muted hover:text-foreground")}>{g}</button>
+                          ))}
+                        </div>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
-                         <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><Scale className="w-4 h-4 text-accent/70"/> Mass (kg)</label>
-                         <input type="number" name="weight" step="0.1" required value={formData.weight} onChange={handleChange} className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-foreground/20" placeholder="0.0" />
+                        <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><Scale className="w-4 h-4 text-accent/70" /> Mass (kg)</label>
+                        <input type="number" name="weight" step="0.1" required value={formData.weight} onChange={handleChange} className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-foreground/20" placeholder="0.0" />
                       </div>
                       <div className="space-y-2">
-                         <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><Ruler className="w-4 h-4 text-accent/70"/> Stature (cm)</label>
-                         <input type="number" name="height" required value={formData.height} onChange={handleChange} className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-foreground/20" placeholder="170" />
+                        <label className="flex items-center gap-2 text-sm font-medium text-muted mb-1"><Ruler className="w-4 h-4 text-accent/70" /> Stature (cm)</label>
+                        <input type="number" name="height" required value={formData.height} onChange={handleChange} className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-foreground/20" placeholder="170" />
                       </div>
                     </div>
 
@@ -300,8 +300,8 @@ function HealthProfile() {
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-full bg-surface/80 flex items-center justify-center border border-border/10 font-mono text-sm font-medium">BMI</div>
                           <div>
-                             <div className="text-2xl font-bold font-heading">{getBMI()}</div>
-                             <div className={cn("text-xs font-semibold uppercase tracking-wider", getBMICategory(parseFloat(getBMI())).color)}>{getBMICategory(parseFloat(getBMI())).label}</div>
+                            <div className="text-2xl font-bold font-heading">{getBMI()}</div>
+                            <div className={cn("text-xs font-semibold uppercase tracking-wider", getBMICategory(parseFloat(getBMI())).color)}>{getBMICategory(parseFloat(getBMI())).label}</div>
                           </div>
                         </div>
                         <Info className="w-5 h-5 text-muted/50" />
@@ -312,44 +312,44 @@ function HealthProfile() {
 
                 {currentStep === 2 && (
                   <motion.div key="step2" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8">
-                     <div className="space-y-4">
-                        <label className="flex items-center gap-2 text-sm font-medium text-muted mb-3"><Activity className="w-4 h-4 text-accent/70"/> Energy Expenditure</label>
-                        <div className="grid grid-cols-2 gap-3">
-                          {[
-                            { value: 'sedentary', label: 'Sedentary', desc: 'Base metabolism' },
-                            { value: 'light', label: 'Light', desc: '1-3 sessions/week' },
-                            { value: 'moderate', label: 'Moderate', desc: '3-5 sessions/week' },
-                            { value: 'active', label: 'Active', desc: '6-7 sessions/week' }
-                          ].map(act => (
-                            <button key={act.value} type="button" onClick={() => setFormData(p => ({...p, activityLevel: act.value}))} className={cn("p-4 rounded-xl border text-left transition-all", formData.activityLevel === act.value ? "bg-accent/10 border-accent/40 shadow-[0_0_15px_rgba(34,197,94,0.1)]" : "bg-surface/30 border-border/5 hover:border-border/20")}>
-                               <div className={cn("font-medium mb-1", formData.activityLevel === act.value ? "text-accent" : "text-foreground")}>{act.label}</div>
-                               <div className="text-xs text-muted">{act.desc}</div>
-                            </button>
-                          ))}
-                        </div>
-                     </div>
-                     <div className="space-y-4">
-                        <label className="flex items-center gap-2 text-sm font-medium text-muted mb-3"><Target className="w-4 h-4 text-accent/70"/> Primary Goal</label>
-                        <div className="grid grid-cols-2 gap-3">
-                          {[
-                            { value: 'weight_loss', label: 'Deficit (Cut)' },
-                            { value: 'weight_gain', label: 'Surplus (Bulk)' },
-                            { value: 'maintenance', label: 'Equilibrium' },
-                            { value: 'general_health', label: 'Optimization' }
-                          ].map(goal => (
-                            <button key={goal.value} type="button" onClick={() => setFormData(p => ({...p, goal: goal.value}))} className={cn("p-4 rounded-xl border text-left transition-all", formData.goal === goal.value ? "bg-accent/10 border-accent/40 shadow-[0_0_15px_rgba(34,197,94,0.1)]" : "bg-surface/30 border-border/5 hover:border-border/20")}>
-                               <div className={cn("font-medium", formData.goal === goal.value ? "text-accent" : "text-foreground")}>{goal.label}</div>
-                            </button>
-                          ))}
-                        </div>
-                     </div>
+                    <div className="space-y-4">
+                      <label className="flex items-center gap-2 text-sm font-medium text-muted mb-3"><Activity className="w-4 h-4 text-accent/70" /> Activity Level</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {[
+                          { value: 'sedentary', label: 'Little or No Exercise', desc: 'Base metabolism' },
+                          { value: 'light', label: 'Light Activity', desc: '1-3 sessions/week' },
+                          { value: 'moderate', label: 'Moderate Activity', desc: '3-5 sessions/week' },
+                          { value: 'active', label: 'Very Active', desc: '6-7 sessions/week' }
+                        ].map(act => (
+                          <button key={act.value} type="button" onClick={() => setFormData(p => ({ ...p, activityLevel: act.value }))} className={cn("p-4 rounded-xl border text-left transition-all", formData.activityLevel === act.value ? "bg-accent/10 border-accent/40 shadow-[0_0_15px_rgba(34,197,94,0.1)]" : "bg-surface/30 border-border/5 hover:border-border/20")}>
+                            <div className={cn("font-medium mb-1", formData.activityLevel === act.value ? "text-accent" : "text-foreground")}>{act.label}</div>
+                            <div className="text-xs text-muted">{act.desc}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <label className="flex items-center gap-2 text-sm font-medium text-muted mb-3"><Target className="w-4 h-4 text-accent/70" /> Primary Goal</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {[
+                          { value: 'weight_loss', label: 'Lose Weight' },
+                          { value: 'weight_gain', label: 'Gain Weight' },
+                          { value: 'maintenance', label: 'Maintain Weight' },
+                          { value: 'general_health', label: 'Improve Fitness' }
+                        ].map(goal => (
+                          <button key={goal.value} type="button" onClick={() => setFormData(p => ({ ...p, goal: goal.value }))} className={cn("p-4 rounded-xl border text-left transition-all", formData.goal === goal.value ? "bg-accent/10 border-accent/40 shadow-[0_0_15px_rgba(34,197,94,0.1)]" : "bg-surface/30 border-border/5 hover:border-border/20")}>
+                            <div className={cn("font-medium", formData.goal === goal.value ? "text-accent" : "text-foreground")}>{goal.label}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </motion.div>
                 )}
 
                 {currentStep === 3 && (
                   <motion.div key="step3" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="space-y-6">
                     <div className="space-y-3">
-                      <label className="flex items-center gap-2 text-sm font-medium text-muted"><Wheat className="w-4 h-4 text-accent/70"/> Dietary Restrictions</label>
+                      <label className="flex items-center gap-2 text-sm font-medium text-muted"><Wheat className="w-4 h-4 text-accent/70" /> Dietary Restrictions</label>
                       <select onChange={(e) => handleMultiSelect(e, 'dietaryRestrictions')} value="" className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none">
                         <option value="">Select restrictions to append...</option>
                         <option value="Vegetarian">Vegetarian</option>
@@ -360,16 +360,16 @@ function HealthProfile() {
                       </select>
                       <div className="flex flex-wrap gap-2 mt-3">
                         {formData.dietaryRestrictions.map(item => (
-                           <div key={item} className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 border border-accent/20 rounded-lg text-xs font-medium text-accent">
-                             {item}
-                             <button type="button" onClick={() => removeItem('dietaryRestrictions', item)} className="hover:text-white"><X className="w-3 h-3"/></button>
-                           </div>
+                          <div key={item} className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 border border-accent/20 rounded-lg text-xs font-medium text-accent">
+                            {item}
+                            <button type="button" onClick={() => removeItem('dietaryRestrictions', item)} className="hover:text-white"><X className="w-3 h-3" /></button>
+                          </div>
                         ))}
                       </div>
                     </div>
 
                     <div className="space-y-3">
-                      <label className="flex items-center gap-2 text-sm font-medium text-muted"><Ban className="w-4 h-4 text-accent/70"/> Known Allergens</label>
+                      <label className="flex items-center gap-2 text-sm font-medium text-muted"><Ban className="w-4 h-4 text-accent/70" /> Known Allergens</label>
                       <select onChange={(e) => handleMultiSelect(e, 'allergies')} value="" className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none">
                         <option value="">Select allergens to append...</option>
                         <option value="Peanuts">Peanuts</option>
@@ -380,16 +380,16 @@ function HealthProfile() {
                       </select>
                       <div className="flex flex-wrap gap-2 mt-3">
                         {formData.allergies.map(item => (
-                           <div key={item} className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg text-xs font-medium text-red-400">
-                             {item}
-                             <button type="button" onClick={() => removeItem('allergies', item)} className="hover:text-white"><X className="w-3 h-3"/></button>
-                           </div>
+                          <div key={item} className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg text-xs font-medium text-red-400">
+                            {item}
+                            <button type="button" onClick={() => removeItem('allergies', item)} className="hover:text-white"><X className="w-3 h-3" /></button>
+                          </div>
                         ))}
                       </div>
                     </div>
 
                     <div className="space-y-3">
-                      <label className="flex items-center gap-2 text-sm font-medium text-muted"><HeartPulse className="w-4 h-4 text-accent/70"/> Diagnosed Conditions</label>
+                      <label className="flex items-center gap-2 text-sm font-medium text-muted"><HeartPulse className="w-4 h-4 text-accent/70" /> Diagnosed Conditions</label>
                       <select onChange={(e) => handleMultiSelect(e, 'healthConditions')} value="" className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none">
                         <option value="">Select conditions to append...</option>
                         <option value="Diabetes">Diabetes</option>
@@ -400,10 +400,10 @@ function HealthProfile() {
                       </select>
                       <div className="flex flex-wrap gap-2 mt-3">
                         {formData.healthConditions.map(item => (
-                           <div key={item} className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/10 border border-orange-500/20 rounded-lg text-xs font-medium text-orange-400">
-                             {item}
-                             <button type="button" onClick={() => removeItem('healthConditions', item)} className="hover:text-white"><X className="w-3 h-3"/></button>
-                           </div>
+                          <div key={item} className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/10 border border-orange-500/20 rounded-lg text-xs font-medium text-orange-400">
+                            {item}
+                            <button type="button" onClick={() => removeItem('healthConditions', item)} className="hover:text-white"><X className="w-3 h-3" /></button>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -418,7 +418,7 @@ function HealthProfile() {
                   <button type="button" onClick={() => setCurrentStep(c => c - 1)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border/10 hover:bg-foreground/5 text-sm font-medium transition-colors">
                     <ChevronLeft className="w-4 h-4" /> Go Back
                   </button>
-                ) : <div/>}
+                ) : <div />}
 
                 {currentStep < 3 ? (
                   <button type="button" onClick={() => setCurrentStep(c => c + 1)} className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-accent text-background hover:bg-accent/90 text-sm font-semibold transition-colors disabled:opacity-50" disabled={(currentStep === 1 && (!formData.age || !formData.weight || !formData.height)) || (currentStep === 2 && (!formData.activityLevel || !formData.goal))}>
@@ -436,7 +436,7 @@ function HealthProfile() {
 
         {/* Right Column: Recommendations & Meals */}
         <div className="lg:col-span-5 space-y-6">
-          
+
           <AnimatePresence>
             {recommendations && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-panel p-6">
@@ -448,41 +448,41 @@ function HealthProfile() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mb-8">
-                   <div className="p-4 rounded-xl border border-border/5 bg-surface/50">
-                     <p className="text-xs text-muted font-medium mb-1">Target Energy</p>
-                     <p className="text-2xl font-bold text-accent font-heading">{recommendations.targetCalories} <span className="text-sm font-normal text-muted">kcal</span></p>
-                     <p className="text-[10px] text-muted uppercase tracking-wider mt-2">Optimal Threshold</p>
-                   </div>
-                   <div className="p-4 rounded-xl border border-border/5 bg-surface/50">
-                     <p className="text-xs text-muted font-medium mb-1">Basal Metabolic Rate</p>
-                     <p className="text-2xl font-bold font-heading">{recommendations.bmr} <span className="text-sm font-normal text-muted">kcal</span></p>
-                     <p className="text-[10px] text-muted uppercase tracking-wider mt-2">Resting Base</p>
-                   </div>
+                  <div className="p-4 rounded-xl border border-border/5 bg-surface/50">
+                    <p className="text-xs text-muted font-medium mb-1">Target Energy</p>
+                    <p className="text-2xl font-bold text-accent font-heading">{recommendations.targetCalories} <span className="text-sm font-normal text-muted">kcal</span></p>
+                    <p className="text-[10px] text-muted uppercase tracking-wider mt-2">Optimal Threshold</p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-border/5 bg-surface/50">
+                    <p className="text-xs text-muted font-medium mb-1">Basal Metabolic Rate</p>
+                    <p className="text-2xl font-bold font-heading">{recommendations.bmr} <span className="text-sm font-normal text-muted">kcal</span></p>
+                    <p className="text-[10px] text-muted uppercase tracking-wider mt-2">Resting Base</p>
+                  </div>
                 </div>
 
                 <h4 className="text-sm font-medium text-muted mb-4">Macronutrient Distribution</h4>
                 <div className="space-y-4">
-                   <div className="space-y-1">
-                     <div className="flex justify-between text-sm">
-                       <span className="font-medium text-foreground">Proteins</span>
-                       <span className="text-accent font-mono">{recommendations.macros.protein}g</span>
-                     </div>
-                     <div className="h-1.5 w-full bg-surface rounded-full overflow-hidden"><div className="h-full bg-accent w-[30%]" /></div>
-                   </div>
-                   <div className="space-y-1">
-                     <div className="flex justify-between text-sm">
-                       <span className="font-medium text-foreground">Carbohydrates</span>
-                       <span className="text-blue-400 font-mono">{recommendations.macros.carbohydrates}g</span>
-                     </div>
-                     <div className="h-1.5 w-full bg-surface rounded-full overflow-hidden"><div className="h-full bg-blue-400 w-[45%]" /></div>
-                   </div>
-                   <div className="space-y-1">
-                     <div className="flex justify-between text-sm">
-                       <span className="font-medium text-foreground">Lipids / Fats</span>
-                       <span className="text-orange-400 font-mono">{recommendations.macros.fat}g</span>
-                     </div>
-                     <div className="h-1.5 w-full bg-surface rounded-full overflow-hidden"><div className="h-full bg-orange-400 w-[25%]" /></div>
-                   </div>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium text-foreground">Proteins</span>
+                      <span className="text-accent font-mono">{recommendations.macros.protein}g</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-surface rounded-full overflow-hidden"><div className="h-full bg-accent w-[30%]" /></div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium text-foreground">Carbohydrates</span>
+                      <span className="text-blue-400 font-mono">{recommendations.macros.carbohydrates}g</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-surface rounded-full overflow-hidden"><div className="h-full bg-blue-400 w-[45%]" /></div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium text-foreground">Lipids / Fats</span>
+                      <span className="text-orange-400 font-mono">{recommendations.macros.fat}g</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-surface rounded-full overflow-hidden"><div className="h-full bg-orange-400 w-[25%]" /></div>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -494,23 +494,23 @@ function HealthProfile() {
                 <h3 className="font-heading font-semibold text-lg flex items-center gap-2"><BookOpen className="w-4 h-4 text-muted" /> Generated Plans</h3>
                 <span className="px-2.5 py-1 rounded-full bg-surface text-xs font-medium border border-border/5">{savedMealPlans.length} records</span>
               </div>
-              
+
               <div className="space-y-3">
                 {savedMealPlans.map(plan => (
                   <div key={plan.id} className="p-4 rounded-xl border border-border/5 bg-surface/30 hover:bg-surface/60 transition-colors group cursor-pointer" onClick={() => setSelectedPlan(plan)}>
-                     <div className="flex justify-between items-start mb-2">
-                       <div>
-                         <p className="font-medium text-sm text-foreground">Meal Plan • {plan.preferences.duration} Day(s)</p>
-                         <p className="text-xs text-muted">{new Date(plan.savedAt).toLocaleDateString()}</p>
-                       </div>
-                       <button onClick={(e) => { e.stopPropagation(); deleteMealPlan(plan.id); }} className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
-                         <Trash2 className="w-3.5 h-3.5" />
-                       </button>
-                     </div>
-                     <div className="flex gap-2 text-xs font-medium">
-                       <span className="px-2 py-1 bg-foreground/5 rounded-md">{plan.preferences.mealsPerDay} meals/day</span>
-                       {plan.preferences.cuisinePreferences.length > 0 && <span className="px-2 py-1 bg-foreground/5 rounded-md text-ellipsis overflow-hidden whitespace-nowrap max-w-[120px]">{plan.preferences.cuisinePreferences[0]}</span>}
-                     </div>
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="font-medium text-sm text-foreground">Meal Plan • {plan.preferences.duration} Day(s)</p>
+                        <p className="text-xs text-muted">{new Date(plan.savedAt).toLocaleDateString()}</p>
+                      </div>
+                      <button onClick={(e) => { e.stopPropagation(); deleteMealPlan(plan.id); }} className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <div className="flex gap-2 text-xs font-medium">
+                      <span className="px-2 py-1 bg-foreground/5 rounded-md">{plan.preferences.mealsPerDay} meals/day</span>
+                      {plan.preferences.cuisinePreferences.length > 0 && <span className="px-2 py-1 bg-foreground/5 rounded-md text-ellipsis overflow-hidden whitespace-nowrap max-w-[120px]">{plan.preferences.cuisinePreferences[0]}</span>}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -522,25 +522,25 @@ function HealthProfile() {
 
       <AnimatePresence>
         {selectedPlan && (
-           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md" onClick={() => setSelectedPlan(null)}>
-              <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="glass-panel w-full max-w-2xl max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                 <div className="flex items-center justify-between p-5 border-b border-border/5">
-                   <h2 className="font-heading font-semibold text-lg">Protocol Documentation • {selectedPlan.preferences.duration} Days</h2>
-                   <button onClick={() => setSelectedPlan(null)} className="p-1"><X className="w-5 h-5 text-muted hover:text-foreground" /></button>
-                 </div>
-                 
-                 <div className="flex-1 overflow-y-auto p-6 text-sm text-foreground/90 prose prose-invert prose-p:leading-relaxed prose-headings:font-heading prose-a:text-accent">
-                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{selectedPlan.mealPlan}</ReactMarkdown>
-                 </div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md" onClick={() => setSelectedPlan(null)}>
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="glass-panel w-full max-w-2xl max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between p-5 border-b border-border/5">
+                <h2 className="font-heading font-semibold text-lg">Protocol Documentation • {selectedPlan.preferences.duration} Days</h2>
+                <button onClick={() => setSelectedPlan(null)} className="p-1"><X className="w-5 h-5 text-muted hover:text-foreground" /></button>
+              </div>
 
-                 <div className="p-4 border-t border-border/5 bg-surface/30 flex justify-end gap-3">
-                   <button onClick={() => setSelectedPlan(null)} className="px-4 py-2 text-sm font-medium text-muted hover:text-foreground">Close</button>
-                   <button onClick={() => { navigator.clipboard.writeText(selectedPlan.mealPlan); alert('Data copied to clipboard'); }} className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-accent text-background rounded-lg hover:bg-accent/90">
-                     <Copy className="w-4 h-4" /> Copy Protocol
-                   </button>
-                 </div>
-              </motion.div>
-           </motion.div>
+              <div className="flex-1 overflow-y-auto p-6 text-sm text-foreground/90 prose prose-invert prose-p:leading-relaxed prose-headings:font-heading prose-a:text-accent">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{selectedPlan.mealPlan}</ReactMarkdown>
+              </div>
+
+              <div className="p-4 border-t border-border/5 bg-surface/30 flex justify-end gap-3">
+                <button onClick={() => setSelectedPlan(null)} className="px-4 py-2 text-sm font-medium text-muted hover:text-foreground">Close</button>
+                <button onClick={() => { navigator.clipboard.writeText(selectedPlan.mealPlan); alert('Data copied to clipboard'); }} className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-accent text-background rounded-lg hover:bg-accent/90">
+                  <Copy className="w-4 h-4" /> Copy Protocol
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
