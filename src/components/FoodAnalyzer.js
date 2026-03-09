@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
+import { formatAIResponseToMarkdown } from '../utils/formatText';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Scan, Search, Activity, ClipboardList, Database, RefreshCcw, Printer,
@@ -177,8 +179,8 @@ function FoodAnalyzer() {
                  </div>
 
                  <div className="flex-1 p-8 overflow-y-auto custom-scrollbar prose prose-invert prose-p:leading-relaxed prose-headings:font-heading prose-a:text-accent max-w-none text-sm text-foreground/90">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {analysis.analysis}
+                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                      {formatAIResponseToMarkdown(analysis.analysis)}
                     </ReactMarkdown>
                  </div>
 

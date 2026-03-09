@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
+import { formatAIResponseToMarkdown } from '../utils/formatText';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -530,7 +532,7 @@ function HealthProfile() {
               </div>
 
               <div className="flex-1 overflow-y-auto p-6 text-sm text-foreground/90 prose prose-invert prose-p:leading-relaxed prose-headings:font-heading prose-a:text-accent">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{selectedPlan.mealPlan}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{formatAIResponseToMarkdown(selectedPlan.mealPlan)}</ReactMarkdown>
               </div>
 
               <div className="p-4 border-t border-border/5 bg-surface/30 flex justify-end gap-3">

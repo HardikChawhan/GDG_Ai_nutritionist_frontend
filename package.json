@@ -5,6 +5,7 @@
   "homepage": "https://HardikChawhan.github.io/GDG_Ai_nutritionist_frontend",
   "dependencies": {
     "@mediapipe/pose": "^0.5.1675469404",
+    "@tailwindcss/typography": "^0.5.19",
     "@tensorflow-models/pose-detection": "^2.1.3",
     "@tensorflow/tfjs": "^4.22.0",
     "@tensorflow/tfjs-backend-webgl": "^4.22.0",
@@ -24,6 +25,7 @@
     "react-markdown": "^10.1.0",
     "react-router-dom": "^6.20.0",
     "react-scripts": "5.0.1",
+    "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^3.4.19"

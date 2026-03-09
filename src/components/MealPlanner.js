@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
+import { formatAIResponseToMarkdown } from '../utils/formatText';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CalendarDays, Utensils, ChefHat, Sparkles, Activity,
@@ -230,8 +232,8 @@ function MealPlanner() {
                   </div>
 
                   <div className="p-8 overflow-y-auto prose prose-invert prose-p:leading-relaxed prose-headings:font-heading prose-a:text-accent prose-pre:bg-surface prose-pre:border prose-pre:border-border/10 max-w-none text-sm text-foreground/90">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {mealPlan.mealPlan}
+                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                      {formatAIResponseToMarkdown(mealPlan.mealPlan)}
                     </ReactMarkdown>
                   </div>
 
