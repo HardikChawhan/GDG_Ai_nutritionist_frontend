@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, LogOut, MessageSquare, Star, CheckSquare, Square, Save, Activity } from 'lucide-react';
 import { getAllReviews, getAllSuggestions, updateReviewPriority } from '../services/firebaseService';
 import { cn } from '../utils/cn';
