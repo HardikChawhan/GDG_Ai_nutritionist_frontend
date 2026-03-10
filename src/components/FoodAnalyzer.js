@@ -54,7 +54,7 @@ function FoodAnalyzer() {
           
           setTimeout(() => {
              window.dispatchEvent(new CustomEvent('trigger-review'));
-          }, 1500);
+          }, 12000);
         } catch (saveError) {}
       }
     } catch (err) {

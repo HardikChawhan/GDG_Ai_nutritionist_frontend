@@ -350,7 +350,7 @@ function WorkoutTracker() {
          setShowResult(false); 
          resetWorkout(); 
          window.dispatchEvent(new CustomEvent('trigger-review'));
-      }, 5000);
+      }, 12000);
     } catch (error) { setIsCalculating(false); alert('Tracking calculation failed.'); }
   };
 

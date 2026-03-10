@@ -98,7 +98,7 @@ function MealPlanner() {
         // Trigger review prompt after successful usage
         setTimeout(() => {
            window.dispatchEvent(new CustomEvent('trigger-review'));
-        }, 1500);
+        }, 12000);
       } else {
         const savedPlans = JSON.parse(localStorage.getItem('savedMealPlans') || '[]');
         savedPlans.unshift(newPlan);

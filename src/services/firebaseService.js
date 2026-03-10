@@ -1,12 +1,15 @@
 import { 
   collection, 
+  collectionGroup,
   doc, 
   getDoc, 
   setDoc, 
   deleteDoc,
   getDocs,
   serverTimestamp,
-  increment 
+  increment,
+  query,
+  where
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
@@ -428,7 +431,8 @@ class FirebaseService {
    */
   async saveReview(userId, rating, text) {
     try {
-      const reviewRef = doc(db, 'reviews', userId);
+      // Store in subcollection so it inherits user's permissions securely
+      const reviewRef = doc(db, 'users', userId, 'reviews', 'appReview');
       await setDoc(reviewRef, {
         userId,
         rating,
@@ -496,15 +500,13 @@ class FirebaseService {
    */
   async getHighlightedReviews() {
     try {
-      const q = collection(db, 'reviews');
+      // Use collectionGroup to query 'reviews' subcollections across all users
+      const q = query(collectionGroup(db, 'reviews'), where('priority', '==', 1));
       const querySnapshot = await getDocs(q);
       
       const reviews = [];
       querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        if (data.priority === 1) {
-           reviews.push({ id: docSnap.id, ...data });
-        }
+         reviews.push({ id: docSnap.id, ...docSnap.data() });
       });
       return reviews;
     } catch (error) {
@@ -516,16 +518,19 @@ class FirebaseService {
   // ==================== SUGGESTIONS ====================
   
   /**
-   * Save user suggestion (enforces 5 max)
+   * Save user suggestion (enforces 5 max inline)
    */
   async saveSuggestion(userId, name, text) {
     try {
-      const count = await this.getUserSuggestionCount(userId);
-      if (count >= 5) {
+      // Direct count inside the function to avoid `this` context loss on destructuring exports
+      const q = collection(db, 'users', userId, 'suggestions');
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.size >= 5) {
          throw new Error('Suggestion limit reached. You can only submit up to 5 suggestions.');
       }
       
-      const suggestionRef = doc(collection(db, 'suggestions'));
+      const suggestionRef = doc(collection(db, 'users', userId, 'suggestions'));
       await setDoc(suggestionRef, {
         userId,
         name: name || 'Anonymous',
@@ -540,22 +545,13 @@ class FirebaseService {
   }
 
   /**
-   * Get count of user's suggestions
+   * Get count of user's suggestions directly (optional helper)
    */
   async getUserSuggestionCount(userId) {
      try {
-       // Since the db constraints are flexible, we'll fetch docs referencing their ID.
-       // For a highly scaling app, we would use a count() aggregate query.
-       const q = collection(db, 'suggestions');
+       const q = collection(db, 'users', userId, 'suggestions');
        const querySnapshot = await getDocs(q);
-       
-       let count = 0;
-       querySnapshot.forEach((docSnap) => {
-         if (docSnap.data().userId === userId) {
-            count++;
-         }
-       });
-       return count;
+       return querySnapshot.size;
      } catch (error) {
        console.error('Error getting suggestion count:', error);
        throw error;
