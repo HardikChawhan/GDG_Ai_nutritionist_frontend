@@ -431,6 +431,11 @@ class FirebaseService {
    */
   async saveReview(userId, rating, text) {
     try {
+      // Fetch user profile data to embed into the review
+      const userRef = doc(db, 'users', userId);
+      const userSnap = await getDoc(userRef);
+      const userData = userSnap.exists() ? userSnap.data() : {};
+
       // Store in subcollection so it inherits user's permissions securely
       const reviewRef = doc(db, 'users', userId, 'reviews', 'appReview');
       await setDoc(reviewRef, {
@@ -438,11 +443,12 @@ class FirebaseService {
         rating,
         text,
         priority: 0,
+        displayName: userData.displayName || 'Anonymous User',
+        photoURL: userData.photoURL || null,
         createdAt: serverTimestamp()
       });
       
       // Update user document to mark review as complete
-      const userRef = doc(db, 'users', userId);
       await setDoc(userRef, { hasReviewed: true }, { merge: true });
       
       return { success: true };

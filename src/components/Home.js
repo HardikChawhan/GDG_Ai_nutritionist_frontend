@@ -235,10 +235,14 @@ function Home() {
                   <p className="text-foreground text-sm italic mb-6">"{review.text}"</p>
                 </div>
                 <div className="flex items-center gap-3 border-t border-border/5 pt-4 relative z-10">
-                  <div className="w-8 h-8 rounded-full bg-surface/80 border border-accent/20 flex items-center justify-center">
-                    <User className="w-4 h-4 text-accent" />
-                  </div>
-                  <div className="text-xs font-semibold">User #{review.userId.substring(0, 4)}</div>
+                  {review.photoURL ? (
+                    <img src={review.photoURL} alt="User Avatar" className="w-8 h-8 rounded-full border border-accent/20 object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-surface/80 border border-accent/20 flex items-center justify-center">
+                      <User className="w-4 h-4 text-accent" />
+                    </div>
+                  )}
+                  <div className="text-xs font-semibold">{review.displayName || `User #${review.userId.substring(0, 4)}`}</div>
                 </div>
               </div>
             ))}
@@ -270,10 +274,16 @@ function Home() {
                   <p className="text-muted text-sm mb-4 line-clamp-4">"{review.text}"</p>
                 </div>
                 <div className="flex items-center gap-2 pt-3 border-t border-border/5">
-                  <div className="w-6 h-6 rounded-full bg-surface/50 flex items-center justify-center">
-                    <User className="w-3 h-3 text-muted/70" />
+                  {review.photoURL ? (
+                    <img src={review.photoURL} alt="Avatar" className="w-6 h-6 rounded-full border border-border/10 object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-surface/50 flex items-center justify-center">
+                      <User className="w-3 h-3 text-muted/70" />
+                    </div>
+                  )}
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold flex-1 truncate">
+                    {review.displayName || `U-${review.userId.substring(0, 4)}`}
                   </div>
-                  <div className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">U-{review.userId.substring(0, 4)}</div>
                 </div>
               </div>
             ))}
