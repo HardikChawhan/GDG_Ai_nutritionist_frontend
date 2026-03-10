@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BrainCircuit, Activity, Database, Sparkles, User, ChevronRight, Apple, Star, MessageSquare } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { getHighlightedReviews, saveSuggestion } from '../services/firebaseService';
+import { getAllReviews, saveSuggestion } from '../services/firebaseService';
 import { cn } from '../utils/cn';
 
 function Home() {
@@ -16,11 +16,14 @@ function Home() {
 
   React.useEffect(() => {
     const fetchReviews = async () => {
-      const data = await getHighlightedReviews();
+      const data = await getAllReviews();
       setReviews(data);
     };
     fetchReviews();
   }, []);
+
+  const highlightedReviews = reviews.filter(r => r.priority === 1);
+  const standardReviews = reviews.filter(r => r.priority !== 1);
 
   const handleSuggestionSubmit = async (e) => {
     e.preventDefault();
@@ -208,33 +211,69 @@ function Home() {
       </motion.div>
 
       {/* Dynamic Highlighted Reviews Section */}
-      {reviews.length > 0 && (
+      {highlightedReviews.length > 0 && (
         <motion.section 
-          className="mt-24 mb-16"
+          className="mt-24 mb-12"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-heading font-bold mb-4">What Our Users Say</h2>
-            <p className="text-muted max-w-2xl mx-auto">Real success stories from individuals optimizing their health through intelligent tracking.</p>
+            <h2 className="text-3xl font-heading font-bold mb-4">What Our Users Say <span className="text-accent underline decoration-wavy decoration-accent/30 underline-offset-8">Most Helpful</span></h2>
+            <p className="text-muted max-w-2xl mx-auto">Real success stories explicitly featured by our administration module.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {reviews.map((review) => (
-              <div key={review.id} className="glass-panel p-6 flex flex-col justify-between">
-                <div>
+            {highlightedReviews.map((review) => (
+              <div key={review.userId} className="glass-panel p-6 flex flex-col justify-between relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-accent/10 transition-colors duration-700" />
+                <div className="relative z-10">
                   <div className="flex text-accent mb-4">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className={cn("w-4 h-4", i < Math.floor(review.rating) ? "fill-accent" : "text-muted/30")} />
                     ))}
                   </div>
-                  <p className="text-muted text-sm italic mb-6">"{review.text}"</p>
+                  <p className="text-foreground text-sm italic mb-6">"{review.text}"</p>
                 </div>
-                <div className="flex items-center gap-3 border-t border-border/5 pt-4">
-                  <div className="w-8 h-8 rounded-full bg-surface/80 flex items-center justify-center">
-                    <User className="w-4 h-4 text-muted" />
+                <div className="flex items-center gap-3 border-t border-border/5 pt-4 relative z-10">
+                  <div className="w-8 h-8 rounded-full bg-surface/80 border border-accent/20 flex items-center justify-center">
+                    <User className="w-4 h-4 text-accent" />
                   </div>
                   <div className="text-xs font-semibold">User #{review.userId.substring(0, 4)}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.section>
+      )}
+
+      {/* Standard Complete Reviews Section */}
+      {standardReviews.length > 0 && (
+        <motion.section 
+          className="mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-heading font-bold mb-2">Community Voices</h2>
+            <p className="text-muted text-sm max-w-xl mx-auto">Unfiltered experiences from our growing user base.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {standardReviews.map((review) => (
+              <div key={review.userId} className="glass-panel p-5 flex flex-col justify-between border-border/5 hover:border-accent/10 transition-colors">
+                <div>
+                  <div className="flex mb-3">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className={cn("w-3 h-3", i < Math.floor(review.rating) ? "fill-accent text-accent" : "text-muted/20")} />
+                    ))}
+                  </div>
+                  <p className="text-muted text-sm mb-4 line-clamp-4">"{review.text}"</p>
+                </div>
+                <div className="flex items-center gap-2 pt-3 border-t border-border/5">
+                  <div className="w-6 h-6 rounded-full bg-surface/50 flex items-center justify-center">
+                    <User className="w-3 h-3 text-muted/70" />
+                  </div>
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">U-{review.userId.substring(0, 4)}</div>
                 </div>
               </div>
             ))}

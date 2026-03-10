@@ -515,8 +515,59 @@ class FirebaseService {
     }
   }
 
+  /**
+   * Get all reviews for admin panel and landing page
+   */
+  async getAllReviews() {
+    try {
+      const q = collectionGroup(db, 'reviews');
+      const querySnapshot = await getDocs(q);
+      
+      const reviews = [];
+      querySnapshot.forEach((docSnap) => {
+         reviews.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      // Sort by newest first
+      return reviews.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
+    } catch (error) {
+      console.error('Error getting all reviews:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Update review priority (Admin)
+   */
+  async updateReviewPriority(userId, priority) {
+    try {
+      const reviewRef = doc(db, 'users', userId, 'reviews', 'appReview');
+      await setDoc(reviewRef, { priority }, { merge: true });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating priority:', error);
+      throw error;
+    }
+  }
+
   // ==================== SUGGESTIONS ====================
   
+  /**
+   * Get all suggestions (Admin)
+   */
+  async getAllSuggestions() {
+    try {
+      const q = collectionGroup(db, 'suggestions');
+      const querySnapshot = await getDocs(q);
+      const suggestions = [];
+      querySnapshot.forEach((docSnap) => {
+         suggestions.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      return suggestions.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
+    } catch (error) {
+      console.error('Error getting suggestions:', error);
+      return [];
+    }
+  }
   /**
    * Save user suggestion (enforces 5 max inline)
    */
@@ -583,5 +634,8 @@ export const {
   shouldShowReviewPrompt,
   getHighlightedReviews,
   saveSuggestion,
-  getUserSuggestionCount
+  getUserSuggestionCount,
+  getAllReviews,
+  updateReviewPriority,
+  getAllSuggestions
 } = firebaseService;

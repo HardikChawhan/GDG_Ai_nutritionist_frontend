@@ -12,6 +12,7 @@ import FoodSearch from './components/FoodSearch';
 import AgentSelection from './components/AgentSelection';
 import VoiceAssistant from './components/VoiceAssistant';
 import WorkoutTracker from './components/WorkoutTracker';
+import AdminPanel from './components/AdminPanel';
 import ScrollToTop from './components/ScrollToTop';
 import ReviewModal from './components/ReviewModal';
 import Logo_pic from './assets/Images/god.png';
