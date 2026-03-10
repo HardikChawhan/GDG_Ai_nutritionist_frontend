@@ -13,6 +13,7 @@ import AgentSelection from './components/AgentSelection';
 import VoiceAssistant from './components/VoiceAssistant';
 import WorkoutTracker from './components/WorkoutTracker';
 import ScrollToTop from './components/ScrollToTop';
+import ReviewModal from './components/ReviewModal';
 import Logo_pic from './assets/Images/god.png';
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -272,6 +273,9 @@ function AppContent() {
           isEnabled={voiceAssistantEnabled}
         />
       )}
+
+      {/* Global Review Prompt */}
+      {currentUser && <ReviewModal />}
     </div>
   );
 }

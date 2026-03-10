@@ -420,6 +420,147 @@ class FirebaseService {
       throw error;
     }
   }
+
+  // ==================== REVIEWS ====================
+
+  /**
+   * Save user review
+   */
+  async saveReview(userId, rating, text) {
+    try {
+      const reviewRef = doc(db, 'reviews', userId);
+      await setDoc(reviewRef, {
+        userId,
+        rating,
+        text,
+        priority: 0,
+        createdAt: serverTimestamp()
+      });
+      
+      // Update user document to mark review as complete
+      const userRef = doc(db, 'users', userId);
+      await setDoc(userRef, { hasReviewed: true }, { merge: true });
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error saving review:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Defer review prompt
+   */
+  async deferReview(userId) {
+    try {
+       const userRef = doc(db, 'users', userId);
+       await setDoc(userRef, { lastReviewDeferredAt: serverTimestamp() }, { merge: true });
+       return { success: true };
+    } catch (error) {
+      console.error('Error deferring review:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if user should see review prompt
+   */
+  async shouldShowReviewPrompt(userId) {
+    try {
+      const userRef = doc(db, 'users', userId);
+      const userSnap = await getDoc(userRef);
+      
+      if (!userSnap.exists()) return true;
+      
+      const data = userSnap.data();
+      if (data.hasReviewed) return false;
+      
+      if (data.lastReviewDeferredAt) {
+         // Check if deferred within the last 24 hours
+         const deferredDate = data.lastReviewDeferredAt.toDate();
+         const now = new Date();
+         const msInDay = 24 * 60 * 60 * 1000;
+         
+         const isSameDayOrFuture = (now - deferredDate) < msInDay;
+         if (isSameDayOrFuture) return false;
+      }
+      return true;
+    } catch (error) {
+      console.error('Error checking review status:', error);
+      return false; // Safest default is to not bug the user if backend flakes
+    }
+  }
+
+  /**
+   * Get highlighted reviews for landing page
+   */
+  async getHighlightedReviews() {
+    try {
+      const q = collection(db, 'reviews');
+      const querySnapshot = await getDocs(q);
+      
+      const reviews = [];
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (data.priority === 1) {
+           reviews.push({ id: docSnap.id, ...data });
+        }
+      });
+      return reviews;
+    } catch (error) {
+      console.error('Error getting highlighted reviews:', error);
+      return [];
+    }
+  }
+
+  // ==================== SUGGESTIONS ====================
+  
+  /**
+   * Save user suggestion (enforces 5 max)
+   */
+  async saveSuggestion(userId, name, text) {
+    try {
+      const count = await this.getUserSuggestionCount(userId);
+      if (count >= 5) {
+         throw new Error('Suggestion limit reached. You can only submit up to 5 suggestions.');
+      }
+      
+      const suggestionRef = doc(collection(db, 'suggestions'));
+      await setDoc(suggestionRef, {
+        userId,
+        name: name || 'Anonymous',
+        text,
+        createdAt: serverTimestamp()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error saving suggestion:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get count of user's suggestions
+   */
+  async getUserSuggestionCount(userId) {
+     try {
+       // Since the db constraints are flexible, we'll fetch docs referencing their ID.
+       // For a highly scaling app, we would use a count() aggregate query.
+       const q = collection(db, 'suggestions');
+       const querySnapshot = await getDocs(q);
+       
+       let count = 0;
+       querySnapshot.forEach((docSnap) => {
+         if (docSnap.data().userId === userId) {
+            count++;
+         }
+       });
+       return count;
+     } catch (error) {
+       console.error('Error getting suggestion count:', error);
+       throw error;
+     }
+  }
 }
 
 const firebaseService = new FirebaseService();
@@ -440,5 +581,11 @@ export const {
   getFoodAnalysisHistory,
   saveAgentSettings,
   getAgentSettings,
-  getAllUserData
+  getAllUserData,
+  saveReview,
+  deferReview,
+  shouldShowReviewPrompt,
+  getHighlightedReviews,
+  saveSuggestion,
+  getUserSuggestionCount
 } = firebaseService;

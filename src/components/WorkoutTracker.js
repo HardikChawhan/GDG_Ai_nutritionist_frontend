@@ -345,7 +345,12 @@ function WorkoutTracker() {
       setCaloriesResult(data.totalCalories); setIsCalculating(false); setShowResult(true);
       speakFeedback(`Energy depleted: ${Math.round(data.totalCalories)} calories.`);
       if (data?.totalCalories) saveCaloriesBurnedToCookie(null, data.totalCalories);
-      setTimeout(() => { setShowResult(false); resetWorkout(); }, 5000);
+      
+      setTimeout(() => { 
+         setShowResult(false); 
+         resetWorkout(); 
+         window.dispatchEvent(new CustomEvent('trigger-review'));
+      }, 5000);
     } catch (error) { setIsCalculating(false); alert('Tracking calculation failed.'); }
   };
 

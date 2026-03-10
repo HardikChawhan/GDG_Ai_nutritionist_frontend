@@ -1,14 +1,46 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BrainCircuit, Activity, Database, Sparkles, User, ChevronRight, Apple } from 'lucide-react';
+import { BrainCircuit, Activity, Database, Sparkles, User, ChevronRight, Apple, Star, MessageSquare } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { getHighlightedReviews, saveSuggestion } from '../services/firebaseService';
 import { cn } from '../utils/cn';
 
 function Home() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { currentUser, userProfile, signInWithGoogle, loading } = useAuth();
   const navigate = useNavigate();
+  const [reviews, setReviews] = useState([]);
+  const [suggestionText, setSuggestionText] = useState('');
+  const [isSubmittingSuggestion, setIsSubmittingSuggestion] = useState(false);
+
+  React.useEffect(() => {
+    const fetchReviews = async () => {
+      const data = await getHighlightedReviews();
+      setReviews(data);
+    };
+    fetchReviews();
+  }, []);
+
+  const handleSuggestionSubmit = async (e) => {
+    e.preventDefault();
+    if (!currentUser) {
+      setShowLoginModal(true);
+      return;
+    }
+    if (!suggestionText.trim()) return;
+    
+    setIsSubmittingSuggestion(true);
+    try {
+      await saveSuggestion(currentUser.uid, currentUser.displayName, suggestionText.trim());
+      alert("Thank you! Your suggestion has been successfully recorded.");
+      setSuggestionText('');
+    } catch (error) {
+      alert(error.message || "Failed to submit suggestion.");
+    } finally {
+      setIsSubmittingSuggestion(false);
+    }
+  };
 
   const handleGetStarted = (e) => {
     if (!currentUser) {
@@ -174,6 +206,76 @@ function Home() {
           </div>
         </motion.div>
       </motion.div>
+
+      {/* Dynamic Highlighted Reviews Section */}
+      {reviews.length > 0 && (
+        <motion.section 
+          className="mt-24 mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-heading font-bold mb-4">What Our Users Say</h2>
+            <p className="text-muted max-w-2xl mx-auto">Real success stories from individuals optimizing their health through intelligent tracking.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {reviews.map((review) => (
+              <div key={review.id} className="glass-panel p-6 flex flex-col justify-between">
+                <div>
+                  <div className="flex text-accent mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className={cn("w-4 h-4", i < Math.floor(review.rating) ? "fill-accent" : "text-muted/30")} />
+                    ))}
+                  </div>
+                  <p className="text-muted text-sm italic mb-6">"{review.text}"</p>
+                </div>
+                <div className="flex items-center gap-3 border-t border-border/5 pt-4">
+                  <div className="w-8 h-8 rounded-full bg-surface/80 flex items-center justify-center">
+                    <User className="w-4 h-4 text-muted" />
+                  </div>
+                  <div className="text-xs font-semibold">User #{review.userId.substring(0, 4)}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.section>
+      )}
+
+      {/* Suggestion Portal */}
+      <motion.section 
+        className="mt-16 mb-20 max-w-2xl mx-auto glass-panel p-8 relative overflow-hidden group"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+      >
+        <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-accent/10 transition-colors duration-700" />
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
+              <MessageSquare className="w-5 h-5 text-accent" />
+            </div>
+            <h3 className="text-2xl font-heading font-semibold">Help Us Improve</h3>
+          </div>
+          <p className="text-muted text-sm mb-6">Have an idea for a new feature? We read every submission. (Max 5 suggestions per user).</p>
+          
+          <form onSubmit={handleSuggestionSubmit}>
+            <textarea
+              value={suggestionText}
+              onChange={(e) => setSuggestionText(e.target.value)}
+              placeholder="I'd love to see a feature that..."
+              className="w-full h-32 bg-surface/50 border border-border/10 rounded-xl px-4 py-3 focus:ring-1 focus:ring-accent focus:border-accent text-sm text-foreground resize-none mb-4 transition-colors"
+            />
+            <button 
+              type="submit"
+              disabled={isSubmittingSuggestion || !suggestionText.trim()}
+              className="w-full sm:w-auto px-6 py-3 bg-foreground text-background font-semibold rounded-xl hover:bg-foreground/90 disabled:opacity-50 transition-colors"
+            >
+              {isSubmittingSuggestion ? 'Submitting...' : 'Send Suggestion'}
+            </button>
+          </form>
+        </div>
+      </motion.section>
 
       {/* Authentication Modal */}
       {showLoginModal && (

@@ -51,6 +51,10 @@ function FoodAnalyzer() {
               goal: userProfile.goal
             }
           });
+          
+          setTimeout(() => {
+             window.dispatchEvent(new CustomEvent('trigger-review'));
+          }, 1500);
         } catch (saveError) {}
       }
     } catch (err) {

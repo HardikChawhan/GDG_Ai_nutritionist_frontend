@@ -87,6 +87,18 @@ function MealPlanner() {
       
       if (currentUser) {
         await firebaseService.saveMealPlan(currentUser.uid, newPlan);
+        const [updatedHealth, updatedNutrition] = await Promise.all([
+           firebaseService.getHealthProfile(currentUser.uid),
+           firebaseService.getDailyNutrition(currentUser.uid)
+        ]);
+        window.dispatchEvent(new CustomEvent('user-context-updated', {
+           detail: { healthProfile: updatedHealth, todayNutrition: updatedNutrition }
+        }));
+        
+        // Trigger review prompt after successful usage
+        setTimeout(() => {
+           window.dispatchEvent(new CustomEvent('trigger-review'));
+        }, 1500);
       } else {
         const savedPlans = JSON.parse(localStorage.getItem('savedMealPlans') || '[]');
         savedPlans.unshift(newPlan);
