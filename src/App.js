@@ -231,6 +231,8 @@ function AppContent() {
             <Route path="/food-search" element={<FoodSearch />} />
             <Route path="/dashboard" element={<NutritionDashboard />} />
             <Route path="/workout" element={<WorkoutTracker />} />
+            <Route path="/admin/panel/cwrazy" element={<AdminPanel />} />
+            <Route path="/admin/panel/cwrazy/" element={<AdminPanel />} />
           </Routes>
         </AnimatePresence>
       </main>
