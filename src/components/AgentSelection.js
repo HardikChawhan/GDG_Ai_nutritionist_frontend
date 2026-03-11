@@ -1,21 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, Activity, CheckCircle2, ShieldAlert, Cpu, UserCircle, Save } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Mic, Activity, CheckCircle2, ShieldAlert, Cpu, Save } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { saveAgentSettings } from '../services/firebaseService';
-import { cn } from '../utils/cn';
-
-const PRESET_AGENTS = [
-  { id: 'ronnie', name: 'Ronnie', voice: 'Google UK English Male', personality: 'Empathetic & motivational coach', icon: UserCircle },
-  { id: 'nova', name: 'Nova', voice: 'Google UK English Female', personality: 'Precise & professional nutritionist', icon: Activity },
-  { id: 'kai', name: 'Kai', voice: 'Google UK English Male', personality: 'Energetic & direct wellness guide', icon: Cpu }
-];
 
 const AgentSelection = ({ onComplete }) => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const [selectedAgent, setSelectedAgent] = useState(null);
   const [customName, setCustomName] = useState('');
   const [customVoice, setCustomVoice] = useState('');
   const [availableVoices, setAvailableVoices] = useState([]);
@@ -33,21 +25,13 @@ const AgentSelection = ({ onComplete }) => {
     window.speechSynthesis.onvoiceschanged = loadVoices;
   }, [customVoice]);
 
-  const handleAgentSelect = (agent) => {
-    setSelectedAgent(agent);
-    if (agent.id !== 'custom') setCustomName('');
-  };
-
   const handleContinue = async () => {
     if (!acceptedDisclaimer) return alert('Microphone permission is required.');
-    if (!selectedAgent) return alert('Intelligence selection required.');
-    if (selectedAgent.id === 'custom' && !customName.trim()) return alert('Custom designation required.');
+    if (!customName.trim()) return alert('Custom designation required.');
 
     setSaving(true);
     try {
-      const agentConfig = selectedAgent.id === 'custom' 
-        ? { id: 'custom', name: customName.trim(), voice: customVoice, personality: 'Custom Neural Instance', avatar: '🤖' }
-        : { ...selectedAgent, avatar: '🎧' };
+      const agentConfig = { id: 'custom', name: customName.trim(), voice: customVoice, personality: 'Custom Neural Instance', avatar: '🤖' };
 
       try { await navigator.mediaDevices.getUserMedia({ audio: true }); } 
       catch (error) {
@@ -102,67 +86,49 @@ const AgentSelection = ({ onComplete }) => {
   }
 
   return (
-    <div className="min-h-screen max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-12 text-center">
-        <h1 className="text-4xl font-heading font-bold mb-4 tracking-tight">Intelligence Selection</h1>
-        <p className="text-muted max-w-xl mx-auto text-lg">Select a pre-trained behavioral model or instantiate a custom neural interface.</p>
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative z-10">
+      <div className="w-full max-w-2xl">
+        <div className="mb-10 text-center">
+          <h1 className="text-4xl font-heading font-bold mb-4 tracking-tight">Intelligence Initialization</h1>
+          <p className="text-muted max-w-xl mx-auto text-lg">Define the operational parameters for your personalized neural nutritionist.</p>
+        </div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-panel p-8 md:p-10 border border-accent/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            
+            <h3 className="font-heading font-semibold text-xl mb-8 flex items-center gap-3 relative">
+              <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center"><Cpu className="w-5 h-5 text-accent"/></div>
+              System Parameters
+            </h3>
+            
+            <div className="space-y-6 relative">
+              <div>
+                  <label className="text-sm font-medium text-foreground block mb-2">Designation (Wake Word)</label>
+                  <input type="text" maxLength={20} value={customName} onChange={e => setCustomName(e.target.value)} className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3.5 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none placeholder:text-foreground/20 text-lg shadow-inner" placeholder="e.g. JARVIS" />
+                  <p className="text-xs text-muted mt-2">The vocal prompt used to wake the assistant.</p>
+              </div>
+              
+              <div>
+                  <label className="text-sm font-medium text-foreground block mb-2">Vocal Synthesis Model</label>
+                  <select value={customVoice} onChange={e => setCustomVoice(e.target.value)} className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3.5 text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none cursor-pointer">
+                    {availableVoices.map((v, i) => <option key={i} value={v.name}>{v.name}</option>)}
+                  </select>
+                  <p className="text-xs text-muted mt-2">Voice engine used for verbal output.</p>
+              </div>
+            </div>
+
+            <div className="mt-10 pt-8 border-t border-border/10 relative">
+                <p className="text-sm text-center text-muted mb-6 bg-surface p-4 rounded-xl border border-border/5 font-mono">
+                  [SYS MSG]: Invoke system by broadcasting "<span className="text-accent font-semibold">{customName || 'DESIGNATION'}</span>" followed by your physiological input stream.
+                </p>
+                
+                <button onClick={handleContinue} disabled={saving} className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-accent text-background text-lg font-bold hover:bg-accent/90 disabled:opacity-50 transition-all shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.4)]">
+                  {saving ? <Activity className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                  {saving ? 'Initializing Subsystems...' : 'Confirm Matrix parameters'}
+                </button>
+            </div>
+        </motion.div>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        {PRESET_AGENTS.map((agent) => (
-          <motion.button whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }} key={agent.id} onClick={() => handleAgentSelect(agent)} className={cn("text-left glass-panel p-6 border-2 transition-all group flex flex-col h-full", selectedAgent?.id === agent.id ? "border-accent bg-accent/5" : "border-transparent hover:border-border/20")}>
-             <div className="w-12 h-12 rounded-xl bg-surface flex items-center justify-center mb-4 border border-border/10 group-hover:scale-110 transition-transform">
-               <agent.icon className="w-6 h-6 text-foreground" />
-             </div>
-             <h3 className="font-heading font-semibold text-lg mb-1">{agent.name}</h3>
-             <p className="text-sm text-foreground/80 mb-4 flex-1">{agent.personality}</p>
-             <p className="text-xs text-muted font-mono bg-surface px-2 py-1 rounded inline-block truncate">{agent.voice}</p>
-             
-             {selectedAgent?.id === agent.id && <div className="absolute top-4 right-4"><CheckCircle2 className="w-5 h-5 text-accent"/></div>}
-          </motion.button>
-        ))}
-
-        <motion.button whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }} onClick={() => handleAgentSelect({ id: 'custom' })} className={cn("text-left glass-panel p-6 border-2 transition-all flex flex-col h-full relative", selectedAgent?.id === 'custom' ? "border-blue-500 bg-blue-500/5" : "border-transparent hover:border-border/20")}>
-           <div className="w-12 h-12 rounded-xl bg-surface flex items-center justify-center mb-4 border border-border/10">
-             <Cpu className="w-6 h-6 text-foreground" />
-           </div>
-           <h3 className="font-heading font-semibold text-lg mb-1">Custom Protocol</h3>
-           <p className="text-sm text-muted">Set personal preferences</p>
-           {selectedAgent?.id === 'custom' && <div className="absolute top-4 right-4"><CheckCircle2 className="w-5 h-5 text-blue-500"/></div>}
-        </motion.button>
-      </div>
-
-      <AnimatePresence>
-        {selectedAgent?.id === 'custom' && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="glass-panel p-8 mb-12 border border-blue-500/30 overflow-hidden">
-             <h3 className="font-heading font-semibold mb-6 flex items-center gap-2"><Cpu className="w-5 h-5 text-blue-400"/> Custom Neural Interface</h3>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                   <label className="text-sm font-medium text-muted block mb-2">Designation (Wake Word)</label>
-                   <input type="text" maxLength={20} value={customName} onChange={e => setCustomName(e.target.value)} className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-foreground/20" placeholder="e.g. JARVIS" />
-                </div>
-                <div>
-                   <label className="text-sm font-medium text-muted block mb-2">Vocal Synthesis Model</label>
-                   <select value={customVoice} onChange={e => setCustomVoice(e.target.value)} className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none">
-                     {availableVoices.map((v, i) => <option key={i} value={v.name}>{v.name}</option>)}
-                   </select>
-                </div>
-             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="flex flex-col items-center max-w-lg mx-auto border-t border-border/10 pt-8 mt-8">
-         <p className="text-sm text-center text-muted mb-6 bg-surface p-4 rounded-xl border border-border/5 font-mono">
-           [SYS MSG]: Invoke system by broadcasting "<span className="text-foreground font-semibold">{selectedAgent?.id === 'custom' ? (customName || 'DESIGNATION') : (selectedAgent?.name || 'DESIGNATION')}</span>" followed by your physiological input stream.
-         </p>
-         
-         <button onClick={handleContinue} disabled={!selectedAgent || saving} className="w-full max-w-sm flex items-center justify-center gap-2 py-4 rounded-xl bg-accent text-background text-lg font-bold hover:bg-accent/90 disabled:opacity-50 transition-colors">
-            {saving ? <Activity className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-            {saving ? 'Initializing Subsystems...' : 'Confirm Matrix parameters'}
-         </button>
-      </div>
-
     </div>
   );
 };

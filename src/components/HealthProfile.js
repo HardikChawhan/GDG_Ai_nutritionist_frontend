@@ -354,6 +354,7 @@ function HealthProfile() {
                       <label className="flex items-center gap-2 text-sm font-medium text-muted"><Wheat className="w-4 h-4 text-accent/70" /> Dietary Restrictions</label>
                       <select onChange={(e) => handleMultiSelect(e, 'dietaryRestrictions')} value="" className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none">
                         <option value="">Select restrictions to append...</option>
+                        <option value="None">None</option>
                         <option value="Vegetarian">Vegetarian</option>
                         <option value="Vegan">Vegan</option>
                         <option value="Gluten-Free">Gluten-Free</option>
@@ -374,6 +375,7 @@ function HealthProfile() {
                       <label className="flex items-center gap-2 text-sm font-medium text-muted"><Ban className="w-4 h-4 text-accent/70" /> Known Allergens</label>
                       <select onChange={(e) => handleMultiSelect(e, 'allergies')} value="" className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none">
                         <option value="">Select allergens to append...</option>
+                        <option value="None">None</option>
                         <option value="Peanuts">Peanuts</option>
                         <option value="Tree Nuts">Tree Nuts</option>
                         <option value="Milk">Milk</option>
@@ -394,6 +396,7 @@ function HealthProfile() {
                       <label className="flex items-center gap-2 text-sm font-medium text-muted"><HeartPulse className="w-4 h-4 text-accent/70" /> Diagnosed Conditions</label>
                       <select onChange={(e) => handleMultiSelect(e, 'healthConditions')} value="" className="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-accent focus:border-accent outline-none appearance-none">
                         <option value="">Select conditions to append...</option>
+                        <option value="None">None</option>
                         <option value="Diabetes">Diabetes</option>
                         <option value="Hypertension">Hypertension</option>
                         <option value="High Cholesterol">High Cholesterol</option>
@@ -423,11 +426,11 @@ function HealthProfile() {
                 ) : <div />}
 
                 {currentStep < 3 ? (
-                  <button type="button" onClick={() => setCurrentStep(c => c + 1)} className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-accent text-background hover:bg-accent/90 text-sm font-semibold transition-colors disabled:opacity-50" disabled={(currentStep === 1 && (!formData.age || !formData.weight || !formData.height)) || (currentStep === 2 && (!formData.activityLevel || !formData.goal))}>
+                  <button type="button" onClick={(e) => { e.preventDefault(); setCurrentStep(c => c + 1); }} className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-accent text-background hover:bg-accent/90 text-sm font-semibold transition-colors disabled:opacity-50" disabled={(currentStep === 1 && (!formData.age || !formData.weight || !formData.height)) || (currentStep === 2 && (!formData.activityLevel || !formData.goal))}>
                     Proceed <ChevronRight className="w-4 h-4" />
                   </button>
                 ) : (
-                  <button type="submit" disabled={loading} className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-accent text-background hover:bg-accent/90 text-sm font-semibold transition-colors disabled:opacity-50">
+                  <button type="submit" disabled={loading} onClick={() => { if(currentStep !== 3) return; }} className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-accent text-background hover:bg-accent/90 text-sm font-semibold transition-colors disabled:opacity-50">
                     <Save className="w-4 h-4" /> {loading ? 'Synchronizing...' : 'Save Profile'}
                   </button>
                 )}
