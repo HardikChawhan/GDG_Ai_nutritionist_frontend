@@ -2,7 +2,7 @@
   "name": "nutrition-assistant-frontend",
   "version": "1.0.0",
   "private": true,
-  "homepage": "https://HardikChawhan.github.io/GDG_Ai_nutritionist_frontend",
+  "homepage": "https://ainutritionist.tech",
   "dependencies": {
     "@mediapipe/pose": "^0.5.1675469404",
     "@tailwindcss/typography": "^0.5.19",
