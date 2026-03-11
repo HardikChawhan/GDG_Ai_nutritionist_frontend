@@ -93,9 +93,9 @@ const NutritionCalendar = () => {
 
         {/* Calendar View */}
         <div className="w-full">
-          <div className="glass-panel p-6">
+          <div className="glass-panel p-3 sm:p-6">
 
-            <div className="flex items-center justify-between mb-8 px-2">
+            <div className="flex items-center justify-between mb-8 px-1 sm:px-2">
               <button onClick={handlePrevMonth} className="w-10 h-10 rounded-full border border-border/10 flex items-center justify-center hover:bg-foreground/5 transition-colors">
                 <ChevronLeft className="w-5 h-5 text-muted" />
               </button>
@@ -113,9 +113,9 @@ const NutritionCalendar = () => {
                 <span className="text-sm font-mono text-muted">Retrieving temporal logs...</span>
               </div>
             ) : (
-              <div className="grid grid-cols-7 gap-2">
+              <div className="grid grid-cols-7 gap-1 sm:gap-2">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                  <div key={day} className="text-center text-xs font-semibold uppercase tracking-wider text-muted pb-4">
+                  <div key={day} className="text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted pb-2 sm:pb-4">
                     {day}
                   </div>
                 ))}
@@ -133,22 +133,22 @@ const NutritionCalendar = () => {
                       disabled={!date}
                       onClick={() => handleDateClick(date)}
                       className={cn(
-                        "aspect-square p-2 rounded-xl flex flex-col items-center border transition-all cursor-pointer relative overflow-hidden group",
+                        "aspect-square p-1 sm:p-2 rounded-lg sm:rounded-xl flex flex-col items-center justify-center border transition-all cursor-pointer relative overflow-hidden group",
                         !date ? "border-transparent cursor-default" : "border-border/5 hover:border-border/20 bg-surface/30",
                         hasData && "bg-surface/80 border-border/10",
                         isSelected && "ring-2 ring-accent border-accent bg-accent/10",
                         today && !isSelected && "border-blue-500/50"
                       )}
                     >
-                      {today && <div className="absolute top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-blue-500 rounded-full"></div>}
+                      {today && <div className="absolute top-1 left-1/2 -translate-x-1/2 w-4 sm:w-8 h-1 bg-blue-500 rounded-full"></div>}
 
-                      <div className={cn("text-lg font-heading font-semibold mt-auto", hasData ? "text-foreground" : "text-muted", isSelected && "text-accent")}>
+                      <div className={cn("text-xs sm:text-lg font-heading font-semibold", hasData ? "text-foreground" : "text-muted", isSelected && "text-accent")}>
                         {date ? date.getDate() : ''}
                       </div>
 
                       {hasData && calories > 0 && (
-                        <div className={cn("text-[10px] uppercase font-bold tracking-wider mt-1 w-full text-center truncate px-1", isSelected ? "text-accent" : "text-emerald-400")}>
-                          {calories} cal
+                        <div className={cn("text-[8px] sm:text-[10px] uppercase font-bold tracking-tighter sm:tracking-wider mt-0.5 sm:mt-1 w-full text-center truncate", isSelected ? "text-accent" : "text-emerald-400")}>
+                          {calories}<span className="hidden sm:inline"> cal</span>
                         </div>
                       )}
                     </button>
