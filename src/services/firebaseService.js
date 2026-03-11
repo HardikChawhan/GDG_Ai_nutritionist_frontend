@@ -610,9 +610,26 @@ class FirebaseService {
        const querySnapshot = await getDocs(q);
        return querySnapshot.size;
      } catch (error) {
-       console.error('Error getting suggestion count:', error);
        throw error;
      }
+  }
+
+  /**
+   * Verify Admin Passcode Securely
+   */
+  async verifyAdminPasscode(inputPassword) {
+    try {
+      const docRef = doc(db, 'admin', 'config');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        return data.passcode === inputPassword;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error verifying admin passcode:', error);
+      return false;
+    }
   }
 }
 
@@ -643,5 +660,6 @@ export const {
   getUserSuggestionCount,
   getAllReviews,
   updateReviewPriority,
-  getAllSuggestions
+  getAllSuggestions,
+  verifyAdminPasscode
 } = firebaseService;

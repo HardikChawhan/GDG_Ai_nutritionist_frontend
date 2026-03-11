@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, LogOut, MessageSquare, Star, CheckSquare, Square, Save, Activity } from 'lucide-react';
-import { getAllReviews, getAllSuggestions, updateReviewPriority } from '../services/firebaseService';
+import { getAllReviews, getAllSuggestions, updateReviewPriority, verifyAdminPasscode } from '../services/firebaseService';
 import { cn } from '../utils/cn';
 
 function AdminPanel() {
@@ -25,14 +25,22 @@ function AdminPanel() {
     }
   }, []);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (password === '1234') {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('adminAuth', 'true');
-      fetchData();
-    } else {
-      alert('Unauthorized. Matrix breach detected.');
+    setLoading(true);
+    try {
+      const isValid = await verifyAdminPasscode(password);
+      if (isValid) {
+        setIsAuthenticated(true);
+        sessionStorage.setItem('adminAuth', 'true');
+        fetchData();
+      } else {
+        alert('Unauthorized. Matrix breach detected.');
+      }
+    } catch (error) {
+      alert('Authentication service error.');
+    } finally {
+      setLoading(false);
     }
   };
 
