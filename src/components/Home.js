@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BrainCircuit, Activity, Database, Sparkles, User, ChevronRight, Apple, Star, MessageSquare } from 'lucide-react';
+import { BrainCircuit, Activity, Database, Sparkles, User, ChevronRight, Apple, Star, MessageSquare, Clock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllReviews, saveSuggestion } from '../services/firebaseService';
 import { cn } from '../utils/cn';
@@ -13,6 +13,25 @@ function Home() {
   const [reviews, setReviews] = useState([]);
   const [suggestionText, setSuggestionText] = useState('');
   const [isSubmittingSuggestion, setIsSubmittingSuggestion] = useState(false);
+
+  const getTimeAgo = (timestamp) => {
+    if (!timestamp) return 'Just now';
+    const reviewDate = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - reviewDate) / 1000);
+
+    if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 30) return `${diffInDays}d ago`;
+    const diffInMonths = Math.floor(diffInDays / 30);
+    if (diffInMonths < 12) return `${diffInMonths}mo ago`;
+    const diffInYears = Math.floor(diffInDays / 365);
+    return `${diffInYears}y ago`;
+  };
 
   React.useEffect(() => {
     const fetchReviews = async () => {
@@ -242,7 +261,13 @@ function Home() {
                       <User className="w-4 h-4 text-accent" />
                     </div>
                   )}
-                  <div className="text-xs font-semibold">{review.displayName || `User #${review.userId.substring(0, 4)}`}</div>
+                  <div className="flex flex-col">
+                    <div className="text-xs font-semibold">{review.displayName || `User #${review.userId.substring(0, 4)}`}</div>
+                    <div className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                      <Clock className="w-3 h-3" />
+                      {getTimeAgo(review.createdAt)}
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -281,8 +306,14 @@ function Home() {
                       <User className="w-3 h-3 text-muted/70" />
                     </div>
                   )}
-                  <div className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold flex-1 truncate">
-                    {review.displayName || `U-${review.userId.substring(0, 4)}`}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold truncate">
+                      {review.displayName || `U-${review.userId.substring(0, 4)}`}
+                    </div>
+                    <div className="text-[9px] text-muted-foreground/70 flex items-center gap-1 mt-0.5">
+                      <Clock className="w-2.5 h-2.5" />
+                      {getTimeAgo(review.createdAt)}
+                    </div>
                   </div>
                 </div>
               </div>
