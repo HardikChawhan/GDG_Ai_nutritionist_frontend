@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BrainCircuit, Activity, Database, Sparkles, User, ChevronRight, Apple, Star, MessageSquare, Clock } from 'lucide-react';
+import { BrainCircuit, Activity, Database, Sparkles, User, ChevronRight, Apple, Star, MessageSquare, Clock, Github, Linkedin, Mail, Heart, ExternalLink } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllReviews, saveSuggestion } from '../services/firebaseService';
 import { cn } from '../utils/cn';
@@ -360,6 +360,113 @@ function Home() {
             </button>
           </form>
         </div>
+      </motion.section>
+
+      {/* Creators Section */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        className="mt-32 mb-16"
+      >
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 mb-6">
+            <Heart className="w-4 h-4 text-accent" />
+            <span className="text-xs font-semibold text-accent uppercase tracking-wider">Built with Passion</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-heading font-bold mb-4">Meet the Creators</h2>
+          <p className="text-muted max-w-lg mx-auto">The team behind your AI-powered health companion.</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          {[
+            {
+              name: 'Paritosh Kolwadkar',
+              github: 'https://github.com/ParitoshKolwadkar',
+              linkedin: 'https://www.linkedin.com/in/paritosh-kolwadkar/',
+              email: 'paritoshk2005@gmail.com',
+              initials: 'PK',
+              gradient: 'from-violet-500/20 to-fuchsia-500/20',
+              border: 'hover:border-violet-500/40',
+              accent: 'text-violet-400',
+            },
+            {
+              name: 'Hardik Chawhan',
+              github: 'https://github.com/HardikChawhan',
+              linkedin: 'https://www.linkedin.com/in/hardikchawhan',
+              email: 'hardik.chawhan20@gmail.com',
+              initials: 'HC',
+              gradient: 'from-accent/20 to-emerald-500/20',
+              border: 'hover:border-accent/40',
+              accent: 'text-accent',
+            },
+            {
+              name: 'Rohan Iyengar',
+              github: 'https://github.com/Rohaniyengar2',
+              linkedin: 'https://www.linkedin.com/in/rohan-iyengar-aba9012b8/',
+              email: 'rohaniyengar56@gmail.com',
+              initials: 'RI',
+              gradient: 'from-sky-500/20 to-cyan-500/20',
+              border: 'hover:border-sky-500/40',
+              accent: 'text-sky-400',
+            },
+          ].map((creator) => (
+            <motion.div
+              key={creator.name}
+              whileHover={{ y: -6 }}
+              className={cn(
+                "glass-panel p-6 text-center border-2 border-transparent transition-all duration-300 group relative overflow-hidden",
+                creator.border
+              )}
+            >
+              <div className={cn("absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500", creator.gradient)} />
+              <div className="relative">
+                <div className={cn("w-16 h-16 rounded-2xl bg-gradient-to-br flex items-center justify-center mx-auto mb-4 text-xl font-bold font-heading border border-white/10 shadow-lg", creator.gradient)}>
+                  {creator.initials}
+                </div>
+                <h3 className="font-heading font-semibold text-lg mb-4">{creator.name}</h3>
+                <div className="flex items-center justify-center gap-3">
+                  <a href={creator.github} target="_blank" rel="noopener noreferrer" className={cn("p-2.5 rounded-xl bg-surface/80 border border-border/10 hover:bg-surface transition-all hover:scale-110", `hover:${creator.accent}`)} title="GitHub">
+                    <Github className="w-4 h-4" />
+                  </a>
+                  <a href={creator.linkedin} target="_blank" rel="noopener noreferrer" className={cn("p-2.5 rounded-xl bg-surface/80 border border-border/10 hover:bg-surface transition-all hover:scale-110", `hover:${creator.accent}`)} title="LinkedIn">
+                    <Linkedin className="w-4 h-4" />
+                  </a>
+                  <a href={`mailto:${creator.email}`} className={cn("p-2.5 rounded-xl bg-surface/80 border border-border/10 hover:bg-surface transition-all hover:scale-110", `hover:${creator.accent}`)} title="Email">
+                    <Mail className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Support Email */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-12 max-w-2xl mx-auto"
+        >
+          <div className="glass-panel p-6 sm:p-8 text-center border border-border/10 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-accent/5 via-transparent to-accent/5" />
+            <div className="relative">
+              <div className="w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-4">
+                <Mail className="w-5 h-5 text-accent" />
+              </div>
+              <h3 className="font-heading font-semibold text-lg mb-2">Need Help?</h3>
+              <p className="text-muted text-sm mb-5">Facing an issue or have a question? Our support team is here for you.</p>
+              <a
+                href="mailto:support.ainutritionist@gmail.com"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-accent/10 border border-accent/20 text-accent font-semibold rounded-xl hover:bg-accent/20 transition-all text-sm group"
+              >
+                <Mail className="w-4 h-4" />
+                support.ainutritionist@gmail.com
+                <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </a>
+            </div>
+          </div>
+        </motion.div>
       </motion.section>
 
       {/* Authentication Modal */}
