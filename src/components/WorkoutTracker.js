@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import voiceAssistantService from '../services/voiceAssistantService';
 import { getHealthProfile } from '../services/firebaseService';
 import { cn } from '../utils/cn';
+import SEO from './SEO';
 import {
   calculateAngle, calculateVerticalAngle, calculateHorizontalDistance,
   SquatStateMachine, BenchPressStateMachine, DeadliftStateMachine,
@@ -381,6 +382,11 @@ function WorkoutTracker() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen lg:h-screen flex flex-col overflow-x-hidden">
+      <SEO
+        title="Workout Tracker"
+        description="AI-powered workout tracking with real-time pose detection. Track squats, bench press, deadlifts, and more with computer vision."
+        canonical="/workout"
+      />
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-heading font-bold mb-1 tracking-tight">Activity Tracker</h1>

@@ -13,6 +13,7 @@ import { foodAnalysisAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import firebaseService from '../services/firebaseService';
 import { cn } from '../utils/cn';
+import SEO from './SEO';
 
 function FoodAnalyzer() {
   const { currentUser, userProfile } = useAuth();
@@ -73,6 +74,11 @@ function FoodAnalyzer() {
 
   return (
     <div className="min-h-screen max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <SEO
+        title="Food Analysis"
+        description="Analyze any food instantly with AI — get detailed calorie counts, macro breakdowns, and nutritional insights for smarter eating decisions."
+        canonical="/food-analyzer"
+      />
       
       <div className="mb-12 text-center">
         <div className="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center mx-auto mb-6">

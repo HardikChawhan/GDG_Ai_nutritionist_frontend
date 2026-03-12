@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Loader2, Info, ChevronRight, X, Flame, Beef, Wheat, Droplets, Database } from 'lucide-react';
 import { nutritionAPI } from '../services/api';
+import SEO from './SEO';
 
 function FoodSearch() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,6 +36,11 @@ function FoodSearch() {
 
   return (
     <div className="min-h-screen max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <SEO
+        title="Nutrition Database"
+        description="Search a comprehensive nutrition database for any food. Explore detailed calorie, protein, carb, and fat data to fuel your health journey."
+        canonical="/food-search"
+      />
       <div className="mb-12 text-center">
         <div className="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center mx-auto mb-6">
            <Database className="w-8 h-8 text-accent" />

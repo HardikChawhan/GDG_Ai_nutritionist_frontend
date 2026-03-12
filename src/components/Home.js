@@ -5,6 +5,7 @@ import { BrainCircuit, Activity, Database, Sparkles, User, ChevronRight, Apple, 
 import { useAuth } from '../contexts/AuthContext';
 import { getAllReviews, saveSuggestion } from '../services/firebaseService';
 import { cn } from '../utils/cn';
+import SEO from './SEO';
 
 function Home() {
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -107,6 +108,10 @@ function Home() {
 
   return (
     <div className="min-h-screen pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto selection:bg-accent/30">
+      <SEO
+        description="AI Nutritionist — Your personal AI-powered health coach. Get personalized meal plans, real-time food analysis, calorie tracking, and smart workout guidance tailored to your body."
+        canonical="/"
+      />
 
       {/* Hero Section */}
       <motion.section

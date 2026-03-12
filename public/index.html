@@ -5,26 +5,69 @@
     <link rel="icon" type="image/png" href="%PUBLIC_URL%/god.png" />
     <link rel="shortcut icon" type="image/png" href="%PUBLIC_URL%/god.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="AI-Powered Nutrition Assistant - Personalized meal planning and nutrition guidance"
-    />
+    <meta name="theme-color" content="#0a0a0a" />
+
+    <!-- Primary SEO Meta -->
+    <title>AI Nutritionist — Your Personal AI Health Coach</title>
+    <meta name="description" content="AI Nutritionist — Your personal AI-powered health coach. Get personalized meal plans, real-time food analysis, calorie tracking, and smart workout guidance." />
+    <meta name="keywords" content="AI Nutritionist, Health Coach, Gym Meal Plans, Personalized Nutrition, Calorie Tracker, Food Analysis, Workout Tracker, AI Health" />
+    <meta name="author" content="AI Nutritionist" />
+    <link rel="canonical" href="https://ainutritionist.tech/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AI Nutritionist" />
+    <meta property="og:title" content="AI Nutritionist — Your Personal AI Health Coach" />
+    <meta property="og:description" content="Get personalized meal plans, real-time food analysis, calorie tracking, and smart workout guidance powered by AI." />
+    <meta property="og:image" content="https://ainutritionist.tech/og/og-landing.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:url" content="https://ainutritionist.tech/" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AI Nutritionist — Your Personal AI Health Coach" />
+    <meta name="twitter:description" content="Get personalized meal plans, real-time food analysis, calorie tracking, and smart workout guidance powered by AI." />
+    <meta name="twitter:image" content="https://ainutritionist.tech/og/og-landing.png" />
+
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/god.png" />
-    <title>AI Nutrition Assistant - Cwrazzy Log(x)</title>
-    
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "AI Nutritionist",
+      "url": "https://ainutritionist.tech",
+      "description": "AI-powered personal health coach providing personalized meal plans, real-time food analysis, calorie tracking, and smart workout guidance.",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "creator": {
+        "@type": "Organization",
+        "name": "AI Nutritionist",
+        "url": "https://ainutritionist.tech"
+      },
+      "featureList": [
+        "Personalized AI Meal Planning",
+        "Real-time Food Analysis",
+        "Calorie and Macro Tracking",
+        "AI Workout Tracking with Pose Detection",
+        "Voice-Activated Health Assistant",
+        "Comprehensive Nutrition Database"
+      ]
+    }
+    </script>
+
     <!-- Start Single Page Apps for GitHub Pages -->
     <script type="text/javascript">
       // Single Page Apps for GitHub Pages
       // MIT License
       // https://github.com/rafgraph/spa-github-pages
-      // This script checks to see if a redirect is present in the query string,
-      // converts it back into the correct url and adds it to the
-      // browser's history using window.history.replaceState(...),
-      // which won't cause the browser to attempt to load the new url.
-      // When the single page app is loaded further down in this file,
-      // the correct url will be waiting in the browser's history for
-      // the single page app to route accordingly.
       (function(l) {
         if (l.search[1] === '/' ) {
           var decoded = l.search.slice(1).split('&').map(function(s) { 
@@ -39,7 +82,21 @@
     <!-- End Single Page Apps for GitHub Pages -->
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>
+      <h1>AI Nutritionist — Your Personal AI Health Coach</h1>
+      <p>AI Nutritionist is your personal AI-powered health coach. Get personalized meal plans, real-time food analysis, calorie tracking, and smart workout guidance.</p>
+      <nav>
+        <ul>
+          <li><a href="https://ainutritionist.tech/">Home</a></li>
+          <li><a href="https://ainutritionist.tech/#/profile">Health Profile</a></li>
+          <li><a href="https://ainutritionist.tech/#/meal-planner">Meal Planner</a></li>
+          <li><a href="https://ainutritionist.tech/#/food-analyzer">Food Analysis</a></li>
+          <li><a href="https://ainutritionist.tech/#/food-search">Nutrition Database</a></li>
+          <li><a href="https://ainutritionist.tech/#/dashboard">Nutrition Dashboard</a></li>
+          <li><a href="https://ainutritionist.tech/#/workout">Workout Tracker</a></li>
+        </ul>
+      </nav>
+    </noscript>
     <div id="root"></div>
   </body>
 </html>

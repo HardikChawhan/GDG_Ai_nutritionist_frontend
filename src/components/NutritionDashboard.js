@@ -12,6 +12,7 @@ import { useAuth } from '../contexts/AuthContext';
 import firebaseService from '../services/firebaseService';
 import NutritionCalendar from './NutritionCalendar';
 import { cn } from '../utils/cn';
+import SEO from './SEO';
 
 const getCaloriesBurnedFromCookie = (date) => {
   const dateKey = date || new Date().toISOString().split('T')[0];
@@ -323,6 +324,11 @@ function NutritionDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+      <SEO
+        title="Nutrition Dashboard"
+        description="Track your daily calorie intake, macronutrients, and nutritional goals in real-time with your AI-powered nutrition dashboard."
+        canonical="/dashboard"
+      />
       
       <AnimatePresence>
         {showWarning && (

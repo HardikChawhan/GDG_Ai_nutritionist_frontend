@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Mic, Activity, CheckCircle2, ShieldAlert, Cpu, Save } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { saveAgentSettings } from '../services/firebaseService';
+import SEO from './SEO';
 
 const AgentSelection = ({ onComplete }) => {
   const { currentUser } = useAuth();
@@ -87,6 +88,12 @@ const AgentSelection = ({ onComplete }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 relative z-10">
+      <SEO
+        title="Voice Agent Setup"
+        description="Configure your personalized AI voice nutritionist. Set up a custom wake word and voice model for hands-free health coaching."
+        canonical="/agent-setup"
+        noIndex={true}
+      />
       <div className="w-full max-w-2xl">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-heading font-bold mb-4 tracking-tight">Intelligence Initialization</h1>

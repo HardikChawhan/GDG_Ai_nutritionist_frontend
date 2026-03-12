@@ -16,6 +16,7 @@ import { healthProfileAPI, nutritionAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import firebaseService from '../services/firebaseService';
 import { cn } from '../utils/cn';
+import SEO from './SEO';
 
 function HealthProfile() {
   const { currentUser, userProfile, updateProfile, signInWithGoogle, loading: authLoading } = useAuth();
@@ -194,6 +195,11 @@ function HealthProfile() {
 
   return (
     <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <SEO
+        title="Health Profile"
+        description="Configure your biometric health profile for personalized AI nutrition recommendations. Set dietary restrictions, allergies, and fitness goals."
+        canonical="/profile"
+      />
 
       <AnimatePresence>
         {showLoginPrompt && (

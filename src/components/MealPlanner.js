@@ -13,6 +13,7 @@ import { mealPlanAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import firebaseService from '../services/firebaseService';
 import { cn } from '../utils/cn';
+import SEO from './SEO';
 
 function MealPlanner() {
   const { currentUser, userProfile } = useAuth();
@@ -118,6 +119,12 @@ function MealPlanner() {
 
   return (
     <div className="min-h-screen max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <SEO
+        title="Personalized Meal Planner"
+        description="Create AI-powered personalized meal plans tailored to your dietary needs, fitness goals, and cuisine preferences. Your smart gym meal planner."
+        canonical="/meal-planner"
+        ogImage="https://ainutritionist.tech/og/og-meal-planner.png"
+      />
       
       <div className="mb-12 text-center">
         <div className="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center mx-auto mb-6">
