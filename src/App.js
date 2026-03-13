@@ -278,8 +278,8 @@ function AppContent() {
         />
       )}
 
-      {/* Global Review Prompt */}
-      {currentUser && <ReviewModal />}
+      {/* Global Review Prompt — TEMPORARILY DISABLED */}
+      {/* {currentUser && <ReviewModal />} */}
     </div>
   );
 }

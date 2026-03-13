@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BrainCircuit, Activity, Database, Sparkles, User, ChevronRight, Apple, Star, MessageSquare, Clock, Github, Linkedin, Mail, Heart, ExternalLink } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { getAllReviews, saveSuggestion } from '../services/firebaseService';
+import { getAllReviews, saveSuggestion, saveReview } from '../services/firebaseService';
 import { cn } from '../utils/cn';
 import SEO from './SEO';
 
@@ -14,6 +14,11 @@ function Home() {
   const [reviews, setReviews] = useState([]);
   const [suggestionText, setSuggestionText] = useState('');
   const [isSubmittingSuggestion, setIsSubmittingSuggestion] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewHover, setReviewHover] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
   const getTimeAgo = (timestamp) => {
     if (!timestamp) return 'Just now';
@@ -327,7 +332,9 @@ function Home() {
         </motion.section>
       )}
 
-      {/* Suggestion Portal */}
+      {/* ==========================================
+         SUGGESTION PORTAL — TEMPORARILY DISABLED
+         ==========================================
       <motion.section 
         className="mt-16 mb-20 max-w-2xl mx-auto glass-panel p-8 relative overflow-hidden group"
         initial={{ opacity: 0, y: 20 }}
@@ -359,6 +366,113 @@ function Home() {
               {isSubmittingSuggestion ? 'Submitting...' : 'Send Suggestion'}
             </button>
           </form>
+        </div>
+      </motion.section>
+      ========================================== */}
+
+      {/* Direct Review Form */}
+      <motion.section 
+        className="mt-16 mb-20 max-w-2xl mx-auto glass-panel p-8 relative overflow-hidden group"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+      >
+        <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-accent/10 transition-colors duration-700" />
+        <div className="relative z-10">
+          {reviewSubmitted ? (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              className="flex flex-col items-center justify-center py-8"
+            >
+              <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center mb-4">
+                <Star className="w-8 h-8 text-accent fill-accent" />
+              </div>
+              <h3 className="text-2xl font-heading font-semibold text-center mb-2">Thank You!</h3>
+              <p className="text-muted text-center text-sm">Your review has been submitted successfully. It means a lot to us!</p>
+            </motion.div>
+          ) : (
+            <>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
+                  <Star className="w-5 h-5 text-accent fill-accent" />
+                </div>
+                <h3 className="text-2xl font-heading font-semibold">Rate Your Experience</h3>
+              </div>
+              <p className="text-muted text-sm mb-6">Share your experience with AI Nutritionist. Your feedback helps us improve.</p>
+
+              {/* Star Rating */}
+              <div className="flex items-center gap-1.5 mb-6">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setReviewRating(star)}
+                    onMouseEnter={() => setReviewHover(star)}
+                    onMouseLeave={() => setReviewHover(0)}
+                    className="p-1 focus:outline-none transition-transform hover:scale-125 active:scale-95"
+                  >
+                    <Star 
+                      className={cn(
+                        "w-9 h-9 transition-all duration-200",
+                        (reviewHover || reviewRating) >= star 
+                          ? "text-yellow-400 fill-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,0.4)]" 
+                          : "text-muted/20 hover:text-muted/40"
+                      )} 
+                    />
+                  </button>
+                ))}
+                {reviewRating > 0 && (
+                  <span className="text-xs text-muted ml-2 font-mono">{reviewRating}/5</span>
+                )}
+              </div>
+
+              {/* Review Text */}
+              <textarea
+                value={reviewText}
+                onChange={(e) => setReviewText(e.target.value)}
+                placeholder="Tell us what you love or what we can improve..."
+                className="w-full h-28 bg-surface/50 border border-border/10 rounded-xl px-4 py-3 focus:ring-1 focus:ring-accent focus:border-accent text-sm text-foreground placeholder:text-foreground/20 resize-none mb-5 transition-colors"
+              />
+
+              {/* Submit */}
+              <button 
+                onClick={async () => {
+                  if (!currentUser) {
+                    setShowLoginModal(true);
+                    return;
+                  }
+                  if (reviewRating === 0) {
+                    alert('Please select a star rating.');
+                    return;
+                  }
+                  setIsSubmittingReview(true);
+                  try {
+                    await saveReview(currentUser.uid, reviewRating, reviewText.trim());
+                    setReviewSubmitted(true);
+                    // Refresh reviews list
+                    const data = await getAllReviews();
+                    setReviews(data);
+                  } catch (error) {
+                    alert(error.message || 'Failed to submit review. Please try again.');
+                  } finally {
+                    setIsSubmittingReview(false);
+                  }
+                }}
+                disabled={isSubmittingReview || reviewRating === 0}
+                className="w-full sm:w-auto px-8 py-3.5 bg-foreground text-background font-semibold rounded-xl hover:bg-foreground/90 disabled:opacity-50 transition-all shadow-lg hover:shadow-xl"
+              >
+                {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+              </button>
+
+              {!currentUser && (
+                <p className="text-xs text-muted mt-4 flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5" />
+                  Sign in required to submit a review.
+                </p>
+              )}
+            </>
+          )}
         </div>
       </motion.section>
 
