@@ -19,7 +19,7 @@ import ReviewModal from './components/ReviewModal';
 import Logo_pic from './assets/Images/god.png';
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { getAgentSettings, getHealthProfile, getDailyNutrition } from './services/firebaseService';
+import { getAgentSettings, getHealthProfile, getDailyNutrition, recordDailyVisit } from './services/firebaseService';
 import { cn } from './utils/cn';
 
 function AppContent() {
@@ -56,6 +56,9 @@ function AppContent() {
     const loadUserData = async () => {
       if (currentUser) {
         try {
+          // Record daily visit for streak tracking
+          await recordDailyVisit(currentUser.uid);
+
           const agent = await getAgentSettings(currentUser.uid);
           if (agent) {
             setAgentConfig(agent);

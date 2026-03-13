@@ -9,7 +9,7 @@ import {
   UserCircle, Activity, HeartPulse, Scale, Ruler,
   Target, AlertCircle, Calendar, Save, Copy, Trash2,
   ChevronRight, ChevronLeft, Lock, ArrowRight, BookOpen,
-  Wheat, Ban, Info, CheckCircle2, X
+  Wheat, Ban, Info, CheckCircle2, X, Trophy, Medal, Flame, TrendingUp, Award
 } from 'lucide-react';
 
 import { healthProfileAPI, nutritionAPI } from '../services/api';
@@ -44,6 +44,26 @@ function HealthProfile() {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile');
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'leaderboard') {
+      const fetchLeaderboard = async () => {
+        setLeaderboardLoading(true);
+        try {
+          const data = await firebaseService.getLeaderboard();
+          setLeaderboard(data);
+        } catch (error) {
+          console.error('Error fetching leaderboard:', error);
+        } finally {
+          setLeaderboardLoading(false);
+        }
+      };
+      fetchLeaderboard();
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     if (!authLoading && !currentUser) setShowLoginPrompt(true);
@@ -229,10 +249,45 @@ function HealthProfile() {
         )}
       </AnimatePresence>
 
-      <div className="mb-12">
-        <h1 className="text-4xl font-heading font-bold mb-4">Health Profile</h1>
-        <p className="text-muted max-w-2xl text-lg">Manage your biometric data, dietary requirements, and computational health models.</p>
+      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-heading font-bold mb-3">User Account</h1>
+          <p className="text-muted max-w-xl text-lg">Manage your biometric data and track your standing in the global community.</p>
+        </div>
+        
+        <div className="flex bg-surface/50 p-1.5 rounded-2xl border border-border/10 self-start">
+          <button 
+            onClick={() => setActiveTab('profile')}
+            className={cn(
+              "flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300",
+              activeTab === 'profile' ? "bg-accent text-background shadow-lg shadow-accent/20" : "text-muted hover:text-foreground"
+            )}
+          >
+            <UserCircle className="w-4 h-4" />
+            Health Profile
+          </button>
+          <button 
+            onClick={() => setActiveTab('leaderboard')}
+            className={cn(
+              "flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300",
+              activeTab === 'leaderboard' ? "bg-accent text-background shadow-lg shadow-accent/20" : "text-muted hover:text-foreground"
+            )}
+          >
+            <Trophy className="w-4 h-4" />
+            Leaderboard
+          </button>
+        </div>
       </div>
+
+      <AnimatePresence mode="wait">
+        {activeTab === 'profile' ? (
+          <motion.div 
+            key="profile-tab"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.3 }}
+          >
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
@@ -555,6 +610,148 @@ function HealthProfile() {
         )}
       </AnimatePresence>
 
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="leaderboard-tab"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-8"
+          >
+            {/* User Stats Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="glass-panel p-6 border-accent/20 bg-accent/[0.03]">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
+                    <Flame className="w-5 h-5 text-accent" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted uppercase tracking-wider font-semibold">Current Streak</p>
+                    <p className="text-2xl font-bold font-heading">{userProfile?.currentStreak || 0} Days</p>
+                  </div>
+                </div>
+                <p className="text-xs text-muted">Keep visiting daily to grow your heat!</p>
+              </div>
+              
+              <div className="glass-panel p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-orange-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted uppercase tracking-wider font-semibold">Longest Streak</p>
+                    <p className="text-2xl font-bold font-heading">{userProfile?.longestStreak || 0} Days</p>
+                  </div>
+                </div>
+                <p className="text-xs text-muted">Your personal all-time best record.</p>
+              </div>
+
+              <div className="glass-panel p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                    <Award className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted uppercase tracking-wider font-semibold">Community Rank</p>
+                    <p className="text-2xl font-bold font-heading">
+                      #{leaderboard.findIndex(u => u.userId === currentUser?.uid) + 1 || '--'}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-xs text-muted">Your standing among all health enthusiasts.</p>
+              </div>
+            </div>
+
+            {/* Leaderboard Table */}
+            <div className="glass-panel overflow-hidden border border-border/5">
+              <div className="p-6 border-b border-border/5 bg-surface/30">
+                <h3 className="font-heading font-semibold text-xl">Top Performers</h3>
+                <p className="text-sm text-muted">Global rankings based on daily consistency.</p>
+              </div>
+              
+              <div className="overflow-x-auto">
+                {leaderboardLoading ? (
+                  <div className="p-20 flex flex-col items-center justify-center gap-4">
+                    <Activity className="w-8 h-8 text-accent animate-spin" />
+                    <p className="text-sm text-muted font-medium">Fetching global rankings...</p>
+                  </div>
+                ) : leaderboard.length === 0 ? (
+                  <div className="p-20 text-center">
+                    <p className="text-muted">No streak records found yet. Be the first!</p>
+                  </div>
+                ) : (
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-surface/20 text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground">
+                        <th className="px-8 py-4 w-20">Rank</th>
+                        <th className="px-6 py-4">Participant</th>
+                        <th className="px-6 py-4 text-center">Current</th>
+                        <th className="px-6 py-4 text-center">Best</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/5">
+                      {leaderboard.map((user, idx) => {
+                        const isCurrentUser = user.userId === currentUser?.uid;
+                        const rank = idx + 1;
+                        
+                        return (
+                          <tr 
+                            key={user.userId} 
+                            className={cn(
+                              "group transition-colors",
+                              isCurrentUser ? "bg-accent/[0.04]" : "hover:bg-surface/40"
+                            )}
+                          >
+                            <td className="px-8 py-4 font-mono font-bold">
+                              {rank === 1 ? <div className="w-8 h-8 rounded-lg bg-yellow-500/20 flex items-center justify-center"><Medal className="w-5 h-5 text-yellow-500" /></div> :
+                               rank === 2 ? <div className="w-8 h-8 rounded-lg bg-slate-300/20 flex items-center justify-center"><Medal className="w-5 h-5 text-slate-300" /></div> :
+                               rank === 3 ? <div className="w-8 h-8 rounded-lg bg-orange-700/20 flex items-center justify-center"><Medal className="w-5 h-5 text-orange-700" /></div> :
+                               <span className="text-muted ml-2">{rank}</span>}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                {user.photoURL ? (
+                                  <img src={user.photoURL} alt="" className="w-9 h-9 rounded-full border border-border/10 shadow-sm" referrerPolicy="no-referrer" />
+                                ) : (
+                                  <div className="w-9 h-9 rounded-full bg-surface border border-border/10 flex items-center justify-center">
+                                    <UserCircle className="w-5 h-5 text-muted/50" />
+                                  </div>
+                                )}
+                                <div>
+                                  <div className={cn("text-sm font-semibold flex items-center gap-2", isCurrentUser ? "text-accent" : "text-foreground")}>
+                                    {user.displayName}
+                                    {isCurrentUser && <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/20 text-accent font-bold uppercase tracking-wider">You</span>}
+                                  </div>
+                                  <div className="text-[10px] text-muted uppercase tracking-wider">Authenticated User</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface border border-border/5 group-hover:border-accent/30 transition-colors">
+                                <Flame className={cn("w-3.5 h-3.5", rank <= 3 ? "text-accent" : "text-orange-400")} />
+                                <span className="font-bold font-mono">{user.currentStreak}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <span className="font-mono text-muted text-sm">{user.longestStreak}</span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+              
+              <div className="p-4 bg-surface/10 border-t border-border/5 text-[10px] text-muted uppercase tracking-widest text-center">
+                Leaderboard updates in real-time based on global activity
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

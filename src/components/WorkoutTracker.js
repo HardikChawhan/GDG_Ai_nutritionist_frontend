@@ -4,8 +4,9 @@ import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-backend-webgl';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Play, Square, Settings, User, CheckCircle2, AlertTriangle, ChevronRight, Check } from 'lucide-react';
+import { Activity, Play, Square, Settings, User, CheckCircle2, AlertTriangle, ChevronRight, Check, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import voiceAssistantService from '../services/voiceAssistantService';
 import { getHealthProfile } from '../services/firebaseService';
 import { cn } from '../utils/cn';
@@ -58,7 +59,8 @@ const EXERCISE_INSTRUCTIONS = {
 };
 
 function WorkoutTracker() {
-  const { currentUser } = useAuth();
+  const { currentUser, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -81,6 +83,8 @@ function WorkoutTracker() {
 
   const stateMachineRef = useRef(null);
   const stateMachinesRef = useRef({});
+
+  useEffect(() => { isCountingRef.current = isCounting; }, [isCounting]);
 
   useEffect(() => { isCountingRef.current = isCounting; }, [isCounting]);
 
@@ -376,6 +380,28 @@ function WorkoutTracker() {
         <div className="mt-8 font-mono text-sm text-muted bg-surface/50 p-4 border border-border/5 rounded-xl">
           [SYS MSG]: Or execute voice command: "<span className="text-foreground">{voiceAssistantService.agentConfig?.name || 'DESIGNATION'} initiate workout</span>"
         </div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <SEO title="Workout Tracker" description="AI-powered workout tracking with real-time pose detection." canonical="/workout" />
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel w-full max-w-md p-8 text-center">
+          <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center mb-6 mx-auto">
+            <Lock className="w-6 h-6 text-accent" />
+          </div>
+          <h2 className="text-2xl font-heading font-semibold mb-2">Authentication Required</h2>
+          <p className="text-muted text-sm mb-8">Sign in to access the AI Workout Tracker.</p>
+          <button onClick={() => signInWithGoogle()} className="w-full flex items-center justify-center gap-3 bg-foreground text-black hover:bg-foreground/90 px-4 py-3 rounded-xl font-medium transition-colors mb-4">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
+            Authenticate with Google
+          </button>
+          <button onClick={() => navigate('/')} className="w-full border border-border/10 hover:bg-foreground/5 py-3 rounded-xl font-medium text-muted transition-colors">
+            Return to Dashboard
+          </button>
+        </motion.div>
       </div>
     );
   }

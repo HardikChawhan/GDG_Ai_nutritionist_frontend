@@ -9,7 +9,9 @@ import {
   serverTimestamp,
   increment,
   query,
-  where
+  where,
+  orderBy,
+  limit
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
@@ -631,6 +633,96 @@ class FirebaseService {
       return false;
     }
   }
+  /**
+   * Record a daily visit and update streak
+   */
+  async recordDailyVisit(userId) {
+    try {
+      const userRef = doc(db, 'users', userId);
+      const userSnap = await getDoc(userRef);
+      
+      if (!userSnap.exists()) return { success: false };
+      
+      const userData = userSnap.data();
+      const now = new Date();
+      // Use local date string YYYY-MM-DD for consistency
+      const todayStr = now.toISOString().split('T')[0];
+      
+      const lastVisitDate = userData.lastVisitDate || '';
+      let currentStreak = userData.currentStreak || 0;
+      let longestStreak = userData.longestStreak || 0;
+      
+      if (lastVisitDate === todayStr) {
+        // Already visited today
+        return { success: true, alreadyVisited: true };
+      }
+      
+      const yesterday = new Date(now);
+      yesterday.setDate(now.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      
+      if (lastVisitDate === yesterdayStr) {
+        // Consecutive visit
+        currentStreak += 1;
+      } else {
+        // Gap or first visit
+        currentStreak = 1;
+      }
+      
+      if (currentStreak > longestStreak) {
+        longestStreak = currentStreak;
+      }
+      
+      await setDoc(userRef, {
+        lastVisitDate: todayStr,
+        currentStreak,
+        longestStreak,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      
+      return { success: true, currentStreak, longestStreak };
+    } catch (error) {
+      console.error('Error recording daily visit:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get leaderboard data
+   */
+  async getLeaderboard(limitCount = 20) {
+    try {
+      const usersRef = collection(db, 'users');
+      // Query users who have at least 1 streak, sorted by current streak then longest
+      const q = query(
+        usersRef, 
+        where('currentStreak', '>', 0),
+        orderBy('currentStreak', 'desc'),
+        orderBy('longestStreak', 'desc'),
+        limit(limitCount)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const leaderboard = [];
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        leaderboard.push({
+          userId: doc.id,
+          displayName: data.displayName || 'Anonymous',
+          photoURL: data.photoURL || null,
+          currentStreak: data.currentStreak || 0,
+          longestStreak: data.longestStreak || 0
+        });
+      });
+      
+      return leaderboard;
+    } catch (error) {
+      console.error('Error getting leaderboard:', error);
+      // Fallback for indexing issues or empty data
+      return [];
+    }
+  }
 }
 
 const firebaseService = new FirebaseService();
@@ -661,5 +753,7 @@ export const {
   getAllReviews,
   updateReviewPriority,
   getAllSuggestions,
-  verifyAdminPasscode
+  verifyAdminPasscode,
+  recordDailyVisit,
+  getLeaderboard
 } = firebaseService;
