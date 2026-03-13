@@ -20,6 +20,13 @@ function Home() {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
+  // Check if user has already reviewed (persists across refreshes)
+  React.useEffect(() => {
+    if (userProfile?.hasReviewed) {
+      setReviewSubmitted(true);
+    }
+  }, [userProfile]);
+
   const getTimeAgo = (timestamp) => {
     if (!timestamp) return 'Just now';
     const reviewDate = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
