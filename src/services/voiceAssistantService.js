@@ -282,64 +282,74 @@ class VoiceAssistantService {
   async processCommand(command) {
     console.log('Processing command:', command);
 
-    // Detect intent
-    const intent = this.detectIntent(command);
-    console.log('Detected intent:', intent);
+    // AI-driven intent detection (no keywords needed)
+    const intent = await this.detectIntentAI(command);
+    console.log('AI-detected intent:', intent);
 
     let response;
-
     try {
-      // Route to appropriate handler
       switch (intent.type) {
-        case 'navigation':
-          response = await this.handleNavigation(intent);
-          break;
-        case 'nutrition_log':
-          response = await this.handleNutritionLog(intent);
-          break;
+        case 'navigation':    response = await this.handleNavigation(intent);   break;
+        case 'nutrition_log': response = await this.handleNutritionLog(intent); break;
+        case 'water_log':     response = await this.handleWaterLog(intent);     break;
+        case 'sleep_log':     response = await this.handleSleepLog(intent);     break;
+        case 'workout_log':   response = await this.handleWorkoutLog(intent);   break;
         case 'nutrition_query':
-          response = await this.handleNutritionQuery(intent);
-          break;
-        case 'workout_log':
-          response = await this.handleWorkoutLog(intent);
-          break;
-        case 'general_query':
-        default:
-          response = await this.handleGeneralQuery(intent);
-          break;
+        default:              response = await this.handleGeneralQuery(intent); break;
       }
 
-      // Add to conversation history
-      this.conversationHistory.push({
-        user: command,
-        assistant: response.message,
-        timestamp: new Date().toISOString()
-      });
-
-      // Show response
-      if (this.onResponseCallback) {
-        this.onResponseCallback(response);
-      }
-
-      // Speak response
+      this.conversationHistory.push({ user: command, assistant: response.message, timestamp: new Date().toISOString() });
+      if (this.onResponseCallback) this.onResponseCallback(response);
       this.speak(response.message);
-
       return response;
     } catch (error) {
       console.error('Error processing command:', error);
-      const errorResponse = {
-        success: false,
-        message: "I'm having trouble processing that. Could you try again?",
-        intent: intent.type
-      };
-      
-      if (this.onResponseCallback) {
-        this.onResponseCallback(errorResponse);
-      }
-      
-      this.speak(errorResponse.message);
-      return errorResponse;
+      const err = { success: false, message: "I'm having trouble with that. Could you try again?", intent: intent.type };
+      if (this.onResponseCallback) this.onResponseCallback(err);
+      this.speak(err.message);
+      return err;
     }
+  }
+
+  // ── AI Intent Classifier ────────────────────────────────────────────────────
+  async detectIntentAI(input) {
+    const prompt = `
+You are an intent classifier for a health & nutrition AI assistant.
+Classify the following user command into ONE of these intents:
+- nutrition_log   → user mentions eating/consuming any food or drink that isn't water
+- water_log       → user mentions drinking water, staying hydrated, water ml/liters
+- sleep_log       → user mentions sleeping, rest, how many hours they slept
+- workout_log     → user mentions any physical activity, exercise, or asks to calculate calories burned from exercise
+- nutrition_query → user asks about their macros, calories, diet progress
+- navigation      → user wants to navigate/open a page (workout tracker, profile, etc.)
+- general_query   → anything else
+
+Respond with ONLY valid JSON like:
+{ "type": "nutrition_log", "rawInput": "<original command>" }
+or for navigation:
+{ "type": "navigation", "destination": "/workout", "rawInput": "<original command>" }
+
+User command: "${input}"
+`;
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || 'https://ai-nutritionist-backend.onrender.com';
+      const res = await fetch(`${API_URL}/api/voice-assistant/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: prompt, conversationHistory: [] })
+      });
+      const data = await res.json();
+      const text = (data.response || data.message || '').trim();
+      const jsonMatch = text.match(/{[\s\S]*}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return { ...parsed, rawInput: input };
+      }
+    } catch (err) {
+      console.error('AI intent detection failed, falling back:', err);
+    }
+    // Fallback: return as general_query
+    return { type: 'general_query', rawInput: input };
   }
 
   detectIntent(input) {
@@ -421,27 +431,58 @@ class VoiceAssistantService {
   }
 
   async handleNavigation(intent) {
-    // Navigate to the specified destination
     const destination = intent.destination;
-    
-    // Dispatch navigation event
-    const event = new CustomEvent('voice-navigation', {
-      detail: { destination }
-    });
-    window.dispatchEvent(event);
-    
-    let message = '';
-    if (destination === '/workout') {
-      message = 'Opening workout tracker. Get ready to crush it!';
-    } else {
-      message = `Navigating to ${destination}`;
+    window.dispatchEvent(new CustomEvent('voice-navigation', { detail: { destination } }));
+    const msg = destination === '/workout' ? 'Opening workout tracker. Get ready!' : `Navigating to ${destination}`;
+    return { success: true, message: msg, intent: intent.type };
+  }
+
+  // ── Water log handler ───────────────────────────────────────────────────────
+  async handleWaterLog(intent) {
+    const prompt = `
+Extract the water amount in millilitres from this command. If litres are mentioned convert to ml.
+If no amount is mentioned assume 250ml (a standard glass).
+Respond ONLY with valid JSON: {"amountMl": <number>}
+Command: "${intent.rawInput}"
+`;
+    let amountMl = 250;
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || 'https://ai-nutritionist-backend.onrender.com';
+      const res = await fetch(`${API_URL}/api/voice-assistant/chat`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: prompt, conversationHistory: [] })
+      });
+      const data = await res.json();
+      const match = (data.response || '').match(/{[\s\S]*}/);
+      if (match) { const p = JSON.parse(match[0]); amountMl = p.amountMl || 250; }
+    } catch (_) {}
+    window.dispatchEvent(new CustomEvent('voice-water-log', { detail: { amountMl } }));
+    return { success: true, message: `Got it! Logged ${amountMl}ml of water. Stay hydrated!`, intent: intent.type };
+  }
+
+  // ── Sleep log handler ───────────────────────────────────────────────────────
+  async handleSleepLog(intent) {
+    const prompt = `
+Extract the number of sleep hours from this command. Convert minutes to decimal hours if needed.
+Respond ONLY with valid JSON: {"hours": <number>}
+Command: "${intent.rawInput}"
+`;
+    let hours = 0;
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || 'https://ai-nutritionist-backend.onrender.com';
+      const res = await fetch(`${API_URL}/api/voice-assistant/chat`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: prompt, conversationHistory: [] })
+      });
+      const data = await res.json();
+      const match = (data.response || '').match(/{[\s\S]*}/);
+      if (match) { const p = JSON.parse(match[0]); hours = p.hours || 0; }
+    } catch (_) {}
+    if (!hours || hours <= 0) {
+      return { success: false, message: "I couldn't figure out how many hours you slept. Can you say something like 'I slept 7 hours'?", intent: intent.type };
     }
-    
-    return {
-      success: true,
-      message: message,
-      intent: intent.type
-    };
+    window.dispatchEvent(new CustomEvent('voice-sleep-log', { detail: { hours, isVoice: true } }));
+    return { success: true, message: `Logged ${hours} hours of sleep. Sweet dreams were had!`, intent: intent.type };
   }
 
   async handleNutritionLog(intent) {
@@ -530,17 +571,47 @@ class VoiceAssistantService {
   }
 
   async handleWorkoutLog(intent) {
-    const { exercises, reps } = intent.entities;
+    const prompt = `
+Extract the workout details and calculate an estimated CALORIES BURNED based on the activity type, duration, intensity, and the user's weight/profile.
+If no duration is given, assume a standard 30-minute session.
+User Profile context: Weight=${this.userContext?.weight || 70}kg, Height=${this.userContext?.height || 170}cm, Age=${this.userContext?.age || 30}.
+Respond ONLY with valid JSON: {"caloriesBurned": <number>, "workoutName": "<string>"}
+Command: "${intent.rawInput}"
+`;
+    let caloriesBurned = 0;
+    let workoutName = 'Workout';
     
-    const response = await this.callGeminiAPI({
-      intent: 'workout_log',
-      exercises: exercises,
-      reps: reps,
-      command: intent.rawInput,
-      userContext: this.userContext
-    });
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || 'https://ai-nutritionist-backend.onrender.com';
+      const res = await fetch(`${API_URL}/api/voice-assistant/chat`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: prompt, conversationHistory: [] })
+      });
+      const data = await res.json();
+      const match = (data.response || '').match(/{[\s\S]*}/);
+      if (match) { 
+        const p = JSON.parse(match[0]); 
+        caloriesBurned = p.caloriesBurned || 0;
+        workoutName = p.workoutName || 'Workout';
+      }
+    } catch (error) {
+       console.error("Error calculating workout calories", error);
+    }
+    
+    if (!caloriesBurned || caloriesBurned <= 0) {
+      return { success: false, message: "Could you tell me how long you worked out? I need that to calculate calories burned.", intent: intent.type };
+    }
 
-    return response;
+    // Dispatch custom event to dashboard
+    window.dispatchEvent(new CustomEvent('voice-workout-log', { 
+      detail: { caloriesBurned, workoutName } 
+    }));
+    
+    return { 
+      success: true, 
+      message: `Awesome job! I've logged your ${workoutName} and added ${caloriesBurned} calories to your burned total.`, 
+      intent: intent.type 
+    };
   }
 
   async handleGeneralQuery(intent) {
