@@ -314,20 +314,19 @@ class VoiceAssistantService {
   // ── AI Intent Classifier ────────────────────────────────────────────────────
   async detectIntentAI(input) {
     const prompt = `
-You are an intent classifier for a health & nutrition AI assistant.
-Classify the following user command into ONE of these intents:
-- nutrition_log   → user mentions eating/consuming any food or drink that isn't water
-- water_log       → user mentions drinking water, staying hydrated, water ml/liters
-- sleep_log       → user mentions sleeping, rest, how many hours they slept
-- workout_log     → user mentions any physical activity, exercise, or asks to calculate calories burned from exercise
-- nutrition_query → user asks about their macros, calories, diet progress
-- navigation      → user wants to navigate/open a page (workout tracker, profile, etc.)
-- general_query   → anything else
+TASK: Intent Classification.
+Read the user command and return ONE valid JSON object, and absolutely nothing else. Do not use markdown blocks like \`\`\`json. Do not include conversational text.
 
-Respond with ONLY valid JSON like:
-{ "type": "nutrition_log", "rawInput": "<original command>" }
-or for navigation:
-{ "type": "navigation", "destination": "/workout", "rawInput": "<original command>" }
+Valid types are:
+- "nutrition_log": user mentions eating/consuming any food (e.g., apple, egg, meal)
+- "water_log": user mentions drinking water (ml/liters)
+- "sleep_log": user mentions sleeping, resting, or hours slept
+- "workout_log": user mentions running, walking, exercise, gym, or burning calories
+- "nutrition_query": asking about macros/calories
+- "navigation": wants to open a page
+- "general_query": anything else
+
+Example Output: {"type": "workout_log"}
 
 User command: "${input}"
 `;
@@ -440,9 +439,10 @@ User command: "${input}"
   // ── Water log handler ───────────────────────────────────────────────────────
   async handleWaterLog(intent) {
     const prompt = `
-Extract the water amount in millilitres from this command. If litres are mentioned convert to ml.
-If no amount is mentioned assume 250ml (a standard glass).
-Respond ONLY with valid JSON: {"amountMl": <number>}
+TASK: Data Extraction.
+Extract the water amount in millilitres from this command. If litres are mentioned, convert to ml. If no amount is given, assume 250.
+Respond ONLY with a raw JSON object. No markdown block \`\`\`json. No regular text.
+Format: {"amountMl": 250}
 Command: "${intent.rawInput}"
 `;
     let amountMl = 250;
@@ -463,8 +463,10 @@ Command: "${intent.rawInput}"
   // ── Sleep log handler ───────────────────────────────────────────────────────
   async handleSleepLog(intent) {
     const prompt = `
+TASK: Data Extraction.
 Extract the number of sleep hours from this command. Convert minutes to decimal hours if needed.
-Respond ONLY with valid JSON: {"hours": <number>}
+Respond ONLY with a raw JSON object. No markdown block. No regular text.
+Format: {"hours": 7.5}
 Command: "${intent.rawInput}"
 `;
     let hours = 0;
@@ -561,10 +563,11 @@ Command: "${intent.rawInput}"
 
   async handleWorkoutLog(intent) {
     const prompt = `
-Extract the workout details and calculate an estimated CALORIES BURNED based on the activity type, duration, intensity, and the user's weight/profile.
-If no duration is given, assume a standard 30-minute session.
-User Profile context: Weight=${this.userContext?.weight || 70}kg, Height=${this.userContext?.height || 170}cm, Age=${this.userContext?.age || 30}.
-Respond ONLY with valid JSON: {"caloriesBurned": <number>, "workoutName": "<string>"}
+TASK: Calories Calculation.
+Estimate calories burned based on activity, duration, intensity, and user weight (${this.userContext?.weight || 70}kg).
+If duration is missing, assume 30 minutes.
+Respond ONLY with a raw JSON object. No markdown block. No conversational text.
+Format: {"caloriesBurned": 300, "workoutName": "Treadmill Run"}
 Command: "${intent.rawInput}"
 `;
     let caloriesBurned = 0;
