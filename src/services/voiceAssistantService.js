@@ -486,20 +486,10 @@ Command: "${intent.rawInput}"
   }
 
   async handleNutritionLog(intent) {
-    const { foods, cleanFoodName } = intent.entities;
-    
-    if (!foods || foods.length === 0) {
-      return {
-        success: false,
-        message: "I couldn't identify the food. Could you be more specific?",
-        intent: intent.type
-      };
-    }
-
     // Call backend to get nutrition data (database + AI hybrid)
     const response = await this.callGeminiAPI({
       intent: 'nutrition_log',
-      foods: foods,
+      foods: [intent.rawInput], // Send the whole phrase, AI will extract
       command: intent.rawInput,
       userContext: this.userContext
     });
@@ -510,9 +500,8 @@ Command: "${intent.rawInput}"
         console.log('💾 Nutrition data received:', response.data);
         
         // Extract nutrition data from backend response
-        // Backend returns { foods: [...], totals: {...} }
         let foodData = {
-          food: cleanFoodName || (response.data.foods && response.data.foods[0] ? response.data.foods[0].name : intent.rawInput),
+          food: (response.data.foods && response.data.foods[0] ? response.data.foods[0].name : intent.rawInput),
           calories: 0,
           protein: 0,
           carbs: 0,

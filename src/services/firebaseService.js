@@ -116,6 +116,8 @@ class FirebaseService {
           fiber: 0
         },
         ...(nutritionData.caloriesBurned !== undefined && { caloriesBurned: nutritionData.caloriesBurned }),
+        ...(nutritionData.water !== undefined && { water: nutritionData.water }),
+        ...(nutritionData.sleep !== undefined && { sleep: nutritionData.sleep }),
         updatedAt: serverTimestamp()
       }, { merge: true });
       
