@@ -331,14 +331,11 @@ Example Output: {"type": "workout_log"}
 User command: "${input}"
 `;
     try {
-      const API_URL = process.env.REACT_APP_API_URL || 'https://ai-nutritionist-backend.onrender.com';
-      const res = await fetch(`${API_URL}/api/voice-assistant/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: prompt, conversationHistory: [] })
+      const res = await this.callGeminiAPI({
+        intent: 'system_extraction',
+        command: prompt
       });
-      const data = await res.json();
-      const text = (data.response || data.message || '').trim();
+      const text = (res.message || '').trim();
       const jsonMatch = text.match(/{[\s\S]*}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
@@ -447,13 +444,11 @@ Command: "${intent.rawInput}"
 `;
     let amountMl = 250;
     try {
-      const API_URL = process.env.REACT_APP_API_URL || 'https://ai-nutritionist-backend.onrender.com';
-      const res = await fetch(`${API_URL}/api/voice-assistant/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: prompt, conversationHistory: [] })
+      const res = await this.callGeminiAPI({
+        intent: 'system_extraction',
+        command: prompt
       });
-      const data = await res.json();
-      const match = (data.response || '').match(/{[\s\S]*}/);
+      const match = (res.message || '').match(/{[\s\S]*}/);
       if (match) { const p = JSON.parse(match[0]); amountMl = p.amountMl || 250; }
     } catch (_) {}
     window.dispatchEvent(new CustomEvent('voice-water-log', { detail: { amountMl } }));
@@ -471,13 +466,11 @@ Command: "${intent.rawInput}"
 `;
     let hours = 0;
     try {
-      const API_URL = process.env.REACT_APP_API_URL || 'https://ai-nutritionist-backend.onrender.com';
-      const res = await fetch(`${API_URL}/api/voice-assistant/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: prompt, conversationHistory: [] })
+      const res = await this.callGeminiAPI({
+        intent: 'system_extraction',
+        command: prompt
       });
-      const data = await res.json();
-      const match = (data.response || '').match(/{[\s\S]*}/);
+      const match = (res.message || '').match(/{[\s\S]*}/);
       if (match) { const p = JSON.parse(match[0]); hours = p.hours || 0; }
     } catch (_) {}
     if (!hours || hours <= 0) {
@@ -574,13 +567,11 @@ Command: "${intent.rawInput}"
     let workoutName = 'Workout';
     
     try {
-      const API_URL = process.env.REACT_APP_API_URL || 'https://ai-nutritionist-backend.onrender.com';
-      const res = await fetch(`${API_URL}/api/voice-assistant/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: prompt, conversationHistory: [] })
+      const res = await this.callGeminiAPI({
+        intent: 'system_extraction',
+        command: prompt
       });
-      const data = await res.json();
-      const match = (data.response || '').match(/{[\s\S]*}/);
+      const match = (res.message || '').match(/{[\s\S]*}/);
       if (match) { 
         const p = JSON.parse(match[0]); 
         caloriesBurned = p.caloriesBurned || 0;
@@ -659,6 +650,11 @@ Command: "${intent.rawInput}"
   }
 
   buildContextPrompt(payload) {
+    // If this is a raw system extraction, bypass all conversational filler!
+    if (payload.intent === 'system_extraction') {
+      return payload.command;
+    }
+
     const agentName = this.agentConfig?.name || 'Assistant';
     const userProfile = this.userContext?.healthProfile || {};
     const todayNutrition = this.userContext?.todayNutrition || { foods: [], totals: {} };
